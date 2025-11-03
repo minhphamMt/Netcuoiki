@@ -1,0 +1,42 @@
+﻿@model BTAPLON.Models.Assignment
+
+<h2>Assignment Detail</h2>
+
+<p><strong>Class:</strong> @Model.Class?.ClassCode</p>
+<p><strong>Title:</strong> @Model.Title</p>
+<p><strong>Description:</strong> @Model.Description</p>
+<p><strong>Due:</strong> @Model.DueDate?.ToShortDateString()</p>
+
+<hr />
+
+<h4>Nộp bài</h4>
+
+<form asp-controller="Submission" asp-action="Submit" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="assignmentID" value="@Model.AssignmentID" />
+    <input type="file" class="form-control mb-2" name="fileUpload" id="fileUpload" />
+
+
+    <button type="submit" class="btn btn-primary">Nộp bài</button>
+</form>
+
+<hr />
+
+<h4>Danh sách bài nộp</h4>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Student</th>
+        <th>File</th>
+        <th>Time</th>
+    </tr>
+    @foreach (var s in Model.Submissions ?? new List<BTAPLON.Models.Submission>())
+    {
+        <tr>
+            <td>@s.Student?.FullName</td>
+            <td><a href="@s.FilePath" target="_blank">Xem file</a></td>
+            <td>@s.SubmittedAt</td>
+        </tr>
+    }
+</table>
+
+<a class="btn btn-secondary" asp-action="Index">Back</a>

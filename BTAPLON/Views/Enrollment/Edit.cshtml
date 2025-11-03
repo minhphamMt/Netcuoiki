@@ -1,0 +1,20 @@
+﻿@model BTAPLON.Models.Enrollment
+
+<h2>Edit Enrollment</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="EnrollmentID" />
+
+    <div class="form-group">
+        <label>Class</label>
+        <select asp-for="ClassID" asp-items="ViewBag.ClassID" class="form-control"></select>
+    </div>
+
+    <div class="form-group">
+        <label>Student</label>
+        <select asp-for="StudentID" asp-items="ViewBag.StudentID" class="form-control"></select>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

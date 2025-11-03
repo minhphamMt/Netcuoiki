@@ -1,0 +1,29 @@
+﻿@model BTAPLON.Models.Assignment
+
+<h2>Edit Assignment</h2>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="AssignmentID" />
+
+    <div class="form-group mb-3">
+        <label>Class</label>
+        <select class="form-control" asp-for="ClassID" asp-items="ViewBag.ClassID"></select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label>Title</label>
+        <input asp-for="Title" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label>Description</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+
+    <div class="form-group mb-3">
+        <label>Due Date</label>
+        <input type="date" asp-for="DueDate" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>

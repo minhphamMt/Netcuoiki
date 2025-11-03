@@ -1,0 +1,31 @@
+﻿@model IEnumerable<BTAPLON.Models.Class>
+
+<h2>Class List</h2>
+
+<a asp-action="Create" class="btn btn-success mb-2">Create New Class</a>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Class ID</th>
+        <th>Class Code</th>
+        <th>Semester</th>
+        <th>Năm</th>
+        <th>Khóa học</th>
+        <th>Chức năng</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.ClassID</td>
+            <td>@item.ClassCode</td>
+            <td>@item.Semester</td>
+            <td>@item.Year</td>
+            <td>@item.Course?.CourseName</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ClassID" class="btn btn-primary btn-sm">Edit</a>
+                <a asp-action="Delete" asp-route-id="@item.ClassID" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+    }
+</table>

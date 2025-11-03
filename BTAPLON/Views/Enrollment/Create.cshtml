@@ -1,0 +1,26 @@
+﻿@model BTAPLON.Models.Enrollment
+
+<div class="container mt-4">
+    <h2 class="mb-3">Add Enrollment</h2>
+
+    <form method="post" class="card p-4 shadow" style="max-width:500px">
+
+        <div class="mb-3">
+            <label class="form-label">Class</label>
+            @Html.DropDownList("ClassID", (SelectList)ViewBag.ClassID, "-- select class --",
+            new { @class = "form-control" })
+            @Html.ValidationMessage("ClassID", null, new { @class = "text-danger" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Student</label>
+            @Html.DropDownList("StudentID", (SelectList)ViewBag.StudentID, "-- select student --",
+                        new { @class = "form-control" })
+            @Html.ValidationMessage("StudentID", null, new { @class = "text-danger" })
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Save</button>
+        <a asp-action="Index" class="btn btn-secondary">back</a>
+
+    </form>
+</div>

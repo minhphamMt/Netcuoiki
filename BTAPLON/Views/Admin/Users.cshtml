@@ -1,0 +1,34 @@
+﻿@model List<BTAPLON.Models.User>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Danh sách User</h2>
+    <a class="btn btn-primary" asp-action="AddUser">+ Thêm User mới</a>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th style="width:150px">Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.UserID</td>
+                <td>@u.FullName</td>
+                <td>@u.Email</td>
+                <td>@u.Role</td>
+                <td>
+                    <a class="btn btn-warning btn-sm" asp-action="EditUser" asp-route-id="@u.UserID">Edit</a>
+                    <a class="btn btn-danger btn-sm ms-1" asp-action="DeleteUser" asp-route-id="@u.UserID">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

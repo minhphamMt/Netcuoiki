@@ -1,0 +1,13 @@
+﻿@model BTAPLON.Models.Course
+
+<h2>Confirm Delete</h2>
+
+<p>Bạn có chắc chắn muốn xóa khóa học:</p>
+
+<h3>@Model.CourseName</h3>
+<p>Teacher: @Model.Teacher?.FullName</p>
+
+<form method="post" asp-action="Delete" asp-route-id="@Model.CourseID">
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

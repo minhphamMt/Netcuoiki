@@ -1,0 +1,15 @@
+﻿@model BTAPLON.Models.Assignment
+
+<h2>Delete Assignment</h2>
+
+<p>Bạn có chắc chắn muốn xóa?</p>
+
+<div>
+    <strong>@Model.Title</strong>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="AssignmentID" />
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a class="btn btn-secondary" asp-action="Index">Cancel</a>
+</form>

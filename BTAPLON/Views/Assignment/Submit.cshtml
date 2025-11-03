@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Submit Assignment";
+}
+
+<form asp-action="Submit" method="post" enctype="multipart/form-data">
+
+    <input type="hidden" name="assignmentId" value="@Model.AssignmentID" />
+
+    <div class="mb-3">
+        <label>Upload file bài làm</label>
+        <input type="file" name="file" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-success">Nộp bài</button>
+</form>
+
