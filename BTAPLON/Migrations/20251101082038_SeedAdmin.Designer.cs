@@ -191,7 +191,7 @@ namespace BTAPLON.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -216,110 +216,37 @@ namespace BTAPLON.Migrations
                         new
                         {
                             UserID = 1,
-                            CreatedAt = new DateTime(2025, 11, 1, 15, 20, 38, 303, DateTimeKind.Local).AddTicks(6482),
+
+                            CreatedAt = new DateTime(2025, 11, 1, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@gmail.com",
                             FullName = "Admin User",
-                            PasswordHash = "123",
+
+                            PasswordHash = "$2y$12$YTyoxyxHpp6PDV23yRHRn.4m39bD1zisfhoPdl9dTGaPkEyt8tks.",
                             Role = "Admin"
                         });
                 });
 
             modelBuilder.Entity("BTAPLON.Models.Assignment", b =>
-                {
-                    b.HasOne("BTAPLON.Models.Class", "Class")
-                        .WithMany("Assignments")
-                        .HasForeignKey("ClassID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("BTAPLON.Models.Class", "Class")
+                    .WithMany("Assignments")
+                    .HasForeignKey("ClassID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Class");
-                });
-
-            modelBuilder.Entity("BTAPLON.Models.Class", b =>
-                {
-                    b.HasOne("BTAPLON.Models.Course", "Course")
-                        .WithMany("Classes")
-                        .HasForeignKey("CourseID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-                });
-
-            modelBuilder.Entity("BTAPLON.Models.Course", b =>
-                {
-                    b.HasOne("BTAPLON.Models.User", "Teacher")
-                        .WithMany("CoursesTaught")
-                        .HasForeignKey("TeacherID")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("BTAPLON.Models.Enrollment", b =>
-                {
-                    b.HasOne("BTAPLON.Models.Class", "Class")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("ClassID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BTAPLON.Models.User", "Student")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("StudentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("BTAPLON.Models.Submission", b =>
-                {
-                    b.HasOne("BTAPLON.Models.Assignment", "Assignment")
-                        .WithMany("Submissions")
-                        .HasForeignKey("AssignmentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BTAPLON.Models.User", "Student")
-                        .WithMany("Submissions")
-                        .HasForeignKey("StudentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Assignment");
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("BTAPLON.Models.Assignment", b =>
-                {
-                    b.Navigation("Submissions");
-                });
+                b.Navigation("Class");
+            });
 
             modelBuilder.Entity("BTAPLON.Models.Class", b =>
-                {
-                    b.Navigation("Assignments");
+            {
+                b.HasOne("BTAPLON.Models.Course", "Course")
+                    .WithMany("Classes")
+                    .HasForeignKey("CourseID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Enrollments");
-                });
-
-            modelBuilder.Entity("BTAPLON.Models.Course", b =>
-                {
-                    b.Navigation("Classes");
-                });
-
-            modelBuilder.Entity("BTAPLON.Models.User", b =>
-                {
-                    b.Navigation("CoursesTaught");
-
-                    b.Navigation("Enrollments");
-
-                    b.Navigation("Submissions");
-                });
-#pragma warning restore 612, 618
+                b.Navigation("Course");
+            });
         }
     }
 }

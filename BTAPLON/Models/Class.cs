@@ -22,5 +22,8 @@ namespace BTAPLON.Models
 
         [ValidateNever]
         public ICollection<Assignment>? Assignments { get; set; }
+
+        [ValidateNever]
+        public ICollection<Exam>? Exams { get; set; }
     }
 }

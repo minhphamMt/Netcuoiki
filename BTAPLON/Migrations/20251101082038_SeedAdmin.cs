@@ -14,7 +14,7 @@ namespace BTAPLON.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "UserID", "CreatedAt", "Email", "FullName", "PasswordHash", "Role" },
-                values: new object[] { 1, new DateTime(2025, 11, 1, 15, 20, 38, 303, DateTimeKind.Local).AddTicks(6482), "admin@gmail.com", "Admin User", "123", "Admin" });
+        values: new object[] { 1, new DateTime(2025, 11, 1, 0, 0, 0, DateTimeKind.Utc), "admin@gmail.com", "Admin User", "$2y$12$YTyoxyxHpp6PDV23yRHRn.4m39bD1zisfhoPdl9dTGaPkEyt8tks.", "Admin" });
         }
 
         /// <inheritdoc />

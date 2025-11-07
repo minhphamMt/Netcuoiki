@@ -1,0 +1,70 @@
+﻿@model ExamReviewSubmissionViewModel
+@{
+    ViewData["Title"] = "Kết quả bài thi";
+    var answers = Model.Answers.ToDictionary(a => a.QuestionId, a => a);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2>@Model.Exam.Title</h2>
+        <div class="text-muted">Điểm đạt được: <strong>@(Model.Submission.Score?.ToString("0.##") ?? "Chưa chấm")</strong></div>
+        <div class="text-muted">Thời gian nộp: @Model.Submission.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</div>
+    </div>
+    <a asp-action="Available" class="btn btn-outline-secondary">Quay lại danh sách</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Submission.TeacherFeedback))
+{
+    <div class="alert alert-success">
+        <strong>Nhận xét:</strong> @Model.Submission.TeacherFeedback
+    </div>
+}
+
+@foreach (var question in Model.Exam.Questions?.OrderBy(q => q.DisplayOrder) ?? Enumerable.Empty<Question>())
+{
+    answers.TryGetValue(question.QuestionID, out var answer);
+    <div class="card mb-3">
+        <div class="card-header">
+            <strong>Câu hỏi:</strong> @question.Prompt
+            <span class="badge bg-light text-dark ms-2">@question.Points điểm</span>
+        </div>
+        <div class="card-body">
+            @if (question.IsMultipleChoice)
+            {
+                <ul class="list-group">
+                    @foreach (var choice in question.Choices ?? Enumerable.Empty<Choice>())
+                    {
+                        var isSelected = answer?.SelectedChoiceId == choice.ChoiceID;
+                        var itemClass = "list-group-item";
+                        if (choice.IsCorrect)
+                        {
+                            itemClass += " list-group-item-success";
+                        }
+                        else if (isSelected)
+                        {
+                            itemClass += " list-group-item-danger";
+                        }
+                        <li class="@itemClass">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>@choice.Text</span>
+                                @if (isSelected)
+                                {
+                                    <span class="badge bg-primary">Bạn chọn</span>
+                                }
+                                @if (choice.IsCorrect)
+                                {
+                                    <span class="badge bg-success">Đáp án đúng</span>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+            <p><strong>Bài làm:</strong></p>
+            <p class="border rounded p-3">@answer?.AnswerText</p>
+            }
+        </div>
+    </div>
+}

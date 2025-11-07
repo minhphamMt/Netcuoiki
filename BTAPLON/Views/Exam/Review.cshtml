@@ -1,0 +1,45 @@
+﻿@model Exam
+@{
+    ViewData["Title"] = $"Bài nộp - {Model.Title}";
+}
+
+<h2>@ViewData["Title"]</h2>
+<div class="mb-3 text-muted">Lớp: @Model.Class?.ClassCode (@Model.Class?.Course?.CourseName)</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+@if (Model.Submissions == null || !Model.Submissions.Any())
+{
+    <div class="alert alert-info">Chưa có sinh viên nào nộp bài.</div>
+}
+else
+{
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Sinh viên</th>
+            <th>Thời gian bắt đầu</th>
+            <th>Thời gian nộp</th>
+            <th>Điểm</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var submission in Model.Submissions.OrderByDescending(s => s.SubmittedAt))
+        {
+            <tr>
+                <td>@submission.Student?.FullName</td>
+                <td>@submission.StartedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@submission.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@(submission.Score?.ToString("0.##") ?? "Chưa chấm")</td>
+                <td>
+                    <a asp-action="GradeSubmission" asp-route-submissionId="@submission.ExamSubmissionID" class="btn btn-sm btn-primary">Chấm bài</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}

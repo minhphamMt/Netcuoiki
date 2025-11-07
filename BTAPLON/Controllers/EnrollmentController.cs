@@ -1,4 +1,5 @@
 ﻿using BTAPLON.Data;
+using BTAPLON.Filters;
 using BTAPLON.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BTAPLON.Controllers
 {
+    [SessionAuthorize("Admin")]
     public class EnrollmentController : Controller
     {
         public IActionResult Index1()

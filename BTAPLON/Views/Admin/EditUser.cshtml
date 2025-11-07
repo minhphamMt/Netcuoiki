@@ -25,6 +25,7 @@
     <div class="mb-3">
         <label class="form-label">Password</label>
         <input asp-for="PasswordHash" class="form-control" type="password" />
+        <small class="form-text text-muted">Để trống nếu giữ nguyên mật khẩu hiện tại.</small>
         <span asp-validation-for="PasswordHash" class="text-danger"></span>
     </div>
 

@@ -1,0 +1,55 @@
+﻿@model Exam
+@{
+    ViewData["Title"] = "Tạo bài thi";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Lớp áp dụng</label>
+                <select asp-for="ClassID" asp-items="ViewBag.ClassID" class="form-select">
+                    <option value="">-- Chọn lớp --</option>
+                </select>
+                <span asp-validation-for="ClassID" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label asp-for="DurationMinutes" class="form-label"></label>
+                <input asp-for="DurationMinutes" class="form-control" type="number" min="1" max="600" />
+                <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="StartTime" class="form-label">Thời gian mở</label>
+                <input asp-for="StartTime" class="form-control" type="datetime-local" />
+                <span class="form-text">Nếu bỏ trống, đề sẽ mở ngay khi bấm "Mở đề".</span>
+            </div>
+            <div class="form-check mb-3">
+                <input asp-for="PreventBackNavigation" class="form-check-input" />
+                <label asp-for="PreventBackNavigation" class="form-check-label">Chặn quay lại (anti-cheat)</label>
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu và cấu hình câu hỏi</button>
+    <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

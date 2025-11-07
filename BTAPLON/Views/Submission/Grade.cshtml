@@ -1,0 +1,41 @@
+﻿@model BTAPLON.Models.Submission
+
+@{
+    ViewData["Title"] = "Grade Submission";
+}
+
+<h2 class="mb-3">Chấm bài nộp</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <p><strong>Sinh viên:</strong> @Model.Student?.FullName</p>
+        <p><strong>Bài tập:</strong> @Model.Assignment?.Title</p>
+        <p><strong>Lớp:</strong> @Model.Assignment?.Class?.ClassCode</p>
+        <p><strong>File nộp:</strong> <a href="@Model.FilePath" target="_blank">Xem file</a></p>
+        <p><strong>Thời gian nộp:</strong> @Model.SubmittedAt</p>
+    </div>
+</div>
+
+<form asp-action="Grade" method="post" class="card p-4 shadow-sm">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.SubmissionID" />
+
+    <div class="mb-3">
+        <label asp-for="Score" class="form-label"></label>
+        <input asp-for="Score" class="form-control" />
+        <span asp-validation-for="Score" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Feedback" class="form-label"></label>
+        <textarea asp-for="Feedback" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Feedback" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu điểm</button>
+    <a class="btn btn-secondary ms-2" asp-controller="Assignment" asp-action="Details" asp-route-id="@Model.AssignmentID">Hủy</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

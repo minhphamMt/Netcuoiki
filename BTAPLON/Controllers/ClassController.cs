@@ -1,4 +1,5 @@
 ﻿using BTAPLON.Data;
+using BTAPLON.Filters;
 using BTAPLON.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BTAPLON.Controllers
 {
+    [SessionAuthorize("Admin")]
     public class ClassController : Controller
     {
         public IActionResult Index1()

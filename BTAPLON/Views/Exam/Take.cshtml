@@ -1,0 +1,153 @@
+﻿@model ExamTakeViewModel
+@{
+    ViewData["Title"] = Model.Exam.Title;
+    var seconds = Model.RemainingSeconds;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2>@Model.Exam.Title</h2>
+        <div class="text-muted">Thời lượng còn lại: <span id="timer" class="fw-bold text-danger"></span></div>
+    </div>
+    <div>
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#confirmSubmitModal">Nộp bài</button>
+    </div>
+</div>
+
+<form asp-action="Submit" asp-route-id="@Model.Exam.ExamID" method="post" id="examForm">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="remainingSeconds" value="@seconds" />
+    <div class="mb-3">
+        <div class="alert alert-info">
+            Vui lòng không tải lại hoặc rời khỏi trang khi đang làm bài. Bài thi sẽ tự động nộp khi hết thời gian.
+        </div>
+    </div>
+
+    @{
+        var orderedQuestions = Model.Exam.Questions?.OrderBy(q => q.DisplayOrder).ToList() ?? new List<Question>();
+    }
+    @for (int i = 0; i < orderedQuestions.Count; i++)
+    {
+        var question = orderedQuestions[i];
+        var answer = Model.Answers.ContainsKey(question.QuestionID) ? Model.Answers[question.QuestionID] : null;
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>Câu @(i + 1):</strong> @question.Prompt
+                <span class="badge bg-light text-dark ms-2">@question.Points điểm</span>
+            </div>
+            <div class="card-body">
+                @if (question.IsMultipleChoice)
+                {
+                    @foreach (var choice in question.Choices ?? Enumerable.Empty<Choice>())
+                    {
+                        var isChecked = answer?.SelectedChoiceId == choice.ChoiceID;
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="answers[@question.QuestionID]" value="@choice.ChoiceID" @(isChecked ? "checked" : null) id="choice_@choice.ChoiceID">
+                            <label class="form-check-label" for="choice_@choice.ChoiceID">@choice.Text</label>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <textarea class="form-control" name="answers[@question.QuestionID]" rows="4">@answer?.AnswerText</textarea>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between">
+        <span class="text-muted">Bài thi sẽ lưu toàn bộ câu trả lời khi bạn bấm "Nộp bài" hoặc hết thời gian.</span>
+        <button type="submit" class="btn btn-primary">Nộp bài</button>
+    </div>
+</form>
+
+<!-- Modal confirm -->
+<div class="modal fade" id="confirmSubmitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận nộp bài</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn chắc chắn muốn nộp bài ngay bây giờ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tiếp tục làm</button>
+                <button type="button" class="btn btn-primary" id="confirmSubmitButton">Nộp bài</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const remainingInput = document.getElementById('remainingSeconds');
+            let seconds = parseInt(remainingInput.value);
+            const timerLabel = document.getElementById('timer');
+            const form = document.getElementById('examForm');
+            const modalButton = document.getElementById('confirmSubmitButton');
+            let submitted = false;
+
+            function formatTime(sec) {
+                const minutes = Math.floor(sec / 60);
+                const seconds = sec % 60;
+                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            function updateTimer() {
+                timerLabel.textContent = formatTime(seconds);
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    if (!submitted) {
+                        submitted = true;
+                        if (typeof form.requestSubmit === 'function') {
+                            form.requestSubmit();
+                        } else {
+                            form.submit();
+                        }
+                    }
+                }
+                seconds--;
+            }
+
+            const interval = setInterval(updateTimer, 1000);
+            updateTimer();
+
+            form.addEventListener('submit', function () {
+                submitted = true;
+                window.removeEventListener('beforeunload', beforeUnloadHandler);
+            });
+
+            modalButton.addEventListener('click', function () {
+                document.querySelector('#confirmSubmitModal .btn-close').click();
+                if (!submitted) {
+                    submitted = true;
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                }
+            });
+
+            function beforeUnloadHandler(event) {
+                event.preventDefault();
+                event.returnValue = '';
+            }
+
+            window.addEventListener('beforeunload', beforeUnloadHandler);
+
+            @if (Model.Exam.PreventBackNavigation)
+            {
+                    <text>
+                    history.pushState(null, '', location.href);
+                    window.onpopstate = function () {
+                        history.pushState(null, '', location.href);
+                    };
+                    </text>
+            }
+        })();
+    </script>
+}

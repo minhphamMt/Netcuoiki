@@ -1,0 +1,81 @@
+﻿@model ExamReviewSubmissionViewModel
+@{
+    ViewData["Title"] = "Chấm bài";
+    var answers = Model.Answers.ToDictionary(a => a.QuestionId, a => a);
+    var totalPoints = Model.Exam.Questions?.Sum(q => q.Points) ?? 0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2>@Model.Submission.Student?.FullName</h2>
+        <div class="text-muted">Bài thi: @Model.Exam.Title</div>
+        <div class="text-muted">Thời gian nộp: @Model.Submission.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</div>
+    </div>
+    <a asp-action="Review" asp-route-id="@Model.Exam.ExamID" class="btn btn-outline-secondary">Quay lại</a>
+</div>
+
+<form asp-action="GradeSubmission" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="submissionId" value="@Model.Submission.ExamSubmissionID" />
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label class="form-label">Điểm</label>
+            <input type="number" step="0.25" min="0" max="@totalPoints" class="form-control" name="score" value="@Model.Submission.Score" />
+            <small class="text-muted">Tổng điểm tối đa: @totalPoints</small>
+        </div>
+        <div class="col-md-8">
+            <label class="form-label">Nhận xét</label>
+            <textarea class="form-control" name="feedback" rows="3">@Model.Submission.TeacherFeedback</textarea>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary mb-4">Lưu đánh giá</button>
+</form>
+
+@foreach (var question in Model.Exam.Questions?.OrderBy(q => q.DisplayOrder) ?? Enumerable.Empty<Question>())
+{
+    answers.TryGetValue(question.QuestionID, out var answer);
+    <div class="card mb-3">
+        <div class="card-header">
+            <strong>Câu hỏi:</strong> @question.Prompt
+            <span class="badge bg-light text-dark ms-2">@question.Points điểm</span>
+        </div>
+        <div class="card-body">
+            @if (question.IsMultipleChoice)
+            {
+                <ul class="list-group">
+                    @foreach (var choice in question.Choices ?? Enumerable.Empty<Choice>())
+                    {
+                        var isSelected = answer?.SelectedChoiceId == choice.ChoiceID;
+                        var itemClass = "list-group-item";
+                        if (choice.IsCorrect)
+                        {
+                            itemClass += " list-group-item-success";
+                        }
+                        else if (isSelected)
+                        {
+                            itemClass += " list-group-item-danger";
+                        }
+                        <li class="@itemClass">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>@choice.Text</span>
+                                @if (isSelected)
+                                {
+                                    <span class="badge bg-primary">Sinh viên chọn</span>
+                                }
+                                @if (choice.IsCorrect)
+                                {
+                                    <span class="badge bg-success">Đáp án đúng</span>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+            <p><strong>Bài làm:</strong></p>
+            <p class="border rounded p-3">@answer?.AnswerText</p>
+            }
+        </div>
+    </div>
+}

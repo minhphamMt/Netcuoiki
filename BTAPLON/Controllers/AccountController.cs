@@ -1,5 +1,6 @@
 ﻿using BTAPLON.Data;
 using BTAPLON.Models;
+using BTAPLON.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,12 +33,27 @@ namespace BTAPLON.Controllers
         public async Task<IActionResult> Login(string email, string password)
         {
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email && u.PasswordHash == password);
+                .FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
                 ViewBag.Error = "Email hoặc mật khẩu không đúng!";
                 return View();
+            }
+
+            var passwordMatches = PasswordHelper.TryVerify(password, user.PasswordHash, out var shouldUpgradeHash);
+
+            if (!passwordMatches)
+            {
+                ViewBag.Error = "Email hoặc mật khẩu không đúng!";
+                return View();
+            }
+
+            if (shouldUpgradeHash)
+            {
+                user.PasswordHash = PasswordHelper.HashPassword(password);
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
             }
 
             // Đăng nhập thành công
@@ -54,5 +70,6 @@ namespace BTAPLON.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
+
     }
 }

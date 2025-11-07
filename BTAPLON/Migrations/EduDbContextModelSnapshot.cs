@@ -53,6 +53,31 @@ namespace BTAPLON.Migrations
 
                     b.ToTable("Assignments");
                 });
+            modelBuilder.Entity("BTAPLON.Models.Choice", b =>
+            {
+                b.Property<int>("ChoiceID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChoiceID"));
+
+                b.Property<bool>("IsCorrect")
+                    .HasColumnType("bit");
+
+                b.Property<int>("QuestionID")
+                    .HasColumnType("int");
+
+                b.Property<string>("Text")
+                    .IsRequired()
+                    .HasMaxLength(500)
+                    .HasColumnType("nvarchar(500)");
+
+                b.HasKey("ChoiceID");
+
+                b.HasIndex("QuestionID");
+
+                b.ToTable("Choices");
+            });
 
             modelBuilder.Entity("BTAPLON.Models.Class", b =>
                 {
@@ -137,7 +162,131 @@ namespace BTAPLON.Migrations
 
                     b.ToTable("Enrollments");
                 });
+            modelBuilder.Entity("BTAPLON.Models.Exam", b =>
+            {
+                b.Property<int>("ExamID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExamID"));
+
+                b.Property<int>("ClassID")
+                    .HasColumnType("int");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<int>("CreatorID")
+                    .HasColumnType("int");
+
+                b.Property<string>("Description")
+                    .HasMaxLength(1000)
+                    .HasColumnType("nvarchar(1000)");
+
+                b.Property<int>("DurationMinutes")
+                    .HasColumnType("int");
+
+                b.Property<DateTime?>("EndTime")
+                    .HasColumnType("datetime2");
+
+                b.Property<bool>("IsPublished")
+                    .HasColumnType("bit");
+
+                b.Property<bool>("PreventBackNavigation")
+                    .HasColumnType("bit");
+
+                b.Property<DateTime?>("PublishedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<DateTime?>("StartTime")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("nvarchar(200)");
+
+                b.HasKey("ExamID");
+
+                b.HasIndex("ClassID");
+
+                b.HasIndex("CreatorID");
+
+                b.ToTable("Exams");
+            });
+
+            modelBuilder.Entity("BTAPLON.Models.ExamSubmission", b =>
+            {
+                b.Property<int>("ExamSubmissionID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExamSubmissionID"));
+
+                b.Property<string>("AnswersJson")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<int>("ExamID")
+                    .HasColumnType("int");
+
+                b.Property<bool>("IsFinalized")
+                    .HasColumnType("bit");
+
+                b.Property<double?>("Score")
+                    .HasColumnType("float");
+
+                b.Property<DateTime>("StartedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<int>("StudentID")
+                    .HasColumnType("int");
+
+                b.Property<DateTime?>("SubmittedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("TeacherFeedback")
+                    .HasColumnType("nvarchar(max)");
+
+                b.HasKey("ExamSubmissionID");
+
+                b.HasIndex("ExamID");
+
+                b.HasIndex("StudentID");
+
+                b.ToTable("ExamSubmissions");
+            });
+
+            modelBuilder.Entity("BTAPLON.Models.Question", b =>
+            {
+                b.Property<int>("QuestionID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionID"));
+
+                b.Property<int>("DisplayOrder")
+                    .HasColumnType("int");
+
+                b.Property<int>("ExamID")
+                    .HasColumnType("int");
+
+                b.Property<bool>("IsMultipleChoice")
+                    .HasColumnType("bit");
+
+                b.Property<double>("Points")
+                    .HasColumnType("float");
+
+                b.Property<string>("Prompt")
+                    .IsRequired()
+                    .HasMaxLength(2000)
+                    .HasColumnType("nvarchar(2000)");
+
+                b.HasKey("QuestionID");
+
+                b.HasIndex("ExamID");
+
+                b.ToTable("Questions");
+            });
             modelBuilder.Entity("BTAPLON.Models.Submission", b =>
                 {
                     b.Property<int>("SubmissionID")
@@ -209,16 +358,6 @@ namespace BTAPLON.Migrations
 
                     b.ToTable("Users");
 
-                    b.HasData(
-                        new
-                        {
-                            UserID = 1,
-                            CreatedAt = new DateTime(2025, 11, 1, 15, 20, 38, 303, DateTimeKind.Local).AddTicks(6482),
-                            Email = "admin@gmail.com",
-                            FullName = "Admin User",
-                            PasswordHash = "123",
-                            Role = "Admin"
-                        });
                 });
 
             modelBuilder.Entity("BTAPLON.Models.Assignment", b =>
@@ -231,7 +370,16 @@ namespace BTAPLON.Migrations
 
                     b.Navigation("Class");
                 });
+            modelBuilder.Entity("BTAPLON.Models.Choice", b =>
+            {
+                b.HasOne("BTAPLON.Models.Question", "Question")
+                    .WithMany("Choices")
+                    .HasForeignKey("QuestionID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
+                b.Navigation("Question");
+            });
             modelBuilder.Entity("BTAPLON.Models.Class", b =>
                 {
                     b.HasOne("BTAPLON.Models.Course", "Course")
@@ -272,6 +420,54 @@ namespace BTAPLON.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("BTAPLON.Models.Exam", b =>
+            {
+                b.HasOne("BTAPLON.Models.Class", "Class")
+                    .WithMany("Exams")
+                    .HasForeignKey("ClassID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("BTAPLON.Models.User", "Creator")
+                    .WithMany("ExamsCreated")
+                    .HasForeignKey("CreatorID")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+
+                b.Navigation("Class");
+
+                b.Navigation("Creator");
+            });
+
+            modelBuilder.Entity("BTAPLON.Models.ExamSubmission", b =>
+            {
+                b.HasOne("BTAPLON.Models.Exam", "Exam")
+                    .WithMany("Submissions")
+                    .HasForeignKey("ExamID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("BTAPLON.Models.User", "Student")
+                    .WithMany("ExamSubmissions")
+                    .HasForeignKey("StudentID")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+
+                b.Navigation("Exam");
+
+                b.Navigation("Student");
+            });
+
+            modelBuilder.Entity("BTAPLON.Models.Question", b =>
+            {
+                b.HasOne("BTAPLON.Models.Exam", "Exam")
+                    .WithMany("Questions")
+                    .HasForeignKey("ExamID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Exam");
+            });
             modelBuilder.Entity("BTAPLON.Models.Submission", b =>
                 {
                     b.HasOne("BTAPLON.Models.Assignment", "Assignment")
@@ -301,18 +497,34 @@ namespace BTAPLON.Migrations
                     b.Navigation("Assignments");
 
                     b.Navigation("Enrollments");
+
+                    b.Navigation("Exams");
                 });
 
             modelBuilder.Entity("BTAPLON.Models.Course", b =>
                 {
                     b.Navigation("Classes");
                 });
+            modelBuilder.Entity("BTAPLON.Models.Exam", b =>
+            {
+                b.Navigation("Questions");
 
+                b.Navigation("Submissions");
+            });
+
+            modelBuilder.Entity("BTAPLON.Models.Question", b =>
+            {
+                b.Navigation("Choices");
+            });
             modelBuilder.Entity("BTAPLON.Models.User", b =>
                 {
                     b.Navigation("CoursesTaught");
 
                     b.Navigation("Enrollments");
+                    b.Navigation("ExamSubmissions");
+
+                    b.Navigation("ExamsCreated");
+
 
                     b.Navigation("Submissions");
                 });

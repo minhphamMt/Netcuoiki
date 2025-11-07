@@ -99,7 +99,8 @@ namespace BTAPLON.Controllers
         public IActionResult Details(int id)
         {
             var a = _context.Assignments
-                .Include(x => x.Class)
+                 .Include(x => x.Class)!
+                    .ThenInclude(c => c.Course)
                 .Include(x => x.Submissions)
                 .ThenInclude(s => s.Student)
                 .FirstOrDefault(x => x.AssignmentID == id);

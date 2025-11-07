@@ -1,10 +1,12 @@
 ﻿using BTAPLON.Data;
+using BTAPLON.Filters;
 using BTAPLON.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BTAPLON.Controllers
 {
+    [SessionAuthorize("Admin")]
     public class CourseController : Controller
     {
         public IActionResult Index1()

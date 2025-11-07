@@ -1,0 +1,61 @@
+﻿@model ExamStatisticsViewModel
+@{
+    ViewData["Title"] = $"Thống kê - {Model.Exam.Title}";
+}
+
+<h2>@ViewData["Title"]</h2>
+<div class="mb-3 text-muted">Lớp: @Model.Exam.Class?.ClassCode (@Model.Exam.Class?.Course?.CourseName)</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-muted">Tổng số sinh viên</div>
+                <h3>@Model.TotalStudents</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-muted">Số bài nộp</div>
+                <h3>@Model.TotalSubmissions</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-muted">Điểm trung bình</div>
+                <h3>@Model.AverageScore</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-muted">Cao nhất / Thấp nhất</div>
+                <h3>@Model.HighestScore / @Model.LowestScore</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Phân bố điểm</h4>
+<table class="table table-striped w-50">
+    <thead>
+        <tr>
+            <th>Khoảng điểm</th>
+            <th>Số lượng</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.GradeDistribution)
+        {
+            <tr>
+                <td>@item.Key</td>
+                <td>@item.Value</td>
+            </tr>
+        }
+    </tbody>
+</table>

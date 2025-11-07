@@ -3,14 +3,16 @@
 <h2 class="mb-3">Thêm User mới</h2>
 
 <form method="post" class="card p-4 shadow" style="max-width:500px">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="mb-3">
         <label class="form-label">Full Name</label>
-        <input type="text" name="FullName" class="form-control" required />
+        <input type="text" name="FullName" class="form-control" value="@Model?.FullName" required />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Email</label>
-        <input type="email" name="Email" class="form-control" required />
+        <input type="email" name="Email" class="form-control" value="@Model?.Email" required />
     </div>
 
     <div class="mb-3">
@@ -21,9 +23,9 @@
     <div class="mb-3">
         <label class="form-label">Role</label>
         <select name="Role" class="form-select">
-            <option value="Admin">Admin</option>
-            <option value="Teacher">Teacher</option>
-            <option value="Student">Student</option>
+             <option value="@(Model?.Role == "Admin" ? "selected" : string.Empty)">Admin</option>
+            <option value="@(Model?.Role == "Teacher" ? "selected" : string.Empty)">Teacher</option>
+            <option value="@(Model?.Role == "Student" ? "selected" : string.Empty)">Student</option>
         </select>
     </div>
 

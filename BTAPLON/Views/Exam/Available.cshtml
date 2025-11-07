@@ -1,0 +1,51 @@
+﻿@model IEnumerable<Exam>
+@{
+    ViewData["Title"] = "Bài thi khả dụng";
+    var submissions = ViewBag.Submissions as IEnumerable<ExamSubmission> ?? Enumerable.Empty<ExamSubmission>();
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["QuestionError"] != null)
+{
+    <div class="alert alert-warning">@TempData["QuestionError"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Hiện chưa có bài thi nào mở cho bạn.</div>
+}
+else
+{
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    @foreach (var exam in Model)
+    {
+        var submission = submissions.FirstOrDefault(s => s.ExamID == exam.ExamID);
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">@exam.Title</h5>
+                    <p class="card-text">@exam.Description</p>
+                    <ul class="list-unstyled small text-muted">
+                        <li><strong>Lớp:</strong> @exam.Class?.ClassCode (@exam.Class?.Course?.CourseName)</li>
+                        <li><strong>Thời lượng:</strong> @exam.DurationMinutes phút</li>
+                        <li><strong>Bắt đầu:</strong> @exam.StartTime?.ToString("dd/MM/yyyy HH:mm")</li>
+                        <li><strong>Kết thúc:</strong> @exam.EndTime?.ToString("dd/MM/yyyy HH:mm")</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
+                    @if (submission != null && submission.IsFinalized)
+                    {
+                        <span class="badge bg-success">Đã nộp</span>
+                        <a asp-action="Result" asp-route-submissionId="@submission.ExamSubmissionID" class="btn btn-outline-info btn-sm">Xem kết quả</a>
+                    }
+                    else
+                    {
+                    <a asp-action="Take" asp-route-id="@exam.ExamID" class="btn btn-primary">Bắt đầu làm</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+}

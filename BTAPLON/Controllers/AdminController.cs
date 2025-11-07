@@ -1,5 +1,6 @@
 ﻿using BTAPLON.Data;
 using BTAPLON.Models;
+using BTAPLON.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BTAPLON.Controllers
@@ -35,6 +36,11 @@ namespace BTAPLON.Controllers
         [HttpPost]
         public IActionResult AddUser(User user)
         {
+            if (!string.IsNullOrWhiteSpace(user.PasswordHash) && !PasswordHelper.IsBcryptHash(user.PasswordHash))
+            {
+                user.PasswordHash = PasswordHelper.HashPassword(user.PasswordHash);
+            }
+
             _context.Users.Add(user);
             _context.SaveChanges();
             return RedirectToAction("Users");
@@ -46,6 +52,7 @@ namespace BTAPLON.Controllers
         {
             var user = _context.Users.Find(id);
             if (user == null) return NotFound();
+            user.PasswordHash = string.Empty;
             return View(user);
         }
 
@@ -63,8 +70,14 @@ namespace BTAPLON.Controllers
 
             user.FullName = model.FullName;
             user.Email = model.Email;
-            user.PasswordHash = model.PasswordHash;
             user.Role = model.Role;
+
+            if (!string.IsNullOrWhiteSpace(model.PasswordHash))
+            {
+                user.PasswordHash = PasswordHelper.IsBcryptHash(model.PasswordHash)
+                    ? model.PasswordHash
+                    : PasswordHelper.HashPassword(model.PasswordHash);
+            }
 
             _context.SaveChanges();
 
