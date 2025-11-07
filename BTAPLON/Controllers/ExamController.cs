@@ -24,6 +24,31 @@ namespace BTAPLON.Controllers
         private bool IsAdmin => string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase);
         private bool IsStudent => string.Equals(CurrentUserRole, "Student", StringComparison.OrdinalIgnoreCase);
 
+        private bool TeacherCanManageExam(Exam exam)
+        {
+            if (!IsTeacher || CurrentUserId is not int teacherId)
+            {
+                return false;
+            }
+
+            if (exam.CreatorID == teacherId)
+            {
+                return true;
+            }
+
+            if (exam.Class?.Course?.TeacherID == teacherId)
+            {
+                return true;
+            }
+
+            int? assignedTeacherId = _context.Classes
+                .Where(c => c.ClassID == exam.ClassID)
+                .Select(c => c.Course != null ? c.Course.TeacherID : null)
+                .FirstOrDefault();
+
+            return assignedTeacherId == teacherId;
+        }
+
         private IActionResult RequireLogin()
         {
             if (CurrentUserId == null)
@@ -51,9 +76,10 @@ namespace BTAPLON.Controllers
                 .Include(e => e.Submissions)
                 .AsQueryable();
 
-            if (IsTeacher)
+            if (IsTeacher && CurrentUserId is int teacherId)
             {
-                examsQuery = examsQuery.Where(e => e.CreatorID == CurrentUserId);
+                examsQuery = examsQuery.Where(e => e.CreatorID == teacherId ||
+                    (e.Class != null && e.Class.Course != null && e.Class.Course.TeacherID == teacherId));
             }
 
             var exams = examsQuery
@@ -123,15 +149,15 @@ namespace BTAPLON.Controllers
             }
 
             var exam = _context.Exams
-                .Include(e => e.Class)
-                .ThenInclude(c => c.Course)
-                .Include(e => e.Questions!)
-                .ThenInclude(q => q.Choices)
-                .FirstOrDefault(e => e.ExamID == id);
+                    .Include(e => e.Class)
+                    .ThenInclude(c => c.Course)
+                    .Include(e => e.Questions)
+                    .ThenInclude(q => q.Choices)
+                    .FirstOrDefault(e => e.ExamID == id);
 
             if (exam == null) return NotFound();
 
-            if (IsTeacher && exam.CreatorID != CurrentUserId)
+            if (IsTeacher && !TeacherCanManageExam(exam))
             {
                 return Forbid();
             }
@@ -160,11 +186,13 @@ namespace BTAPLON.Controllers
             }
 
             var exam = _context.Exams
+                .Include(e => e.Class)
+                .ThenInclude(c => c.Course)
                 .Include(e => e.Questions)
                 .FirstOrDefault(e => e.ExamID == model.ExamID);
 
             if (exam == null) return NotFound();
-            if (IsTeacher && exam.CreatorID != CurrentUserId)
+            if (IsTeacher && !TeacherCanManageExam(exam))
             {
                 return Forbid();
             }
@@ -187,9 +215,11 @@ namespace BTAPLON.Controllers
             _context.Questions.Add(question);
             _context.SaveChanges();
 
-            if (model.IsMultipleChoice)
+            var choices = model.Choices ?? new List<ChoiceOptionViewModel>();
+
+            if (model.IsMultipleChoice || choices.Any(c => !string.IsNullOrWhiteSpace(c.Text)))
             {
-                var validChoices = model.Choices
+                var validChoices = choices
                     .Where(c => !string.IsNullOrWhiteSpace(c.Text))
                     .Select(c => new Choice
                     {
@@ -205,6 +235,7 @@ namespace BTAPLON.Controllers
                 }
                 else
                 {
+                    question.IsMultipleChoice = true;
                     if (!validChoices.Any(c => c.IsCorrect))
                     {
                         validChoices[0].IsCorrect = true;
@@ -232,11 +263,18 @@ namespace BTAPLON.Controllers
 
             var question = _context.Questions
                 .Include(q => q.Exam)
+                .ThenInclude(e => e.Class)
+                .ThenInclude(c => c.Course)
                 .FirstOrDefault(q => q.QuestionID == id);
 
             if (question == null) return NotFound();
 
-            if (!IsAdmin && (!IsTeacher || question.Exam!.CreatorID != CurrentUserId))
+            if (question.Exam == null)
+            {
+                return NotFound();
+            }
+
+            if (!IsAdmin && (!IsTeacher || !TeacherCanManageExam(question.Exam)))
             {
                 return Forbid();
             }
@@ -256,12 +294,14 @@ namespace BTAPLON.Controllers
             if (redirect != null) return redirect;
 
             var exam = _context.Exams
+                .Include(e => e.Class)
+                .ThenInclude(c => c.Course)
                 .Include(e => e.Questions)
                 .FirstOrDefault(e => e.ExamID == id);
 
             if (exam == null) return NotFound();
 
-            if (!IsAdmin && (!IsTeacher || exam.CreatorID != CurrentUserId))
+            if (!IsAdmin && (!IsTeacher || !TeacherCanManageExam(exam)))
             {
                 return Forbid();
             }
@@ -303,10 +343,13 @@ namespace BTAPLON.Controllers
             var redirect = RequireLogin();
             if (redirect != null) return redirect;
 
-            var exam = _context.Exams.FirstOrDefault(e => e.ExamID == id);
+            var exam = _context.Exams
+                .Include(e => e.Class)
+                .ThenInclude(c => c.Course)
+                .FirstOrDefault(e => e.ExamID == id);
             if (exam == null) return NotFound();
 
-            if (!IsAdmin && (!IsTeacher || exam.CreatorID != CurrentUserId))
+            if (!IsAdmin && (!IsTeacher || !TeacherCanManageExam(exam)))
             {
                 return Forbid();
             }
@@ -562,15 +605,33 @@ namespace BTAPLON.Controllers
             if (redirect != null) return redirect;
 
             var submission = _context.ExamSubmissions
-                .Include(s => s.Exam)!
-                .ThenInclude(e => e!.Questions)
-                .FirstOrDefault(s => s.ExamSubmissionID == submissionId);
+         .Include(s => s.Exam)
+             .ThenInclude(e => e.Class)
+                 .ThenInclude(c => c.Course)
+         .Include(s => s.Exam)
+             .ThenInclude(e => e.Questions)
+         .FirstOrDefault(s => s.ExamSubmissionID == submissionId);
 
             if (submission == null) return NotFound();
 
-            if (submission.StudentID != CurrentUserId && !IsTeacher && !IsAdmin)
+            if (submission.Exam == null)
             {
-                return Forbid();
+                return NotFound();
+            }
+
+            if (submission.StudentID != CurrentUserId)
+            {
+                if (IsTeacher)
+                {
+                    if (!TeacherCanManageExam(submission.Exam))
+                    {
+                        return Forbid();
+                    }
+                }
+                else if (!IsAdmin)
+                {
+                    return Forbid();
+                }
             }
 
             var answers = new List<ExamSubmissionAnswer>();
@@ -592,7 +653,7 @@ namespace BTAPLON.Controllers
 
             var vm = new ExamReviewSubmissionViewModel
             {
-                Exam = submission.Exam!,
+                Exam = submission.Exam,
                 Submission = submission,
                 Answers = answers
             };
@@ -614,13 +675,13 @@ namespace BTAPLON.Controllers
             var exam = _context.Exams
                 .Include(e => e.Class)
                 .ThenInclude(c => c.Course)
-                .Include(e => e.Submissions!)
+                .Include(e => e.Submissions)
                 .ThenInclude(s => s.Student)
                 .FirstOrDefault(e => e.ExamID == id);
 
             if (exam == null) return NotFound();
 
-            if (IsTeacher && exam.CreatorID != CurrentUserId)
+            if (IsTeacher && !TeacherCanManageExam(exam))
             {
                 return Forbid();
             }
@@ -640,15 +701,23 @@ namespace BTAPLON.Controllers
             }
 
             var submission = _context.ExamSubmissions
-                .Include(s => s.Exam)!
-                .ThenInclude(e => e!.Questions!)
-                .ThenInclude(q => q.Choices)
+                .Include(s => s.Exam)
+                    .ThenInclude(e => e.Class)
+                        .ThenInclude(c => c.Course)
+                .Include(s => s.Exam)
+                    .ThenInclude(e => e.Questions)
+                        .ThenInclude(q => q.Choices)
                 .Include(s => s.Student)
                 .FirstOrDefault(s => s.ExamSubmissionID == submissionId);
 
             if (submission == null) return NotFound();
 
-            if (IsTeacher && submission.Exam!.CreatorID != CurrentUserId)
+            if (submission.Exam == null)
+            {
+                return NotFound();
+            }
+
+            if (IsTeacher && !TeacherCanManageExam(submission.Exam))
             {
                 return Forbid();
             }
@@ -672,7 +741,7 @@ namespace BTAPLON.Controllers
 
             var vm = new ExamReviewSubmissionViewModel
             {
-                Exam = submission.Exam!,
+                Exam = submission.Exam,
                 Submission = submission,
                 Answers = answers
             };
@@ -694,11 +763,18 @@ namespace BTAPLON.Controllers
 
             var submission = _context.ExamSubmissions
                 .Include(s => s.Exam)
+                    .ThenInclude(e => e.Class)
+                        .ThenInclude(c => c.Course)
                 .FirstOrDefault(s => s.ExamSubmissionID == submissionId);
 
             if (submission == null) return NotFound();
 
-            if (IsTeacher && submission.Exam!.CreatorID != CurrentUserId)
+            if (submission.Exam == null)
+            {
+                return NotFound();
+            }
+
+            if (IsTeacher && !TeacherCanManageExam(submission.Exam))
             {
                 return Forbid();
             }
@@ -737,7 +813,7 @@ namespace BTAPLON.Controllers
 
             if (exam == null) return NotFound();
 
-            if (IsTeacher && exam.CreatorID != CurrentUserId)
+            if (IsTeacher && !TeacherCanManageExam(exam))
             {
                 return Forbid();
             }
@@ -750,13 +826,13 @@ namespace BTAPLON.Controllers
             double lowest = finalized.Any() ? finalized.Min(s => s.Score!.Value) : 0;
 
             var distribution = new Dictionary<string, int>
-            {
-                { ">= 9", finalized.Count(s => s.Score >= 9) },
-                { "8 - 8.99", finalized.Count(s => s.Score >= 8 && s.Score < 9) },
-                { "7 - 7.99", finalized.Count(s => s.Score >= 7 && s.Score < 8) },
-                { "5 - 6.99", finalized.Count(s => s.Score >= 5 && s.Score < 7) },
-                { "< 5", finalized.Count(s => s.Score < 5) }
-            };
+    {
+        { ">= 9", finalized.Count(s => s.Score >= 9) },
+        { "8 - 8.99", finalized.Count(s => s.Score >= 8 && s.Score < 9) },
+        { "7 - 7.99", finalized.Count(s => s.Score >= 7 && s.Score < 8) },
+        { "5 - 6.99", finalized.Count(s => s.Score >= 5 && s.Score < 7) },
+        { "< 5", finalized.Count(s => s.Score < 5) }
+    };
 
             var vm = new ExamStatisticsViewModel
             {
