@@ -33,13 +33,13 @@ namespace BTAPLON.Migrations
                         column: x => x.ClassID,
                         principalTable: "Classes",
                         principalColumn: "ClassID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_DiscussionThreads_Courses_CourseID",
                         column: x => x.CourseID,
                         principalTable: "Courses",
                         principalColumn: "CourseID",
-                        onDelete: ReferentialAction.Cascade);
+                     onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_DiscussionThreads_Users_CreatedByID",
                         column: x => x.CreatedByID,
@@ -71,13 +71,13 @@ namespace BTAPLON.Migrations
                         column: x => x.ClassID,
                         principalTable: "Classes",
                         principalColumn: "ClassID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_ForumQuestions_Courses_CourseID",
                         column: x => x.CourseID,
                         principalTable: "Courses",
                         principalColumn: "CourseID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_ForumQuestions_Users_StudentID",
                         column: x => x.StudentID,

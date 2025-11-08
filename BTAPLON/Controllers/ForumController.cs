@@ -1,4 +1,5 @@
-﻿using BTAPLON.Data;
+﻿using System;
+using BTAPLON.Data;
 using BTAPLON.Models;
 using BTAPLON.Models.Forum;
 using BTAPLON.Models.ViewModels;
@@ -20,7 +21,7 @@ namespace BTAPLON.Controllers
 
         public async Task<IActionResult> Index(int? courseId, int? classId)
         {
-            if (!EnsureAuthenticated(out var _))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -33,6 +34,11 @@ namespace BTAPLON.Controllers
 
             var course = loadResult.course;
             var cls = loadResult.cls;
+
+            if (!await HasForumAccessAsync(userId, role, course, cls))
+            {
+                return Forbid();
+            }
 
             var threadQuery = _context.DiscussionThreads
                 .Include(t => t.CreatedBy)
@@ -73,7 +79,7 @@ namespace BTAPLON.Controllers
         [HttpGet]
         public async Task<IActionResult> CreateThread(int? courseId, int? classId)
         {
-            if (!EnsureAuthenticated(out _))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -82,6 +88,11 @@ namespace BTAPLON.Controllers
             if (!loadResult.success)
             {
                 return NotFound();
+            }
+
+            if (!await HasForumAccessAsync(userId, role, loadResult.course, loadResult.cls))
+            {
+                return Forbid();
             }
 
             ViewBag.Course = loadResult.course;
@@ -98,7 +109,7 @@ namespace BTAPLON.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateThread(ThreadCreateViewModel model)
         {
-            if (!EnsureAuthenticated(out var userId))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -112,6 +123,11 @@ namespace BTAPLON.Controllers
             if (!loadResult.success)
             {
                 return NotFound();
+            }
+
+            if (!await HasForumAccessAsync(userId, role, loadResult.course, loadResult.cls))
+            {
+                return Forbid();
             }
 
             if (!ModelState.IsValid)
@@ -152,7 +168,7 @@ namespace BTAPLON.Controllers
         [HttpGet]
         public async Task<IActionResult> Thread(int id)
         {
-            if (!EnsureAuthenticated(out _))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -170,6 +186,11 @@ namespace BTAPLON.Controllers
                 return NotFound();
             }
 
+            if (!await HasForumAccessAsync(userId, role, thread.Course, thread.Class))
+            {
+                return Forbid();
+            }
+
             return View(thread);
         }
 
@@ -177,15 +198,23 @@ namespace BTAPLON.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PostReply(PostCreateViewModel model)
         {
-            if (!EnsureAuthenticated(out var userId))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            var thread = await _context.DiscussionThreads.FindAsync(model.DiscussionThreadID);
+            var thread = await _context.DiscussionThreads
+                .Include(t => t.Course)
+                .Include(t => t.Class)
+                .FirstOrDefaultAsync(t => t.DiscussionThreadID == model.DiscussionThreadID);
             if (thread == null)
             {
                 return NotFound();
+            }
+
+            if (!await HasForumAccessAsync(userId, role, thread.Course, thread.Class))
+            {
+                return Forbid();
             }
 
             if (!ModelState.IsValid)
@@ -217,7 +246,7 @@ namespace BTAPLON.Controllers
         [HttpGet]
         public async Task<IActionResult> AskQuestion(int? courseId, int? classId)
         {
-            if (!EnsureAuthenticated(out _))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -226,6 +255,11 @@ namespace BTAPLON.Controllers
             if (!loadResult.success)
             {
                 return NotFound();
+            }
+
+            if (!await HasForumAccessAsync(userId, role, loadResult.course, loadResult.cls))
+            {
+                return Forbid();
             }
 
             ViewBag.Course = loadResult.course;
@@ -242,7 +276,7 @@ namespace BTAPLON.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AskQuestion(QuestionCreateViewModel model)
         {
-            if (!EnsureAuthenticated(out var userId))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -256,6 +290,11 @@ namespace BTAPLON.Controllers
             if (!loadResult.success)
             {
                 return NotFound();
+            }
+
+            if (!await HasForumAccessAsync(userId, role, loadResult.course, loadResult.cls))
+            {
+                return Forbid();
             }
 
             if (!ModelState.IsValid)
@@ -291,7 +330,7 @@ namespace BTAPLON.Controllers
         [HttpGet]
         public async Task<IActionResult> Question(int id)
         {
-            if (!EnsureAuthenticated(out _))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -309,6 +348,15 @@ namespace BTAPLON.Controllers
                 return NotFound();
             }
 
+            if (!await HasForumAccessAsync(userId, role, question.Course, question.Class))
+            {
+                return Forbid();
+            }
+
+            var teacherId = await GetTeacherIdAsync(question.CourseID, question.ClassID);
+            ViewBag.CanMarkAnswers = userId == question.StudentID ||
+                                     (teacherId.HasValue && teacherId.Value == userId);
+            
             return View(question);
         }
 
@@ -316,18 +364,25 @@ namespace BTAPLON.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PostAnswer(AnswerCreateViewModel model)
         {
-            if (!EnsureAuthenticated(out var userId))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
 
             var question = await _context.ForumQuestions
                 .Include(q => q.Answers)
+                .Include(q => q.Course)
+                .Include(q => q.Class)
                 .FirstOrDefaultAsync(q => q.QuestionID == model.QuestionID);
 
             if (question == null)
             {
                 return NotFound();
+            }
+
+            if (!await HasForumAccessAsync(userId, role, question.Course, question.Class))
+            {
+                return Forbid();
             }
 
             if (!ModelState.IsValid)
@@ -354,7 +409,7 @@ namespace BTAPLON.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkAnswer(int id)
         {
-            if (!EnsureAuthenticated(out var userId))
+            if (!EnsureAuthenticated(out var userId, out var role))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -378,6 +433,12 @@ namespace BTAPLON.Controllers
             }
 
             var question = answer.Question!;
+
+            if (!await HasForumAccessAsync(userId, role, question.Course, question.Class))
+            {
+                return Forbid();
+            }
+
             var ownerId = question.StudentID;
             var teacherId = await GetTeacherIdAsync(question.CourseID, question.ClassID);
 
@@ -400,10 +461,79 @@ namespace BTAPLON.Controllers
             return RedirectToAction(nameof(Question), new { id = question.QuestionID });
         }
 
-        private bool EnsureAuthenticated(out int userId)
+        private bool EnsureAuthenticated(out int userId, out string? role)
         {
             userId = HttpContext.Session.GetInt32("UserID") ?? 0;
+            role = HttpContext.Session.GetString("UserRole") ?? string.Empty;
             return userId != 0;
+        }
+
+        private async Task<bool> HasForumAccessAsync(int userId, string? role, Course? course, Class? cls)
+        {
+            if (userId == 0 || string.IsNullOrWhiteSpace(role))
+            {
+                return false;
+            }
+
+            if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (cls != null)
+            {
+                if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase))
+                {
+                    var teachesClass = await _context.Classes
+                        .Where(c => c.ClassID == cls.ClassID)
+                        .AnyAsync(c => c.Course != null && c.Course.TeacherID == userId);
+
+                    if (teachesClass)
+                    {
+                        return true;
+                    }
+                }
+
+                if (string.Equals(role, "Student", StringComparison.OrdinalIgnoreCase))
+                {
+                    var enrolled = await _context.Enrollments
+                        .AnyAsync(e => e.ClassID == cls.ClassID && e.StudentID == userId);
+
+                    if (enrolled)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            if (course != null)
+            {
+                if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase))
+                {
+                    var ownsCourse = await _context.Courses
+                        .AnyAsync(c => c.CourseID == course.CourseID && c.TeacherID == userId);
+
+                    if (ownsCourse)
+                    {
+                        return true;
+                    }
+                }
+
+                if (string.Equals(role, "Student", StringComparison.OrdinalIgnoreCase))
+                {
+                    var hasEnrollment = await _context.Enrollments
+                        .AnyAsync(e => e.StudentID == userId && e.Class != null && e.Class.CourseID == course.CourseID);
+
+                    if (hasEnrollment)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private async Task<(bool success, Course? course, Class? cls)> LoadContextAsync(int? courseId, int? classId)

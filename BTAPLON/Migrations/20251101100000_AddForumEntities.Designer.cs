@@ -671,12 +671,12 @@ namespace BTAPLON.Migrations
                 b.HasOne("BTAPLON.Models.Class", "Class")
                     .WithMany("DiscussionThreads")
                     .HasForeignKey("ClassID")
-                    .OnDelete(DeleteBehavior.Cascade);
+                     .OnDelete(DeleteBehavior.SetNull);
 
                 b.HasOne("BTAPLON.Models.Course", "Course")
                     .WithMany("DiscussionThreads")
                     .HasForeignKey("CourseID")
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.NoAction);
 
                 b.HasOne("BTAPLON.Models.User", "CreatedBy")
                     .WithMany("DiscussionThreads")
@@ -715,12 +715,13 @@ namespace BTAPLON.Migrations
                 b.HasOne("BTAPLON.Models.Class", "Class")
                     .WithMany("Questions")
                     .HasForeignKey("ClassID")
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 b.HasOne("BTAPLON.Models.Course", "Course")
                     .WithMany("Questions")
                     .HasForeignKey("CourseID")
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.NoAction);
+
 
                 b.HasOne("BTAPLON.Models.User", "Student")
                     .WithMany("QuestionsAsked")

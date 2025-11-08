@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = Model.Title;
     var orderedAnswers = (Model.Answers ?? new List<Answer>()).OrderBy(a => a.CreatedAt).ToList();
+    var canMarkAnswers = (bool?)ViewBag.CanMarkAnswers ?? false;
 }
 
 <h2>@Model.Title</h2>
@@ -62,7 +63,7 @@
                         {
                             <span class="badge bg-success">Câu trả lời hay</span>
                         }
-                        else if (User?.Identity?.IsAuthenticated ?? false)
+                        else if (canMarkAnswers)
                         {
                             <form asp-action="MarkAnswer" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()

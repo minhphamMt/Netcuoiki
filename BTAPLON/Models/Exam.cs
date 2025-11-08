@@ -1,5 +1,4 @@
-﻿using BTAPLON.Models.Forum;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 
 namespace BTAPLON.Models
@@ -43,8 +42,6 @@ namespace BTAPLON.Models
 
         [ValidateNever]
         public ICollection<Question>? Questions { get; set; }
-        [ValidateNever]
-        public ICollection<Choice>? Choices { get; set; }
 
         [ValidateNever]
         public ICollection<ExamSubmission>? Submissions { get; set; }

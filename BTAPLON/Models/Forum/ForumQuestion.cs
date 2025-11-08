@@ -5,6 +5,7 @@ namespace BTAPLON.Models.Forum
 {
     public class ForumQuestion
     {
+        [Key]
         public int QuestionID { get; set; }
 
         public int? CourseID { get; set; }

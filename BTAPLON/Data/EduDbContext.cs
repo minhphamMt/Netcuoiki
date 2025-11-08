@@ -74,13 +74,13 @@ namespace BTAPLON.Data
                 .HasOne(dt => dt.Course)
                 .WithMany(c => c.DiscussionThreads!)
                 .HasForeignKey(dt => dt.CourseID)
-                .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<DiscussionThread>()
                 .HasOne(dt => dt.Class)
                 .WithMany(c => c.DiscussionThreads!)
                 .HasForeignKey(dt => dt.ClassID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<DiscussionThread>()
                 .HasOne(dt => dt.CreatedBy)
@@ -104,13 +104,13 @@ namespace BTAPLON.Data
                 .HasOne(q => q.Course)
                 .WithMany(c => c.Questions!)
                 .HasForeignKey(q => q.CourseID)
-                .OnDelete(DeleteBehavior.Cascade);
+                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ForumQuestion>()
                 .HasOne(q => q.Class)
                 .WithMany(c => c.Questions!)
                 .HasForeignKey(q => q.ClassID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<ForumQuestion>()
                 .HasOne(q => q.Student)

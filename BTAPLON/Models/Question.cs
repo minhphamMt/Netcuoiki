@@ -1,47 +1,29 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
-namespace BTAPLON.Models.Forum
+namespace BTAPLON.Models
 {
     public class Question
     {
         public int QuestionID { get; set; }
 
-        public int? CourseID { get; set; }
-
-        public int? ClassID { get; set; }
-        public int? ExamID { get; set; }
+        [Required]
+        public int ExamID { get; set; }
 
         [Required]
-        public int StudentID { get; set; }
+        [StringLength(2000)]
+        public string Prompt { get; set; } = string.Empty;
+        public bool IsMultipleChoice { get; set; }
 
-        [Required]
-        [StringLength(200)]
-        public string Title { get; set; } = string.Empty;
+        [Range(0, 100)]
+        public double Points { get; set; } = 1;
 
-        [Required]
-        [StringLength(4000)]
-        public string Body { get; set; } = string.Empty;
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public bool IsResolved { get; set; }
-
-        public DateTime? TeacherNotifiedAt { get; set; }
-
-        [ValidateNever]
-        public Course? Course { get; set; }
-
-        [ValidateNever]
-        public Class? Class { get; set; }
-
-        [ValidateNever]
-        public User? Student { get; set; }
+        public int DisplayOrder { get; set; }
 
         [ValidateNever]
         public Exam? Exam { get; set; }
 
         [ValidateNever]
-        public ICollection<Answer> Answers { get; set; } = new List<Answer>();
+        public ICollection<Choice> Choices { get; set; } = new List<Choice>();
     }
 }

@@ -1,0 +1,96 @@
+﻿@model BTAPLON.Models.ViewModels.DashboardOverviewViewModel
+@{
+    ViewData["Title"] = "Bảng điều khiển";
+    var hasCourses = Model.Courses != null && Model.Courses.Any();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Bảng điều khiển</h1>
+    @if (!string.IsNullOrWhiteSpace(Model.Role))
+    {
+        <span class="badge bg-secondary text-uppercase">@Model.Role</span>
+    }
+</div>
+
+@if (!hasCourses)
+{
+    <div class="alert alert-info">
+        Bạn chưa được gán vào khóa học hoặc lớp học nào. Hãy liên hệ quản trị viên để được thêm vào hệ thống.
+    </div>
+}
+else
+{
+    foreach (var course in Model.Courses)
+    {
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    <h5 class="mb-1">@course.CourseName</h5>
+                    @if (!string.IsNullOrWhiteSpace(course.TeacherName))
+                    {
+                        <small class="text-muted">Giảng viên phụ trách: @course.TeacherName</small>
+                    }
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary me-1">@course.ForumThreadCount chủ đề</span>
+                    <span class="badge bg-success">@course.ForumQuestionCount câu hỏi</span>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrWhiteSpace(course.Description))
+                {
+                    <p class="text-muted">@course.Description</p>
+                }
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <a class="btn btn-outline-primary btn-sm" asp-controller="Dashboard" asp-action="Course" asp-route-id="@course.CourseID">Chi tiết khóa học</a>
+                    <a class="btn btn-outline-secondary btn-sm" asp-controller="Forum" asp-action="Index" asp-route-courseId="@course.CourseID">Diễn đàn khóa học</a>
+                </div>
+
+                @if (course.Classes == null || !course.Classes.Any())
+                {
+                    <p class="text-muted fst-italic">Chưa có lớp học nào được tạo cho khóa học này.</p>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var cls in course.Classes)
+                        {
+                            <div class="col-md-6">
+                                <div class="border rounded h-100 p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-1">Lớp: @(!string.IsNullOrWhiteSpace(cls.ClassCode) ? cls.ClassCode : $"#{cls.ClassID}")</h6>
+                                            <small class="text-muted">@cls.Semester @if(cls.Year.HasValue){
+                                            <text>@cls.Year</text>
+                                        }
+            </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-info text-dark me-1">@cls.AssignmentCount bài tập</span>
+                                        <span class="badge bg-warning text-dark">@cls.ExamCount bài kiểm tra</span>
+                                    </div>
+                                </div>
+
+                                @if (cls.NextExamStartTime.HasValue)
+                                {
+                                    <p class="mb-2"><strong>Bài kiểm tra sắp tới:</strong> @cls.NextExamStartTime.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                }
+                                else
+                                {
+                                    <p class="mb-2 text-muted">Chưa có lịch bài kiểm tra sắp tới.</p>
+                                }
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a class="btn btn-sm btn-primary" asp-controller="Dashboard" asp-action="Class" asp-route-id="@cls.ClassID">Chi tiết lớp</a>
+                                    <a class="btn btn-sm btn-outline-secondary" asp-controller="Forum" asp-action="Index" asp-route-classId="@cls.ClassID">Diễn đàn lớp</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+}

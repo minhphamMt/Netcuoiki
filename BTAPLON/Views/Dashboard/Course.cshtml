@@ -1,0 +1,138 @@
+﻿@model BTAPLON.Models.ViewModels.DashboardCourseDetailViewModel
+@{
+    ViewData["Title"] = $"Khóa học - {Model.CourseName}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">@Model.CourseName</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.TeacherName))
+        {
+            <p class="text-muted mb-0">Giảng viên phụ trách: @Model.TeacherName</p>
+        }
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-secondary" asp-controller="Dashboard" asp-action="Index">&larr; Quay lại</a>
+        <a class="btn btn-primary" asp-controller="Forum" asp-action="Index" asp-route-courseId="@Model.CourseID">Mở diễn đàn khóa học</a>
+        <a class="btn btn-outline-primary" asp-controller="Forum" asp-action="CreateThread" asp-route-courseId="@Model.CourseID">Tạo chủ đề mới</a>
+        <a class="btn btn-outline-success" asp-controller="Forum" asp-action="AskQuestion" asp-route-courseId="@Model.CourseID">Đặt câu hỏi</a>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Description))
+{
+    <div class="alert alert-light border mb-4">
+        <strong>Mô tả khóa học:</strong>
+        <p class="mb-0">@Model.Description</p>
+    </div>
+}
+
+<section class="mb-5">
+    <h2 class="h4 mb-3">Danh sách lớp học</h2>
+    @if (Model.Classes == null || !Model.Classes.Any())
+    {
+        <p class="text-muted fst-italic">Không có lớp học nào để hiển thị.</p>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var cls in Model.Classes)
+            {
+                <div class="col-md-6">
+                    <div class="border rounded h-100 p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-1">Lớp: @(!string.IsNullOrWhiteSpace(cls.ClassCode) ? cls.ClassCode : $"#{cls.ClassID}")</h6>
+                                <small class="text-muted">@cls.Semester @if(cls.Year.HasValue){
+                                <text>@cls.Year</text>
+                            }
+    </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-info text-dark me-1">@cls.AssignmentCount bài tập</span>
+                            <span class="badge bg-warning text-dark">@cls.ExamCount bài kiểm tra</span>
+                        </div>
+                    </div>
+                    <p class="mb-2 text-muted">
+                        @if (cls.NextExamStartTime.HasValue)
+                        {
+                            <text>Bài kiểm tra tiếp theo: @cls.NextExamStartTime.Value.ToString("dd/MM/yyyy HH:mm")</text>
+                        }
+                        else
+                        {
+                            <text>Chưa có lịch kiểm tra.</text>
+                        }
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-sm btn-primary" asp-controller="Dashboard" asp-action="Class" asp-route-id="@cls.ClassID">Chi tiết lớp</a>
+                        <a class="btn btn-sm btn-outline-secondary" asp-controller="Forum" asp-action="Index" asp-route-classId="@cls.ClassID">Diễn đàn lớp</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+        }
+</section>
+
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Chủ đề mới nhất</h2>
+        <a class="btn btn-sm btn-outline-primary" asp-controller="Forum" asp-action="CreateThread" asp-route-courseId="@Model.CourseID">Tạo chủ đề</a>
+    </div>
+    @if (Model.Threads == null || !Model.Threads.Any())
+    {
+        <p class="text-muted fst-italic">Chưa có chủ đề thảo luận nào.</p>
+    }
+    else
+    {
+        <div class="list-group mb-4">
+            @foreach (var thread in Model.Threads)
+            {
+                <a class="list-group-item list-group-item-action" asp-controller="Forum" asp-action="Thread" asp-route-id="@thread.DiscussionThreadID">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">@thread.Title</h6>
+                            <small class="text-muted">@thread.AuthorName · @thread.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">@thread.ReplyCount trả lời</span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>
+
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Câu hỏi gần đây</h2>
+        <a class="btn btn-sm btn-outline-success" asp-controller="Forum" asp-action="AskQuestion" asp-route-courseId="@Model.CourseID">Đặt câu hỏi mới</a>
+    </div>
+    @if (Model.Questions == null || !Model.Questions.Any())
+    {
+        <p class="text-muted fst-italic">Chưa có câu hỏi nào cho khóa học này.</p>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var question in Model.Questions)
+            {
+                <a class="list-group-item list-group-item-action" asp-controller="Forum" asp-action="Question" asp-route-id="@question.QuestionID">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">@question.Title</h6>
+                            <small class="text-muted">@question.StudentName · @question.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                        @if (question.IsResolved)
+                        {
+                            <span class="badge bg-success">Đã giải quyết</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Chưa giải quyết</span>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>

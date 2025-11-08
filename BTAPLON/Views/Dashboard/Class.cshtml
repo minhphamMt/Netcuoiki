@@ -1,0 +1,197 @@
+﻿@model BTAPLON.Models.ViewModels.DashboardClassDetailViewModel
+@{
+    var classLabel = !string.IsNullOrWhiteSpace(Model.ClassCode) ? Model.ClassCode : $"Lớp #{Model.ClassID}";
+    ViewData["Title"] = $"{Model.CourseName} - {classLabel}";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h1 class="mb-1">@Model.CourseName</h1>
+        <p class="text-muted mb-1">@classLabel</p>
+        @if (!string.IsNullOrWhiteSpace(Model.Semester) || Model.Year.HasValue)
+        {
+            <p class="text-muted mb-0">Học kỳ: @Model.Semester @if(Model.Year.HasValue){
+            <text>@Model.Year</text>
+        }
+</p>
+                }
+        @if (!string.IsNullOrWhiteSpace(Model.TeacherName))
+        {
+            <p class="text-muted mb-0">Giảng viên: @Model.TeacherName</p>
+        }
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-secondary" asp-controller="Dashboard" asp-action="Index">&larr; Quay lại bảng điều khiển</a>
+        @if (Model.CourseID.HasValue)
+        {
+            <a class="btn btn-outline-secondary" asp-controller="Dashboard" asp-action="Course" asp-route-id="@Model.CourseID">Xem khóa học</a>
+        }
+        <a class="btn btn-primary" asp-controller="Forum" asp-action="Index" asp-route-classId="@Model.ClassID">Mở diễn đàn lớp</a>
+        <a class="btn btn-outline-primary" asp-controller="Forum" asp-action="CreateThread" asp-route-classId="@Model.ClassID">Tạo chủ đề</a>
+        <a class="btn btn-outline-success" asp-controller="Forum" asp-action="AskQuestion" asp-route-classId="@Model.ClassID">Đặt câu hỏi</a>
+    </div>
+</div>
+
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Bài tập</h2>
+        <a class="btn btn-sm btn-outline-primary" asp-controller="Assignment" asp-action="Index">Xem tất cả</a>
+    </div>
+    @if (Model.Assignments == null || !Model.Assignments.Any())
+    {
+        <p class="text-muted fst-italic">Chưa có bài tập nào cho lớp học này.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Tên bài tập</th>
+                        <th>Hạn nộp</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var assignment in Model.Assignments)
+                    {
+                        <tr>
+                            <td>@assignment.Title</td>
+                            <td>@(assignment.DueDate.HasValue? assignment.DueDate.Value.ToString("dd/MM/yyyy") : "Không có")</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-secondary" asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.AssignmentID">Chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Bài kiểm tra</h2>
+        @if (Model.CanManage)
+        {
+            <a class="btn btn-sm btn-outline-primary" asp-controller="Exam" asp-action="Index">Quản lý bài thi</a>
+        }
+        else
+        {
+            <a class="btn btn-sm btn-outline-primary" asp-controller="Exam" asp-action="Available">Danh sách bài thi</a>
+        }
+    </div>
+    @if (Model.Exams == null || !Model.Exams.Any())
+    {
+        <p class="text-muted fst-italic">Chưa có bài kiểm tra nào được tạo.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Tên bài kiểm tra</th>
+                        <th>Thời gian mở</th>
+                        <th>Thời gian đóng</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var exam in Model.Exams)
+                    {
+                        <tr>
+                            <td>@exam.Title</td>
+                            <td>@(exam.StartTime.HasValue? exam.StartTime.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa đặt")</td>
+                            <td>@(exam.EndTime.HasValue? exam.EndTime.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa đặt")</td>
+                            <td>
+                                @if (exam.IsPublished)
+                                {
+                                    <span class="badge bg-success">Đang mở</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Chưa mở</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (Model.CanManage)
+                                {
+                                    <a class="btn btn-sm btn-outline-secondary" asp-controller="Exam" asp-action="Manage" asp-route-id="@exam.ExamID">Quản lý</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-sm btn-outline-secondary" asp-controller="Exam" asp-action="Take" asp-route-id="@exam.ExamID">Vào thi</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Chủ đề thảo luận gần đây</h2>
+        <a class="btn btn-sm btn-outline-primary" asp-controller="Forum" asp-action="CreateThread" asp-route-classId="@Model.ClassID">Tạo chủ đề</a>
+    </div>
+    @if (Model.Threads == null || !Model.Threads.Any())
+    {
+        <p class="text-muted fst-italic">Chưa có chủ đề nào trong diễn đàn lớp.</p>
+    }
+    else
+    {
+        <div class="list-group mb-4">
+            @foreach (var thread in Model.Threads)
+            {
+                <a class="list-group-item list-group-item-action" asp-controller="Forum" asp-action="Thread" asp-route-id="@thread.DiscussionThreadID">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">@thread.Title</h6>
+                            <small class="text-muted">@thread.AuthorName · @thread.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">@thread.ReplyCount trả lời</span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>
+
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Câu hỏi mới nhất</h2>
+        <a class="btn btn-sm btn-outline-success" asp-controller="Forum" asp-action="AskQuestion" asp-route-classId="@Model.ClassID">Đặt câu hỏi</a>
+    </div>
+    @if (Model.Questions == null || !Model.Questions.Any())
+    {
+        <p class="text-muted fst-italic">Chưa có câu hỏi nào được đăng.</p>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var question in Model.Questions)
+            {
+                <a class="list-group-item list-group-item-action" asp-controller="Forum" asp-action="Question" asp-route-id="@question.QuestionID">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">@question.Title</h6>
+                            <small class="text-muted">@question.StudentName · @question.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                        @if (question.IsResolved)
+                        {
+                            <span class="badge bg-success">Đã giải quyết</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Chưa giải quyết</span>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>
