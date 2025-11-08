@@ -1,0 +1,34 @@
+﻿@{
+    ViewData["Title"] = "Kênh thông báo";
+    var currentUser = ViewBag.UserDisplayName as string ?? "Ẩn danh";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span>Kênh thông báo & tương tác tức thời</span>
+                <span class="badge bg-light text-dark" id="connectionStatus">Đang kết nối...</span>
+            </div>
+            <div class="card-body">
+                <div id="notificationFeed" class="mb-3 overflow-auto" style="max-height: 300px;">
+                    <div class="text-muted text-center small">Bắt đầu trao đổi để cập nhật theo thời gian thực.</div>
+                </div>
+                <form id="notificationForm" class="row g-2">
+                    <input type="hidden" id="currentUser" value="@currentUser" />
+                    <div class="col-9 col-sm-10">
+                        <input id="notificationInput" class="form-control" placeholder="Nhập thông báo hoặc tin nhắn..." autocomplete="off" />
+                    </div>
+                    <div class="col-3 col-sm-2 d-grid">
+                        <button type="submit" class="btn btn-primary">Gửi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js" integrity="sha512-0FyNXQT0KW7oaS6zXoPvxrgQ95Y9DSbwaoZpRZ03vyjaC26EEzmKqZIcALCYehSi5Dn9JNUUGf1YTNKHBWfh+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="~/js/notification.js" asp-append-version="true"></script>
+}

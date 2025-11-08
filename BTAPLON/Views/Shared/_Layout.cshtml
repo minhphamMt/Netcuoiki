@@ -1,4 +1,15 @@
-﻿﻿@using Microsoft.AspNetCore.Http
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    Func<string, string?, string> isActive = (controller, action) =>
+        string.Equals(controller, currentController, StringComparison.OrdinalIgnoreCase) &&
+        (string.IsNullOrEmpty(action) || string.Equals(action, currentAction, StringComparison.OrdinalIgnoreCase))
+            ? "active"
+            : string.Empty;
+    var role = Context.Session.GetString("UserRole");
+    var email = Context.Session.GetString("UserEmail");
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,63 +34,75 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
                     <ul class="navbar-nav flex-grow-1">
-                        @{
-                            var role = Context.Session.GetString("UserRole");
-                        }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark @isActive("Home", "Index")" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
 
                         @if (!string.IsNullOrEmpty(role))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                                <a class="nav-link text-dark @isActive("Dashboard", "Index")" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark @isActive("Notification", "Index")" asp-controller="Notification" asp-action="Index">Thông báo</a>
                             </li>
                         }
 
                         @if (string.Equals(role, "Admin", System.StringComparison.OrdinalIgnoreCase))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">Users</a>
+                                <a class="nav-link text-dark @isActive("Admin", "Users")" asp-controller="Admin" asp-action="Users">Users</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Course" asp-action="Index">Courses</a>
+                                <a class="nav-link text-dark @isActive("Course", "Index")" asp-controller="Course" asp-action="Index">Courses</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Class" asp-action="Index">Classes</a>
+                                <a class="nav-link text-dark @isActive("Class", "Index")" asp-controller="Class" asp-action="Index">Classes</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Enrollment" asp-action="Index">Enrollments</a>
+                                <a class="nav-link text-dark @isActive("Enrollment", "Index")" asp-controller="Enrollment" asp-action="Index">Enrollments</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Assignment" asp-action="Index">Assignments</a>
+                                <a class="nav-link text-dark @isActive("Assignment", "Index")" asp-controller="Assignment" asp-action="Index">Assignments</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Exam" asp-action="Index">Exams</a>
+                                <a class="nav-link text-dark @isActive("Exam", "Index")" asp-controller="Exam" asp-action="Index">Exams</a>
                             </li>
                         }
                         else if (string.Equals(role, "Teacher", System.StringComparison.OrdinalIgnoreCase))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Assignment" asp-action="Index">Assignments</a>
+                                <a class="nav-link text-dark @isActive("Assignment", "Index")" asp-controller="Assignment" asp-action="Index">Assignments</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Exam" asp-action="Index">Exams</a>
+                                <a class="nav-link text-dark @isActive("Exam", "Index")" asp-controller="Exam" asp-action="Index">Exams</a>
                             </li>
                         }
                         else if (string.Equals(role, "Student", System.StringComparison.OrdinalIgnoreCase))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Exam" asp-action="Available">Exams</a>
+                                <a class="nav-link text-dark @isActive("Exam", "Available")" asp-controller="Exam" asp-action="Available">Exams</a>
                             </li>
                         }
                     </ul>
+
+                    <div class="d-flex align-items-center">
+                        @if (!string.IsNullOrEmpty(email))
+                        {
+                            <span class="me-2 text-muted small d-none d-md-inline">@email</span>
+                            <a class="btn btn-outline-danger btn-sm" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                        }
+                    </div>
 
                 </div>
             </div>
