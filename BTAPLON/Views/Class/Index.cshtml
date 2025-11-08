@@ -25,6 +25,7 @@
             <td>
                 <a asp-action="Edit" asp-route-id="@item.ClassID" class="btn btn-primary btn-sm">Edit</a>
                 <a asp-action="Delete" asp-route-id="@item.ClassID" class="btn btn-danger btn-sm">Delete</a>
+                <a asp-controller="Forum" asp-action="Index" asp-route-classId="@item.ClassID" class="btn btn-info btn-sm">Diễn đàn</a>
             </td>
         </tr>
     }

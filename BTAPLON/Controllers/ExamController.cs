@@ -1,11 +1,13 @@
-﻿using System.Text.Json;
-using System.Linq;
+﻿using System.Linq;
+using System.Text.Json;
 using BTAPLON.Data;
 using BTAPLON.Models;
 using BTAPLON.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using ExamChoice = BTAPLON.Models.Choice;
+using ExamQuestion = BTAPLON.Models.Question;
 
 namespace BTAPLON.Controllers
 {
@@ -49,7 +51,7 @@ namespace BTAPLON.Controllers
             return assignedTeacherId == teacherId;
         }
 
-        private IActionResult RequireLogin()
+        private IActionResult? RequireLogin()
         {
             if (CurrentUserId == null)
             {
@@ -72,7 +74,7 @@ namespace BTAPLON.Controllers
 
             var examsQuery = _context.Exams
                 .Include(e => e.Class)
-                .ThenInclude(c => c.Course)
+                  .ThenInclude(c => c.Course)
                 .Include(e => e.Submissions)
                 .AsQueryable();
 
@@ -150,9 +152,9 @@ namespace BTAPLON.Controllers
 
             var exam = _context.Exams
                     .Include(e => e.Class)
-                    .ThenInclude(c => c.Course)
+                     .ThenInclude(c => c.Course)
                     .Include(e => e.Questions)
-                    .ThenInclude(q => q.Choices)
+                      .ThenInclude(q => q.Choices)
                     .FirstOrDefault(e => e.ExamID == id);
 
             if (exam == null) return NotFound();
@@ -187,7 +189,7 @@ namespace BTAPLON.Controllers
 
             var exam = _context.Exams
                 .Include(e => e.Class)
-                .ThenInclude(c => c.Course)
+               .ThenInclude(c => c.Course)
                 .Include(e => e.Questions)
                 .FirstOrDefault(e => e.ExamID == model.ExamID);
 
@@ -203,7 +205,7 @@ namespace BTAPLON.Controllers
                 return RedirectToAction(nameof(Manage), new { id = model.ExamID });
             }
 
-            var question = new Question
+            var question = new ExamQuestion
             {
                 ExamID = model.ExamID,
                 Prompt = model.Prompt,
@@ -221,7 +223,7 @@ namespace BTAPLON.Controllers
             {
                 var validChoices = choices
                     .Where(c => !string.IsNullOrWhiteSpace(c.Text))
-                    .Select(c => new Choice
+                    .Select(c => new ExamChoice
                     {
                         QuestionID = question.QuestionID,
                         Text = c.Text!.Trim(),
@@ -262,19 +264,22 @@ namespace BTAPLON.Controllers
             if (redirect != null) return redirect;
 
             var question = _context.Questions
-                .Include(q => q.Exam)
-                .ThenInclude(e => e.Class)
-                .ThenInclude(c => c.Course)
+               
                 .FirstOrDefault(q => q.QuestionID == id);
 
             if (question == null) return NotFound();
 
-            if (question.Exam == null)
+            var exam = _context.Exams
+              .Include(e => e.Class)
+                  .ThenInclude(c => c.Course)
+              .FirstOrDefault(e => e.ExamID == question.ExamID);
+
+            if (exam == null)
             {
                 return NotFound();
             }
 
-            if (!IsAdmin && (!IsTeacher || !TeacherCanManageExam(question.Exam)))
+            if (!IsAdmin && (!IsTeacher || !TeacherCanManageExam(exam)))
             {
                 return Forbid();
             }
@@ -295,7 +300,7 @@ namespace BTAPLON.Controllers
 
             var exam = _context.Exams
                 .Include(e => e.Class)
-                .ThenInclude(c => c.Course)
+                  .ThenInclude(c => c.Course)
                 .Include(e => e.Questions)
                 .FirstOrDefault(e => e.ExamID == id);
 
@@ -345,7 +350,7 @@ namespace BTAPLON.Controllers
 
             var exam = _context.Exams
                 .Include(e => e.Class)
-                .ThenInclude(c => c.Course)
+                  .ThenInclude(c => c.Course)
                 .FirstOrDefault(e => e.ExamID == id);
             if (exam == null) return NotFound();
 
@@ -409,9 +414,9 @@ namespace BTAPLON.Controllers
 
             var exam = _context.Exams
                 .Include(e => e.Class)
-                .ThenInclude(c => c.Course)
+                   .ThenInclude(c => c.Course)
                 .Include(e => e.Questions!)
-                .ThenInclude(q => q.Choices)
+                 .ThenInclude(q => q.Choices)
                 .FirstOrDefault(e => e.ExamID == id);
 
             if (exam == null) return NotFound();
@@ -483,7 +488,7 @@ namespace BTAPLON.Controllers
                 if (exam.Questions != null)
                 {
                     double earned = 0;
-                    foreach (var question in exam.Questions)
+                    foreach (ExamQuestion question in exam.Questions)
                     {
                         if (!question.IsMultipleChoice) continue;
                         if (answers.TryGetValue(question.QuestionID, out var record) && record.SelectedChoiceId.HasValue)
@@ -536,7 +541,7 @@ namespace BTAPLON.Controllers
 
             var exam = _context.Exams
                 .Include(e => e.Questions!)
-                .ThenInclude(q => q.Choices)
+                    .ThenInclude(q => q.Choices)
                 .FirstOrDefault(e => e.ExamID == id);
 
             if (exam == null) return NotFound();
@@ -559,7 +564,7 @@ namespace BTAPLON.Controllers
             double totalScore = 0;
             double earnedScore = 0;
 
-            foreach (var question in exam.Questions!.OrderBy(q => q.DisplayOrder))
+            foreach (ExamQuestion question in exam.Questions!.OrderBy(q => q.DisplayOrder))
             {
                 answers.TryGetValue(question.QuestionID, out var rawValue);
                 var record = new ExamSubmissionAnswer
@@ -606,11 +611,11 @@ namespace BTAPLON.Controllers
 
             var submission = _context.ExamSubmissions
          .Include(s => s.Exam)
-             .ThenInclude(e => e.Class)
-                 .ThenInclude(c => c.Course)
-         .Include(s => s.Exam)
-             .ThenInclude(e => e.Questions)
-         .FirstOrDefault(s => s.ExamSubmissionID == submissionId);
+                    .ThenInclude(e => e.Class)
+                        .ThenInclude(c => c.Course)
+                .Include(s => s.Exam)
+                    .ThenInclude(e => e.Questions)
+                .FirstOrDefault(s => s.ExamSubmissionID == submissionId);
 
             if (submission == null) return NotFound();
 
@@ -826,13 +831,13 @@ namespace BTAPLON.Controllers
             double lowest = finalized.Any() ? finalized.Min(s => s.Score!.Value) : 0;
 
             var distribution = new Dictionary<string, int>
-    {
-        { ">= 9", finalized.Count(s => s.Score >= 9) },
-        { "8 - 8.99", finalized.Count(s => s.Score >= 8 && s.Score < 9) },
-        { "7 - 7.99", finalized.Count(s => s.Score >= 7 && s.Score < 8) },
-        { "5 - 6.99", finalized.Count(s => s.Score >= 5 && s.Score < 7) },
-        { "< 5", finalized.Count(s => s.Score < 5) }
-    };
+       {
+                { ">= 9", finalized.Count(s => s.Score >= 9) },
+                { "8 - 8.99", finalized.Count(s => s.Score >= 8 && s.Score < 9) },
+                { "7 - 7.99", finalized.Count(s => s.Score >= 7 && s.Score < 8) },
+                { "5 - 6.99", finalized.Count(s => s.Score >= 5 && s.Score < 7) },
+                { "< 5", finalized.Count(s => s.Score < 5) }
+            };
 
             var vm = new ExamStatisticsViewModel
             {

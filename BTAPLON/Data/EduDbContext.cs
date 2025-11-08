@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using BTAPLON.Models;
+using BTAPLON.Models.Forum;
 
 namespace BTAPLON.Data
 {
@@ -17,6 +18,10 @@ namespace BTAPLON.Data
         public DbSet<Question> Questions { get; set; }
         public DbSet<Choice> Choices { get; set; }
         public DbSet<ExamSubmission> ExamSubmissions { get; set; }
+        public DbSet<DiscussionThread> DiscussionThreads { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<ForumQuestion> ForumQuestions { get; set; }
+        public DbSet<Answer> Answers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -65,6 +70,66 @@ namespace BTAPLON.Data
                 .HasForeignKey(es => es.StudentID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<DiscussionThread>()
+                .HasOne(dt => dt.Course)
+                .WithMany(c => c.DiscussionThreads!)
+                .HasForeignKey(dt => dt.CourseID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DiscussionThread>()
+                .HasOne(dt => dt.Class)
+                .WithMany(c => c.DiscussionThreads!)
+                .HasForeignKey(dt => dt.ClassID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DiscussionThread>()
+                .HasOne(dt => dt.CreatedBy)
+                .WithMany(u => u.DiscussionThreads!)
+                .HasForeignKey(dt => dt.CreatedByID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.DiscussionThread)
+                .WithMany(dt => dt.Posts)
+                .HasForeignKey(p => p.DiscussionThreadID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.Author)
+                .WithMany(u => u.ForumPosts!)
+                .HasForeignKey(p => p.AuthorID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ForumQuestion>()
+                .HasOne(q => q.Course)
+                .WithMany(c => c.Questions!)
+                .HasForeignKey(q => q.CourseID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ForumQuestion>()
+                .HasOne(q => q.Class)
+                .WithMany(c => c.Questions!)
+                .HasForeignKey(q => q.ClassID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ForumQuestion>()
+                .HasOne(q => q.Student)
+                .WithMany(u => u.QuestionsAsked!)
+                .HasForeignKey(q => q.StudentID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Answer>()
+                .HasOne(a => a.Question)
+                .WithMany(q => q.Answers)
+                .HasForeignKey(a => a.QuestionID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Answer>()
+                .HasOne(a => a.Author)
+                .WithMany(u => u.AnswersProvided!)
+                .HasForeignKey(a => a.AuthorID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<User>().HasData(
@@ -73,10 +138,10 @@ namespace BTAPLON.Data
                     UserID = 1,
                     FullName = "Admin User",
                     Email = "admin@gmail.com",
-                   
+
                     PasswordHash = "$2y$12$YTyoxyxHpp6PDV23yRHRn.4m39bD1zisfhoPdl9dTGaPkEyt8tks.",
                     Role = "Admin",
-                   
+
                     CreatedAt = new DateTime(2025, 11, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );

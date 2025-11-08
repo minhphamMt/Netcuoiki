@@ -1,0 +1,92 @@
+﻿@model ForumIndexViewModel
+@{
+    var title = Model.Class != null
+        ? $"Diễn đàn lớp {Model.Class.ClassCode}"
+        : Model.Course != null ? $"Diễn đàn khóa học {Model.Course.CourseName}" : "Diễn đàn";
+}
+
+<h2>@title</h2>
+
+<div class="mb-3">
+    @if (Model.Course != null)
+    {
+        <span class="badge bg-primary me-2">Khóa học: @Model.Course.CourseName</span>
+    }
+    @if (Model.Class != null)
+    {
+        <span class="badge bg-info">Lớp: @Model.Class.ClassCode</span>
+    }
+</div>
+
+<div class="d-flex gap-2 mb-4">
+    <a class="btn btn-success" asp-action="CreateThread" asp-route-courseId="@Model.Course?.CourseID" asp-route-classId="@Model.Class?.ClassID">+ Tạo chủ đề mới</a>
+    <a class="btn btn-primary" asp-action="AskQuestion" asp-route-courseId="@Model.Course?.CourseID" asp-route-classId="@Model.Class?.ClassID">+ Đặt câu hỏi</a>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><strong>Chủ đề thảo luận</strong></span>
+                <span class="badge bg-secondary">@Model.Threads.Count</span>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Threads.Any())
+                {
+                    <p class="m-3 text-muted">Chưa có chủ đề nào.</p>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var thread in Model.Threads)
+                        {
+                            <a class="list-group-item list-group-item-action" asp-action="Thread" asp-route-id="@thread.DiscussionThreadID">
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="mb-1">@thread.Title</h5>
+                                    <small>@thread.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(thread.Description))
+                                {
+                                    <p class="mb-1 text-muted">@thread.Description</p>
+                                }
+                                <small>Người tạo: @thread.CreatedBy?.FullName ?? "N/A" • @(thread.Posts?.Count ?? 0) bài viết</small>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><strong>Khu vực Hỏi &amp; Đáp</strong></span>
+                <span class="badge bg-secondary">@Model.Questions.Count</span>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Questions.Any())
+                {
+                    <p class="m-3 text-muted">Chưa có câu hỏi nào.</p>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var question in Model.Questions)
+                        {
+                            var statusClass = question.IsResolved ? "bg-success" : "bg-warning text-dark";
+                            var statusText = question.IsResolved ? "Đã giải quyết" : "Đang mở";
+                            <a class="list-group-item list-group-item-action" asp-action="Question" asp-route-id="@question.QuestionID">
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="mb-1">@question.Title</h5>
+                                    <span class="badge @statusClass">@statusText</span>
+                                </div>
+                                <p class="mb-1 text-muted">@question.Body.Substring(0, Math.Min(question.Body.Length, 140))@(question.Body.Length > 140 ? "..." : string.Empty)</p>
+                                <small>Hỏi bởi: @question.Student?.FullName ?? "N/A" • @question.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm") • @question.Answers.Count câu trả lời</small>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,96 @@
+﻿@model BTAPLON.Models.Forum.ForumQuestion
+@{
+    ViewData["Title"] = Model.Title;
+    var orderedAnswers = (Model.Answers ?? new List<Answer>()).OrderBy(a => a.CreatedAt).ToList();
+}
+
+<h2>@Model.Title</h2>
+
+<div class="mb-3">
+    @if (Model.Course != null)
+    {
+        <span class="badge bg-primary me-2">Khóa học: @Model.Course.CourseName</span>
+    }
+    @if (Model.Class != null)
+    {
+        <span class="badge bg-info">Lớp: @Model.Class.ClassCode</span>
+    }
+    <span class="badge bg-light text-dark">Hỏi bởi: @Model.Student?.FullName ?? "N/A"</span>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><strong>Nội dung câu hỏi</strong></span>
+        @if (Model.IsResolved)
+        {
+            <span class="badge bg-success">Đã giải quyết</span>
+        }
+        else
+        {
+            <span class="badge bg-warning text-dark">Đang mở</span>
+        }
+    </div>
+    <div class="card-body">
+        <p class="mb-0">@Model.Body</p>
+        <small class="text-muted">Đăng lúc @Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+    </div>
+</div>
+
+@if (TempData["AnswerError"] != null)
+{
+    <div class="alert alert-danger">@TempData["AnswerError"]</div>
+}
+
+<div class="card mb-4">
+    <div class="card-header"><strong>@orderedAnswers.Count</strong> câu trả lời</div>
+    <div class="list-group list-group-flush">
+        @if (!orderedAnswers.Any())
+        {
+            <div class="list-group-item text-muted">Chưa có câu trả lời nào.</div>
+        }
+        else
+        {
+            foreach (var answer in orderedAnswers)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>@answer.Author?.FullName ?? "Người dùng"</strong>
+                            <div class="small text-muted">@answer.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                        @if (answer.IsAccepted)
+                        {
+                            <span class="badge bg-success">Câu trả lời hay</span>
+                        }
+                        else if (User?.Identity?.IsAuthenticated ?? false)
+                        {
+                            <form asp-action="MarkAnswer" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@answer.AnswerID" />
+                                <button type="submit" class="btn btn-outline-success btn-sm">Đánh dấu hay</button>
+                            </form>
+                        }
+                    </div>
+                    <p class="mt-3 mb-0">@answer.Content</p>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Trả lời câu hỏi</div>
+    <form asp-action="PostAnswer" method="post">
+        @Html.AntiForgeryToken()
+        <div class="card-body">
+            <input type="hidden" name="QuestionID" value="@Model.QuestionID" />
+            <div class="mb-3">
+                <label class="form-label">Nội dung câu trả lời</label>
+                <textarea name="Content" class="form-control" rows="4" required></textarea>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <button type="submit" class="btn btn-primary">Gửi trả lời</button>
+        </div>
+    </form>
+</div>

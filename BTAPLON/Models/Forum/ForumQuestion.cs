@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace BTAPLON.Models.Forum
 {
-    public class Question
+    public class ForumQuestion
     {
         public int QuestionID { get; set; }
 
         public int? CourseID { get; set; }
 
         public int? ClassID { get; set; }
-        public int? ExamID { get; set; }
 
         [Required]
         public int StudentID { get; set; }
@@ -37,9 +36,6 @@ namespace BTAPLON.Models.Forum
 
         [ValidateNever]
         public User? Student { get; set; }
-
-        [ValidateNever]
-        public Exam? Exam { get; set; }
 
         [ValidateNever]
         public ICollection<Answer> Answers { get; set; } = new List<Answer>();

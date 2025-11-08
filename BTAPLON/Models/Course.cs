@@ -15,6 +15,10 @@ namespace BTAPLON.Models
 
         public ICollection<Class>? Classes { get; set; }
 
+        public ICollection<Forum.DiscussionThread>? DiscussionThreads { get; set; }
+
+        public ICollection<Forum.ForumQuestion>? Questions { get; set; }
+
     }
 
 }

@@ -14,6 +14,10 @@
         public ICollection<Submission>? Submissions { get; set; }
         public ICollection<Exam>? ExamsCreated { get; set; }
         public ICollection<ExamSubmission>? ExamSubmissions { get; set; }
+        public ICollection<Forum.DiscussionThread>? DiscussionThreads { get; set; }
+        public ICollection<Forum.Post>? ForumPosts { get; set; }
+        public ICollection<Forum.ForumQuestion>? QuestionsAsked { get; set; }
+        public ICollection<Forum.Answer>? AnswersProvided { get; set; }
     }
 
 }

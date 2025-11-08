@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BTAPLON.Models.Forum;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace BTAPLON.Models
 {
@@ -7,6 +8,7 @@ namespace BTAPLON.Models
     {
         public int ChoiceID { get; set; }
 
+        public int Choices { get; set; }
         [Required]
         public int QuestionID { get; set; }
 
@@ -17,6 +19,7 @@ namespace BTAPLON.Models
         public bool IsCorrect { get; set; }
 
         [ValidateNever]
-        public Question? Question { get; set; }
+       
+        public Question? Question { get; set; } = null!;
     }
 }

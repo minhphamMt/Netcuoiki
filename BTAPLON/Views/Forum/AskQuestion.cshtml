@@ -1,0 +1,45 @@
+﻿@model QuestionCreateViewModel
+@{
+    var course = ViewBag.Course as Course;
+    var cls = ViewBag.Class as Class;
+    var title = "Đặt câu hỏi mới";
+    if (cls != null)
+    {
+        title += $" - Lớp {cls.ClassCode}";
+    }
+    else if (course != null)
+    {
+        title += $" - Khóa học {course.CourseName}";
+    }
+}
+
+<h2>@title</h2>
+
+<form asp-action="AskQuestion" method="post" class="card">
+    @Html.AntiForgeryToken()
+    <div class="card-body">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Body" class="form-label">Nội dung câu hỏi</label>
+            <textarea asp-for="Body" class="form-control" rows="6"></textarea>
+            <span asp-validation-for="Body" class="text-danger"></span>
+        </div>
+        <input type="hidden" asp-for="CourseID" />
+        <input type="hidden" asp-for="ClassID" />
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+        <a class="btn btn-secondary" asp-action="Index" asp-route-courseId="@course?.CourseID" asp-route-classId="@cls?.ClassID">Quay lại</a>
+        <button type="submit" class="btn btn-primary">Gửi câu hỏi</button>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

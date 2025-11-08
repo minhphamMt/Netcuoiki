@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 
+
 namespace BTAPLON.Models
 {
     public class Class
@@ -25,5 +26,11 @@ namespace BTAPLON.Models
 
         [ValidateNever]
         public ICollection<Exam>? Exams { get; set; }
+
+        [ValidateNever]
+        public ICollection<Forum.DiscussionThread>? DiscussionThreads { get; set; }
+
+        [ValidateNever]
+        public ICollection<Forum.ForumQuestion>? Questions { get; set; }
     }
 }

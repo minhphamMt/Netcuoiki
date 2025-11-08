@@ -27,6 +27,7 @@
                 <td>
                     <a class="btn btn-sm btn-warning" href="/Course/Edit/@c.CourseID">Sửa</a>
                     <a class="btn btn-sm btn-danger" href="/Course/Delete/@c.CourseID">Xóa</a>
+                    <a class="btn btn-sm btn-info" asp-controller="Forum" asp-action="Index" asp-route-courseId="@c.CourseID">Diễn đàn</a>
                 </td>
             </tr>
         }
