@@ -50,32 +50,47 @@ else
                         <td>@(exam.Submissions?.Count ?? 0)</td>
                         <td class="text-center">
                             <div class="d-flex flex-wrap justify-content-center gap-2">
-                                <a asp-action="Manage" asp-route-id="@exam.ExamID" class="btn btn-outline-primary btn-sm">
+                                <a asp-action="Manage" asp-route-id="@exam.ExamID" class="btn btn-outline-primary btn-sm w-100" style="max-width:110px;">
                                     <i class="bi bi-gear me-1"></i>Cấu hình
                                 </a>
-                                <a asp-action="Review" asp-route-id="@exam.ExamID" class="btn btn-outline-info btn-sm">
+
+                                <a asp-action="Review" asp-route-id="@exam.ExamID" class="btn btn-outline-info btn-sm w-100" style="max-width:110px;">
                                     <i class="bi bi-folder-check me-1"></i>Bài nộp
                                 </a>
-                                <a asp-action="Statistics" asp-route-id="@exam.ExamID" class="btn btn-outline-secondary btn-sm">
+
+                                <a asp-action="Statistics" asp-route-id="@exam.ExamID" class="btn btn-outline-secondary btn-sm w-100" style="max-width:110px;">
                                     <i class="bi bi-graph-up me-1"></i>Thống kê
                                 </a>
+
                                 @if (exam.IsPublished)
                                 {
                                     <form asp-action="Close" asp-route-id="@exam.ExamID" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Đóng bài thi?')">
+                                        <button type="submit" class="btn btn-warning btn-sm w-100" style="max-width:110px;" onclick="return confirm('Đóng bài thi?')">
                                             <i class="bi bi-lock me-1"></i>Đóng
                                         </button>
                                     </form>
                                 }
                                 else
                                 {
-                                    <a asp-action="Manage" asp-route-id="@exam.ExamID" class="btn btn-success btn-sm">
+                                    <a asp-action="Manage" asp-route-id="@exam.ExamID" class="btn btn-success btn-sm w-100" style="max-width:110px;">
                                         <i class="bi bi-unlock me-1"></i>Mở đề
                                     </a>
                                 }
+
+                                <a asp-action="Edit" asp-route-id="@exam.ExamID" class="btn btn-warning btn-sm w-100" style="max-width:110px;">
+                                    <i class="bi bi-pencil-square me-1"></i>Sửa
+                                </a>
+
+                                <form asp-action="Delete" asp-route-id="@exam.ExamID" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger btn-sm w-100" style="max-width:110px;" onclick="return confirm('Bạn có chắc muốn xóa bài kiểm tra này không?');">
+                                        <i class="bi bi-trash me-1"></i>Xóa
+                                    </button>
+                                </form>
                             </div>
                         </td>
+
                     </tr>
                 }
             </tbody>

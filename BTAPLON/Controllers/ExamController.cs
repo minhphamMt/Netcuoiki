@@ -138,6 +138,85 @@ namespace BTAPLON.Controllers
 
             return RedirectToAction(nameof(Manage), new { id = model.ExamID });
         }
+        // TEACHER: edit exam GET
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var redirect = RequireLogin();
+            if (redirect != null) return redirect;
+
+            var exam = await _context.Exams
+                .Include(e => e.Class)
+                .ThenInclude(c => c.Course)
+                .FirstOrDefaultAsync(e => e.ExamID == id);
+
+            if (exam == null) return NotFound();
+
+            if (!IsAdmin && (!IsTeacher || !TeacherCanManageExam(exam)))
+            {
+                return Forbid();
+            }
+
+            PopulateClassesDropDown(exam.ClassID); // ✅ thêm dòng này
+            return View(exam);
+        }
+
+
+        // TEACHER: edit exam POST
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Exam exam)
+        {
+            var redirect = RequireLogin();
+            if (redirect != null) return redirect;
+
+            if (id != exam.ExamID)
+                return BadRequest();
+
+            if (!IsAdmin && (!IsTeacher || !TeacherCanManageExam(exam)))
+                return Forbid();
+
+            if (!ModelState.IsValid)
+            {
+                PopulateClassesDropDown(exam.ClassID);
+                return View(exam);
+            }
+
+            // ✅ Lấy entity gốc trong DB
+            var existingExam = await _context.Exams.FirstOrDefaultAsync(e => e.ExamID == id);
+            if (existingExam == null)
+                return NotFound();
+
+            // ✅ Cập nhật các trường cho phép chỉnh sửa
+            existingExam.ClassID = exam.ClassID;
+            existingExam.Title = exam.Title;
+            existingExam.Description = exam.Description;
+            existingExam.DurationMinutes = exam.DurationMinutes;
+            existingExam.StartTime = exam.StartTime;
+            existingExam.IsPublished = exam.IsPublished;
+
+            // ✅ Tự động cập nhật EndTime
+            if (existingExam.StartTime.HasValue && existingExam.DurationMinutes > 0)
+                existingExam.EndTime = existingExam.StartTime.Value.AddMinutes(existingExam.DurationMinutes);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                // ✅ Gán thông báo (nếu bạn muốn hiển thị trong Index)
+                TempData["Message"] = "Đã cập nhật bài kiểm tra thành công!";
+
+                // ✅ Trở về trang Index ngay sau khi lưu
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "Không thể cập nhật bài kiểm tra. Hãy chọn lớp hợp lệ.");
+                PopulateClassesDropDown(exam.ClassID);
+                return View(exam);
+            }
+        }
+
 
         // TEACHER: manage questions
         public IActionResult Manage(int id)
@@ -172,6 +251,30 @@ namespace BTAPLON.Controllers
             };
 
             return View(exam);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var redirect = RequireLogin();
+            if (redirect != null) return redirect;
+
+            var exam = await _context.Exams
+                .Include(e => e.Questions)
+                .ThenInclude(q => q.Choices)
+                .FirstOrDefaultAsync(e => e.ExamID == id);
+
+            if (exam == null)
+                return NotFound();
+
+            if (!IsAdmin && (!IsTeacher || !TeacherCanManageExam(exam)))
+                return Forbid();
+
+            _context.Exams.Remove(exam);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Đã xóa bài kiểm tra thành công!";
+            return RedirectToAction(nameof(Index));
         }
 
         // TEACHER: add question
