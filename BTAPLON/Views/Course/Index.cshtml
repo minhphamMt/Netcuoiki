@@ -1,35 +1,47 @@
 ﻿@model IEnumerable<BTAPLON.Models.Course>
+@{
+    ViewData["Title"] = "Quản lý khóa học";
+}
 
-<h2>Danh sách khóa học</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Danh sách khóa học</h1>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1"></i>Thêm khóa học</a>
+</div>
 
-<p>
-    <a class="btn btn-primary" href="/Course/Create">+ Thêm khóa học</a>
-</p>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Mã</th>
-            <th>Tên khóa học</th>
-            <th>GV phụ trách</th>
-            <th>Ngày tạo</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model)
-        {
+<div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-light">
+            
             <tr>
-                <td>@c.CourseID</td>
-                <td>@c.CourseName</td>
-                <td>@c.Teacher?.FullName</td>
-                <td>@c.CreatedAt.ToString("dd/MM/yyyy")</td>
-                <td>
-                    <a class="btn btn-sm btn-warning" href="/Course/Edit/@c.CourseID">Sửa</a>
-                    <a class="btn btn-sm btn-danger" href="/Course/Delete/@c.CourseID">Xóa</a>
-                    <a class="btn btn-sm btn-info" asp-controller="Forum" asp-action="Index" asp-route-courseId="@c.CourseID">Diễn đàn</a>
-                </td>
+                <th style="width: 120px">Mã</th>
+                <th>Tên khóa học</th>
+                <th style="width: 220px">GV phụ trách</th>
+                <th style="width: 160px">Ngày tạo</th>
+                <th style="width: 220px" class="text-center">Thao tác</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.CourseID</td>
+                    <td>@c.CourseName</td>
+                    <td>@c.Teacher?.FullName</td>
+                    <td>@c.CreatedAt.ToString("dd/MM/yyyy")</td>
+                    <td class="text-center">
+                        <div class="d-inline-flex flex-wrap justify-content-center gap-2">
+                            <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@c.CourseID">
+                                <i class="bi bi-pencil-square me-1"></i>Sửa
+                            </a>
+                            <a class="btn btn-outline-danger btn-sm" asp-action="Delete" asp-route-id="@c.CourseID">
+                                <i class="bi bi-trash me-1"></i>Xóa
+                            </a>
+                            <a class="btn btn-outline-info btn-sm" asp-controller="Forum" asp-action="Index" asp-route-courseId="@c.CourseID">
+                                <i class="bi bi-chat-dots me-1"></i>Diễn đàn
+                            </a>
+                        </div>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

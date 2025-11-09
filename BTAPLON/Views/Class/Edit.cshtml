@@ -1,13 +1,13 @@
 ﻿@model BTAPLON.Models.Class
 
 <div class="container mt-4">
-    <h3 class="mb-3">Edit Class</h3>
+    <h3 class="mb-3">Chỉnh sửa thông tin</h3>
 
     <form asp-action="Edit" class="card p-4 shadow-sm">
         <input type="hidden" asp-for="ClassID" />
 
         <div class="mb-3">
-            <label class="form-label">Course</label>
+            <label class="form-label">khóa học</label>
             <select asp-for="CourseID" asp-items="ViewBag.CourseID" class="form-select"></select>
         </div>
 
@@ -17,16 +17,16 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Semester</label>
+            <label class="form-label">Kì học</label>
             <input asp-for="Semester" class="form-control" />
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Year</label>
+            <label class="form-label">Năm</label>
             <input asp-for="Year" type="number" class="form-control" />
         </div>
 
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a asp-action="Index" class="btn btn-secondary ms-2">Back</a>
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        <a asp-action="Index" class="btn btn-secondary  mt-1">Quay lại</a>
     </form>
 </div>

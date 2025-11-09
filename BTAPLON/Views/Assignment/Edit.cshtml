@@ -1,29 +1,30 @@
 ﻿@model BTAPLON.Models.Assignment
 
-<h2>Edit Assignment</h2>
+<h2>Chỉnh sửa bài tập</h2>
 
 <form asp-action="Edit">
     <input type="hidden" asp-for="AssignmentID" />
 
     <div class="form-group mb-3">
-        <label>Class</label>
+        <label>Lớp</label>
         <select class="form-control" asp-for="ClassID" asp-items="ViewBag.ClassID"></select>
     </div>
 
     <div class="form-group mb-3">
-        <label>Title</label>
+        <label>Tiêu đề</label>
         <input asp-for="Title" class="form-control" />
     </div>
 
     <div class="form-group mb-3">
-        <label>Description</label>
+        <label>Mô tả</label>
         <textarea asp-for="Description" class="form-control"></textarea>
     </div>
 
     <div class="form-group mb-3">
-        <label>Due Date</label>
+        <label>Ngày tạo</label>
         <input type="date" asp-for="DueDate" class="form-control" />
     </div>
 
-    <button type="submit" class="btn btn-primary">Update</button>
+    <button type="submit" class="btn btn-primary">Lưu chỉnh sửa</button>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
 </form>

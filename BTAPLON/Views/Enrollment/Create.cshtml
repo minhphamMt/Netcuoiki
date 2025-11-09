@@ -1,26 +1,38 @@
-﻿@model BTAPLON.Models.Enrollment
+﻿@model BTAPLON.Models.ViewModels.EnrollmentBulkCreateViewModel
+@using System.Collections.Generic
 
 <div class="container mt-4">
-    <h2 class="mb-3">Add Enrollment</h2>
+    <h2 class="mb-3">Thêm vào lớp </h2>
 
     <form method="post" class="card p-4 shadow" style="max-width:500px">
 
         <div class="mb-3">
             <label class="form-label">Class</label>
-            @Html.DropDownList("ClassID", (SelectList)ViewBag.ClassID, "-- select class --",
-            new { @class = "form-control" })
-            @Html.ValidationMessage("ClassID", null, new { @class = "text-danger" })
+            @Html.DropDownListFor(m => m.ClassID, Model.ClassOptions, "-- select class --",
+                        new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.ClassID, null, new { @class = "text-danger" })
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Student</label>
-            @Html.DropDownList("StudentID", (SelectList)ViewBag.StudentID, "-- select student --",
-                        new { @class = "form-control" })
-            @Html.ValidationMessage("StudentID", null, new { @class = "text-danger" })
+            <label class="form-label">Students</label>
+            <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                @{
+                    var selected = Model.StudentIDs ?? new List<int>();
+                }
+                @foreach (var student in Model.StudentOptions)
+                {
+                    var isChecked = int.TryParse(student.Value, out var studentId) && selected.Contains(studentId);
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="StudentIDs" value="@student.Value" id="student_@student.Value" @(isChecked ? "checked" : "") />
+                        <label class="form-check-label" for="student_@student.Value">@student.Text</label>
+                    </div>
+                }
+            </div>
+            @Html.ValidationMessageFor(m => m.StudentIDs, null, new { @class = "text-danger" })
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Save</button>
-        <a asp-action="Index" class="btn btn-secondary">back</a>
+        <button type="submit" class="btn btn-primary w-100">Lưu</button>
+        <a asp-action="Index" class="btn btn-secondary mt-1">Quay lại</a>
 
     </form>
 </div>

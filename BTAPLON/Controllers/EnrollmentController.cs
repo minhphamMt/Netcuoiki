@@ -1,9 +1,11 @@
 ﻿using BTAPLON.Data;
 using BTAPLON.Filters;
 using BTAPLON.Models;
+using BTAPLON.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Linq;
 
 namespace BTAPLON.Controllers
 {
@@ -40,48 +42,95 @@ namespace BTAPLON.Controllers
         // CREATE GET
         public IActionResult Create()
         {
-            ViewBag.ClassID = new SelectList(_context.Classes, "ClassID", "ClassCode");
-            ViewBag.StudentID = new SelectList(_context.Users.Where(u => u.Role == "Student"), "UserID", "FullName");
-            return View();
+            var model = PopulateOptions(new EnrollmentBulkCreateViewModel());
+            return View(model);
         }
 
         // CREATE POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Enrollment model)
+        public IActionResult Create(EnrollmentBulkCreateViewModel model)
         {
-            var classValue = Request.Form["ClassID"];
-            var studentValue = Request.Form["StudentID"];
-            Console.WriteLine($"POST ClassID={classValue}, StudentID={studentValue}");
+            model.StudentIDs ??= new List<int>();
 
-            if (ModelState.IsValid)
+            if (!model.StudentIDs.Any())
             {
-                model.EnrolledAt = DateTime.Now;
-                _context.Enrollments.Add(model);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
+                ModelState.AddModelError("StudentIDs", "Please select at least one student.");
             }
 
-            ViewBag.ClassID = new SelectList(_context.Classes, "ClassID", "ClassCode", model.ClassID);
-            ViewBag.StudentID = new SelectList(_context.Users.Where(u => u.Role == "Student"), "UserID", "FullName", model.StudentID);
+            if (ModelState.IsValid && model.ClassID.HasValue)
+            {
+                var existingStudentIds = _context.Enrollments
+                    .Where(e => e.ClassID == model.ClassID && e.StudentID.HasValue && model.StudentIDs.Contains(e.StudentID.Value))
+                    .Select(e => e.StudentID!.Value)
+                    .ToHashSet();
+
+                var newEnrollments = model.StudentIDs
+                    .Where(id => !existingStudentIds.Contains(id))
+                    .Select(id => new Enrollment
+                    {
+                        ClassID = model.ClassID,
+                        StudentID = id,
+                        EnrolledAt = DateTime.Now
+                    })
+                    .ToList();
+
+                if (newEnrollments.Any())
+                {
+                    _context.Enrollments.AddRange(newEnrollments);
+                    _context.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+
+                ModelState.AddModelError("StudentIDs", "All selected students are already enrolled in this class.");
+            }
+
+            PopulateOptions(model);
             return View(model);
         }
 
+        private EnrollmentBulkCreateViewModel PopulateOptions(EnrollmentBulkCreateViewModel model)
+        {
+            model.ClassOptions = _context.Classes
+                .Select(c => new SelectListItem
+                {
+                    Value = c.ClassID.ToString(),
+                    Text = c.ClassCode
+                })
+                .ToList();
 
+            model.StudentOptions = _context.Users
+                .Where(u => u.Role == "Student")
+                .Select(s => new SelectListItem
+                {
+                    Value = s.UserID.ToString(),
+                    Text = s.FullName
+                })
+                .ToList();
+
+            return model;
+        
+        }
 
         // DELETE
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            var e = _context.Enrollments.Find(id);
-            if (e == null) return NotFound();
+            var enrollment = _context.Enrollments.Find(id);
+            if (enrollment == null)
+            {
+                return NotFound();
+            }
 
-            _context.Enrollments.Remove(e);
+            _context.Enrollments.Remove(enrollment);
             _context.SaveChanges();
 
             return RedirectToAction("Index");
         }
 
         // GET: Enrollment/Edit/5
+        [HttpGet]
         public IActionResult Edit(int id)
         {
             var model = _context.Enrollments.Find(id);
@@ -94,6 +143,7 @@ namespace BTAPLON.Controllers
 
         // POST: Enrollment/Edit/5
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(Enrollment model)
         {
             if (ModelState.IsValid)
@@ -105,7 +155,8 @@ namespace BTAPLON.Controllers
             ViewBag.ClassID = new SelectList(_context.Classes, "ClassID", "ClassCode", model.ClassID);
             ViewBag.StudentID = new SelectList(_context.Users.Where(u => u.Role == "Student"), "UserID", "FullName", model.StudentID);
             return View(model);
-        }
 
+
+        }
     }
 }

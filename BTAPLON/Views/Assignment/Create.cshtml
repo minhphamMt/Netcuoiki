@@ -1,14 +1,10 @@
 ﻿@model BTAPLON.Models.Assignment
 
 <div class="container mt-4" style="max-width:800px;">
-    <h2 class="mb-3">Create Assignment</h2>
+    <h2 class="mb-3">Tạo bài tập</h2>
 
     <form asp-action="Create" method="post" class="card p-4 shadow-sm">
         @Html.AntiForgeryToken()
-
-        <!-- hiển thị validation summary -->
-        <div asp-validation-summary="All" class="alert alert-danger"></div>
-
         <div class="mb-3">
             <label class="form-label">Class</label>
             <select asp-for="ClassID" asp-items="ViewBag.ClassID" class="form-select"></select>

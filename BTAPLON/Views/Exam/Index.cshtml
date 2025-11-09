@@ -4,8 +4,8 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>@ViewData["Title"]</h2>
-    <a asp-action="Create" class="btn btn-primary">Tạo bài thi</a>
+    <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Tạo bài thi</a>
 </div>
 
 @if (!Model.Any())
@@ -14,57 +14,71 @@
 }
 else
 {
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Tên bài thi</th>
-            <th>Lớp</th>
-            <th>Thời lượng</th>
-            <th>Trạng thái</th>
-            <th>Số bài nộp</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var exam in Model)
-        {
-            <tr>
-                <td>@exam.Title</td>
-                <td>
-                    @exam.Class?.ClassCode
-                    <div class="text-muted small">@exam.Class?.Course?.CourseName</div>
-                </td>
-                <td>@exam.DurationMinutes phút</td>
-                <td>
-                    @if (exam.IsPublished)
-                    {
-                        <span class="badge bg-success">Đang mở</span>
-                        <div class="small text-muted">Bắt đầu: @exam.StartTime?.ToString("dd/MM/yyyy HH:mm")</div>
-                    }
-                    else
-                    {
-                    <span class="badge bg-secondary">Đang soạn</span>
-                    }
-                </td>
-                <td>@(exam.Submissions?.Count ?? 0)</td>
-                <td class="text-end">
-                    <a asp-action="Manage" asp-route-id="@exam.ExamID" class="btn btn-sm btn-outline-primary me-1">Cấu hình</a>
-                    <a asp-action="Review" asp-route-id="@exam.ExamID" class="btn btn-sm btn-outline-info me-1">Bài nộp</a>
-                    <a asp-action="Statistics" asp-route-id="@exam.ExamID" class="btn btn-sm btn-outline-secondary me-1">Thống kê</a>
-                    @if (exam.IsPublished)
-                    {
-                        <form asp-action="Close" asp-route-id="@exam.ExamID" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Đóng bài thi?')">Đóng</button>
-                        </form>
-                    }
-                    else
-                    {
-                    <a asp-action="Manage" asp-route-id="@exam.ExamID" class="btn btn-sm btn-success">Mở đề</a>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Tên bài thi</th>
+                    <th style="width: 200px">Lớp</th>
+                    <th style="width: 140px">Thời lượng</th>
+                    <th style="width: 180px">Trạng thái</th>
+                    <th style="width: 140px">Bài nộp</th>
+                    <th style="width: 260px" class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var exam in Model)
+                {
+                    <tr>
+                        <td>@exam.Title</td>
+                        <td>
+                            @exam.Class?.ClassCode
+                            <div class="text-muted small">@exam.Class?.Course?.CourseName</div>
+                        </td>
+                        <td>@exam.DurationMinutes phút</td>
+                        <td>
+                            @if (exam.IsPublished)
+                            {
+                                <span class="badge bg-success">Đang mở</span>
+                                <div class="small text-muted">Bắt đầu: @exam.StartTime?.ToString("dd/MM/yyyy HH:mm")</div>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Đang soạn</span>
+                            }
+                        </td>
+                        <td>@(exam.Submissions?.Count ?? 0)</td>
+                        <td class="text-center">
+                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                                <a asp-action="Manage" asp-route-id="@exam.ExamID" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-gear me-1"></i>Cấu hình
+                                </a>
+                                <a asp-action="Review" asp-route-id="@exam.ExamID" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-folder-check me-1"></i>Bài nộp
+                                </a>
+                                <a asp-action="Statistics" asp-route-id="@exam.ExamID" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-graph-up me-1"></i>Thống kê
+                                </a>
+                                @if (exam.IsPublished)
+                                {
+                                    <form asp-action="Close" asp-route-id="@exam.ExamID" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Đóng bài thi?')">
+                                            <i class="bi bi-lock me-1"></i>Đóng
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <a asp-action="Manage" asp-route-id="@exam.ExamID" class="btn btn-success btn-sm">
+                                        <i class="bi bi-unlock me-1"></i>Mở đề
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }

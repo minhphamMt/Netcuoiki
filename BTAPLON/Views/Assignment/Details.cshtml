@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Http
 
 @{
-    ViewData["Title"] = "Assignment Detail";
+    ViewData["Title"] = "Chi tiết bài tập";
     var userRole = Context.Session.GetString("UserRole");
     var userId = Context.Session.GetInt32("UserID");
     var isAdmin = string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase);
@@ -10,12 +10,12 @@
     var canGrade = isAdmin || isTeacher;
 }
 
-<h2>Assignment Detail</h2>
+<h2>Chi tiết bài tập</h2>
 
-<p><strong>Class:</strong> @Model.Class?.ClassCode</p>
-<p><strong>Title:</strong> @Model.Title</p>
-<p><strong>Description:</strong> @Model.Description</p>
-<p><strong>Due:</strong> @Model.DueDate?.ToShortDateString()</p>
+<p><strong>Lớp:</strong> @Model.Class?.ClassCode</p>
+<p><strong>Tiêu đề:</strong> @Model.Title</p>
+<p><strong>Mô tả:</strong> @Model.Description</p>
+<p><strong>Thời gian tạo:</strong> @Model.DueDate?.ToShortDateString()</p>
 
 <hr />
 
@@ -35,11 +35,11 @@
 
 <table class="table table-bordered">
     <tr>
-        <th>Student</th>
+        <th>Học sinh</th>
         <th>File</th>
-        <th>Time</th>
-        <th>Score</th>
-        <th>Feedback</th>
+        <th>Thời gian nộp</th>
+        <th>Điểm</th>
+        <th>Đánh giá</th>
         @if (canGrade)
         {
             <th>Actions</th>
