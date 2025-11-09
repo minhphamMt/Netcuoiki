@@ -1,34 +1,188 @@
-﻿@{
-    ViewData["Title"] = "Kênh thông báo";
-    var currentUser = ViewBag.UserDisplayName as string ?? "Ẩn danh";
+﻿@model NotificationIndexViewModel
+@{
+    ViewData["Title"] = "Thông báo lớp học";
+    var successMessage = TempData["SuccessMessage"] as string;
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <span>Kênh thông báo & tương tác tức thời</span>
-                <span class="badge bg-light text-dark" id="connectionStatus">Đang kết nối...</span>
-            </div>
-            <div class="card-body">
-                <div id="notificationFeed" class="mb-3 overflow-auto" style="max-height: 300px;">
-                    <div class="text-muted text-center small">Bắt đầu trao đổi để cập nhật theo thời gian thực.</div>
+<!-- BOOTSTRAP ICONS (nếu chưa có trong layout) -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<div class="row g-4 justify-content-center">
+
+    <!-- PHẦN GỬI THÔNG BÁO MỚI -->
+    @if (Model.CanCreate)
+    {
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-primary text-white">
+                    <strong>📨 Gửi thông báo mới</strong>
                 </div>
-                <form id="notificationForm" class="row g-2">
-                    <input type="hidden" id="currentUser" value="@currentUser" />
-                    <div class="col-9 col-sm-10">
-                        <input id="notificationInput" class="form-control" placeholder="Nhập thông báo hoặc tin nhắn..." autocomplete="off" />
+                <div class="card-body">
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i> @successMessage
+                        </div>
+                    }
+
+                    @if (!Model.TeacherClasses.Any())
+                    {
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <span>Bạn chưa có lớp học nào để gửi thông báo. Hãy liên hệ quản trị viên để được phân lớp.</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="Create" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Form.ClassId" class="form-label fw-semibold">Lớp học</label>
+                                <select asp-for="Form.ClassId" class="form-select" asp-items="Model.TeacherClasses">
+                                    <option value="">-- Chọn lớp học --</option>
+                                </select>
+                                <span asp-validation-for="Form.ClassId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Form.Title" class="form-label fw-semibold">Tiêu đề</label>
+                                <input asp-for="Form.Title" class="form-control" placeholder="Nhập tiêu đề thông báo..." />
+                                <span asp-validation-for="Form.Title" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Form.Content" class="form-label fw-semibold">Nội dung</label>
+                                <textarea asp-for="Form.Content" class="form-control" rows="5" placeholder="Nhập nội dung chi tiết..."></textarea>
+                                <span asp-validation-for="Form.Content" class="text-danger small"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-send-fill me-1"></i> Gửi thông báo
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- PHẦN DANH SÁCH THÔNG BÁO -->
+    <div class="@(Model.CanCreate ? "col-lg-8" : "col-lg-10 col-xl-8")">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center border-0 border-bottom">
+                <div>
+                    <h5 class="mb-0 fw-bold">📢 Thông báo của lớp</h5>
+                    <small class="text-muted">Chỉ hiển thị những lớp mà bạn thuộc về.</small>
+                </div>
+                <span class="badge bg-secondary">@Model.Notifications.Count thông báo</span>
+            </div>
+
+            <div class="card-body">
+
+                @if (!string.IsNullOrEmpty(successMessage) && !Model.CanCreate)
+                {
+                    <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>@successMessage
                     </div>
-                    <div class="col-3 col-sm-2 d-grid">
-                        <button type="submit" class="btn btn-primary">Gửi</button>
+                }
+
+                @if (!Model.Notifications.Any())
+                {
+                    <div class="text-center text-muted py-5">
+                        <p class="fs-1 mb-2">📭</p>
+                        <p>Hiện chưa có thông báo nào dành cho bạn.</p>
                     </div>
-                </form>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var notification in Model.Notifications)
+                        {
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm hover-shadow-sm notification-card">
+                                    <div class="card-body">
+
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="fw-bold mb-1 text-primary">@notification.Title</h6>
+                                                <div class="text-muted small">
+                                                    <i class="bi bi-journal-bookmark me-1"></i>
+                                                    <span class="fw-semibold">@notification.ClassName</span>
+                                                    @if (!string.IsNullOrWhiteSpace(notification.ClassCode))
+                                                    {
+                                                        <span> (@notification.ClassCode)</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock me-1"></i>
+                                                @notification.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                        </div>
+
+                                        <p class="mb-3 text-body">@notification.Content</p>
+
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="text-muted small">
+                                                <i class="bi bi-person-circle me-1"></i>
+                                                Đăng bởi <span class="fw-semibold">@notification.Author</span>
+                                            </div>
+
+                                            @if (notification.CanManage)
+                                            {
+                                                <div class="btn-group btn-group-sm" role="group" aria-label="Quản lý thông báo">
+                                                    <a class="btn btn-outline-primary d-flex align-items-center"
+                                                       asp-action="Edit"
+                                                       asp-route-id="@notification.Id">
+                                                        <i class="bi bi-pencil-square me-1"></i> Sửa
+                                                    </a>
+                                                    <form asp-action="Delete"
+                                                          asp-route-id="@notification.Id"
+                                                          method="post"
+                                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa thông báo này?');"
+                                                          class="d-inline">
+                                                        <button type="submit" class="btn btn-outline-danger d-flex align-items-center">
+                                                            <i class="bi bi-trash me-1"></i> Xóa
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            }
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js" integrity="sha512-0FyNXQT0KW7oaS6zXoPvxrgQ95Y9DSbwaoZpRZ03vyjaC26EEzmKqZIcALCYehSi5Dn9JNUUGf1YTNKHBWfh+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="~/js/notification.js" asp-append-version="true"></script>
+    <partial name="_ValidationScriptsPartial" />
 }
+
+<style>
+    /* Hiệu ứng hover nhẹ cho từng thông báo */
+    .notification-card {
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+        .notification-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    textarea.form-control {
+        resize: vertical;
+    }
+
+    .card-header small {
+        font-size: 0.85rem;
+    }
+</style>

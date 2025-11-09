@@ -32,5 +32,7 @@ namespace BTAPLON.Models
 
         [ValidateNever]
         public ICollection<Forum.ForumQuestion>? Questions { get; set; }
+        [ValidateNever]
+        public ICollection<Notification>? Notifications { get; set; }
     }
 }

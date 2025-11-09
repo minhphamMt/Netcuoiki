@@ -1,5 +1,4 @@
 using BTAPLON.Data;
-using BTAPLON.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +9,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<EduDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("EduConnection")));
 builder.Services.AddSession();
-builder.Services.AddSignalR();
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
@@ -37,7 +35,6 @@ app.UseSession();
 
 app.UseAuthorization();
 
-app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapControllerRoute(
     name: "default",

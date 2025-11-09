@@ -4,6 +4,7 @@ using BTAPLON.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BTAPLON.Migrations
 {
     [DbContext(typeof(EduDbContext))]
-    partial class EduDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251101110000_AddClassNotifications")]
+    partial class AddClassNotifications : Migration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,36 +25,36 @@ namespace BTAPLON.Migrations
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("BTAPLON.Models.Assignment", b =>
-                {
-                    b.Property<int>("AssignmentID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("AssignmentID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssignmentID"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssignmentID"));
 
-                    b.Property<int>("ClassID")
-                        .HasColumnType("int");
+                b.Property<int>("ClassID")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("DueDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime?>("DueDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("AssignmentID");
+                b.HasKey("AssignmentID");
 
-                    b.HasIndex("ClassID");
+                b.HasIndex("ClassID");
 
-                    b.ToTable("Assignments");
-                });
+                b.ToTable("Assignments");
+            });
             modelBuilder.Entity("BTAPLON.Models.Choice", b =>
             {
                 b.Property<int>("ChoiceID")
@@ -80,88 +82,88 @@ namespace BTAPLON.Migrations
             });
 
             modelBuilder.Entity("BTAPLON.Models.Class", b =>
-                {
-                    b.Property<int>("ClassID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("ClassID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassID"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassID"));
 
-                    b.Property<string>("ClassCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ClassCode")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CourseID")
-                        .HasColumnType("int");
+                b.Property<int>("CourseID")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Semester")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Semester")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
+                b.Property<int>("Year")
+                    .HasColumnType("int");
 
-                    b.HasKey("ClassID");
+                b.HasKey("ClassID");
 
-                    b.HasIndex("CourseID");
+                b.HasIndex("CourseID");
 
-                    b.ToTable("Classes");
-                });
+                b.ToTable("Classes");
+            });
 
             modelBuilder.Entity("BTAPLON.Models.Course", b =>
-                {
-                    b.Property<int>("CourseID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("CourseID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CourseID"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CourseID"));
 
-                    b.Property<string>("CourseName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("CourseName")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TeacherID")
-                        .HasColumnType("int");
+                b.Property<int?>("TeacherID")
+                    .HasColumnType("int");
 
-                    b.HasKey("CourseID");
+                b.HasKey("CourseID");
 
-                    b.HasIndex("TeacherID");
+                b.HasIndex("TeacherID");
 
-                    b.ToTable("Courses");
-                });
+                b.ToTable("Courses");
+            });
 
             modelBuilder.Entity("BTAPLON.Models.Enrollment", b =>
-                {
-                    b.Property<int>("EnrollmentID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("EnrollmentID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EnrollmentID"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EnrollmentID"));
 
-                    b.Property<int>("ClassID")
-                        .HasColumnType("int");
+                b.Property<int>("ClassID")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("EnrolledAt")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("EnrolledAt")
+                    .HasColumnType("datetime2");
 
-                    b.Property<int>("StudentID")
-                        .HasColumnType("int");
+                b.Property<int>("StudentID")
+                    .HasColumnType("int");
 
-                    b.HasKey("EnrollmentID");
+                b.HasKey("EnrollmentID");
 
-                    b.HasIndex("ClassID");
+                b.HasIndex("ClassID");
 
-                    b.HasIndex("StudentID");
+                b.HasIndex("StudentID");
 
-                    b.ToTable("Enrollments");
-                });
+                b.ToTable("Enrollments");
+            });
             modelBuilder.Entity("BTAPLON.Models.Exam", b =>
             {
                 b.Property<int>("ExamID")
@@ -288,41 +290,41 @@ namespace BTAPLON.Migrations
                 b.ToTable("Questions");
             });
             modelBuilder.Entity("BTAPLON.Models.Submission", b =>
-                {
-                    b.Property<int>("SubmissionID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("SubmissionID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubmissionID"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubmissionID"));
 
-                    b.Property<int>("AssignmentID")
-                        .HasColumnType("int");
+                b.Property<int>("AssignmentID")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Feedback")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Feedback")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("FilePath")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("Score")
-                        .HasColumnType("decimal(18,2)");
+                b.Property<decimal?>("Score")
+                    .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("StudentID")
-                        .HasColumnType("int");
+                b.Property<int>("StudentID")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("SubmittedAt")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("SubmissionID");
+                b.HasKey("SubmissionID");
 
-                    b.HasIndex("AssignmentID");
+                b.HasIndex("AssignmentID");
 
-                    b.HasIndex("StudentID");
+                b.HasIndex("StudentID");
 
-                    b.ToTable("Submissions");
-                });
+                b.ToTable("Submissions");
+            });
             modelBuilder.Entity("BTAPLON.Models.Forum.Answer", b =>
             {
                 b.Property<int>("AnswerID")
@@ -831,20 +833,22 @@ namespace BTAPLON.Migrations
                 b.Navigation("Answers");
             });
             modelBuilder.Entity("BTAPLON.Models.User", b =>
-                {
-                    b.Navigation("AnswersProvided");
-                    b.Navigation("CoursesTaught");
-                    b.Navigation("DiscussionThreads");
-                    b.Navigation("Enrollments");
-                    b.Navigation("ExamSubmissions");
+            {
+                b.Navigation("AnswersProvided");
+                b.Navigation("CoursesTaught");
+                b.Navigation("DiscussionThreads");
+                b.Navigation("Enrollments");
+                b.Navigation("ExamSubmissions");
 
-                    b.Navigation("ExamsCreated");
-                    b.Navigation("ForumPosts");
-                    b.Navigation("NotificationsCreated");
-                    b.Navigation("QuestionsAsked");
+                b.Navigation("ExamsCreated");
+                b.Navigation("ForumPosts");
 
-                    b.Navigation("Submissions");
-                });
+                b.Navigation("NotificationsCreated");
+
+                b.Navigation("QuestionsAsked");
+
+                b.Navigation("Submissions");
+            });
 #pragma warning restore 612, 618
         }
     }

@@ -22,7 +22,7 @@ namespace BTAPLON.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<ForumQuestion> ForumQuestions { get; set; }
         public DbSet<Answer> Answers { get; set; }
-
+        public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
@@ -128,6 +128,18 @@ namespace BTAPLON.Data
                 .HasOne(a => a.Author)
                 .WithMany(u => u.AnswersProvided!)
                 .HasForeignKey(a => a.AuthorID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Notification>()
+               .HasOne(n => n.Class)
+               .WithMany(c => c.Notifications!)
+               .HasForeignKey(n => n.ClassID)
+               .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.CreatedBy)
+                .WithMany(u => u.NotificationsCreated!)
+                .HasForeignKey(n => n.CreatedByID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);

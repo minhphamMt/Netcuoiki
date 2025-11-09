@@ -18,6 +18,7 @@
         public ICollection<Forum.Post>? ForumPosts { get; set; }
         public ICollection<Forum.ForumQuestion>? QuestionsAsked { get; set; }
         public ICollection<Forum.Answer>? AnswersProvided { get; set; }
+        public ICollection<Notification>? NotificationsCreated { get; set; }
     }
 
 }
