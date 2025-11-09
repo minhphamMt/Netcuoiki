@@ -1,11 +1,18 @@
-﻿using BTAPLON.Data;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using BTAPLON.Data;
+using BTAPLON.Filters;
 using BTAPLON.Models;
+using BTAPLON.Models.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace BTAPLON.Controllers
 {
+    [SessionAuthorize]
     public class AssignmentController : Controller
     {
         public IActionResult Index1()
@@ -34,6 +41,7 @@ namespace BTAPLON.Controllers
         }
 
         // CREATE GET
+        [SessionAuthorize("Admin")]
         public IActionResult Create()
         {
             ViewBag.ClassID = new SelectList(_context.Classes, "ClassID", "ClassCode");
@@ -43,6 +51,7 @@ namespace BTAPLON.Controllers
         // CREATE POST
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SessionAuthorize("Admin")]
         public IActionResult Create(Assignment model)
         {
             if (!ModelState.IsValid)
@@ -57,6 +66,7 @@ namespace BTAPLON.Controllers
         }
 
         // EDIT GET
+        [SessionAuthorize("Admin")]
         public IActionResult Edit(int id)
         {
             var a = _context.Assignments
@@ -72,6 +82,7 @@ namespace BTAPLON.Controllers
         // EDIT POST
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SessionAuthorize("Admin")]
         public IActionResult Edit(Assignment model)
         {
             if (!ModelState.IsValid)
@@ -86,6 +97,7 @@ namespace BTAPLON.Controllers
         }
 
         // DELETE
+        [SessionAuthorize("Admin")]
         public IActionResult Delete(int id)
         {
             var a = _context.Assignments.Find(id);
@@ -109,7 +121,40 @@ namespace BTAPLON.Controllers
 
             return View(a);
         }
-       
+        [SessionAuthorize("Student")]
+        public async Task<IActionResult> MyAssignments()
+        {
+            var userId = HttpContext.Session.GetInt32("UserID");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var assignments = await _context.Assignments
+                .Where(a => a.Class != null && a.Class.Enrollments.Any(e => e.StudentID == userId))
+                .Select(a => new StudentAssignmentListItemViewModel
+                {
+                    AssignmentID = a.AssignmentID,
+                    Title = a.Title,
+                    Description = a.Description,
+                    DueDate = a.DueDate,
+                    ClassCode = a.Class != null ? a.Class.ClassCode : null,
+                    CourseName = a.Class != null && a.Class.Course != null ? a.Class.Course.CourseName : null,
+                    IsSubmitted = a.Submissions.Any(s => s.StudentID == userId),
+                    SubmittedAt = a.Submissions
+                        .Where(s => s.StudentID == userId && s.SubmittedAt != null)
+                        .OrderByDescending(s => s.SubmittedAt)
+                        .Select(s => s.SubmittedAt)
+                        .FirstOrDefault()
+                })
+                .OrderBy(a => a.DueDate ?? DateTime.MaxValue)
+                .ThenBy(a => a.AssignmentID)
+                .ToListAsync();
+
+            ViewData["Title"] = "Bài tập của tôi";
+
+            return View("MyAssignments", assignments);
+        }
 
     }
 }

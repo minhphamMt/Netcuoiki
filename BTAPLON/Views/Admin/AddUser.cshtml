@@ -1,12 +1,16 @@
 ﻿@model BTAPLON.Models.User
 
-<h2 class="mb-3">Thêm User mới</h2>
+@{
+    ViewData["Title"] = "Thêm người dùng";
+}
+
+<h1 class="h3 mb-3">Thêm người dùng mới</h1>
 
 <form method="post" class="card p-4 shadow" style="max-width:500px">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="mb-3">
-        <label class="form-label">Full Name</label>
+        <label class="form-label">Họ và tên</label>
         <input type="text" name="FullName" class="form-control" value="@Model?.FullName" required />
     </div>
 
@@ -16,24 +20,20 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Password</label>
+        <label class="form-label">Mật khẩu</label>
         <input type="password" name="PasswordHash" class="form-control" required />
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Role</label>
-        <div class="mb-3">
-            <label class="form-label">Role</label>
-            <select name="Role" class="form-select" required>
-                <option value="">-- Chọn vai trò --</option>
-                <option value="Admin" selected="@(Model?.Role == "Admin")">Admin</option>
-                <option value="Teacher" selected="@(Model?.Role == "Teacher")">Teacher</option>
-                <option value="Student" selected="@(Model?.Role == "Student")">Student</option>
-            </select>
-        </div>
-
+        <label class="form-label">Vai trò</label>
+        <select name="Role" class="form-select" required>
+            <option value="">-- Chọn vai trò --</option>
+            <option value="Admin" selected="@(Model?.Role == "Admin")">Quản trị viên</option>
+            <option value="Teacher" selected="@(Model?.Role == "Teacher")">Giảng viên</option>
+            <option value="Student" selected="@(Model?.Role == "Student")">Học viên</option>
+        </select>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Users" class="btn btn-secondary ms-2">Cancel</a>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i>Lưu</button>
+    <a asp-action="Users" class="btn btn-secondary ms-2"><i class="bi bi-arrow-left me-1"></i>Quay lại</a>
 </form>

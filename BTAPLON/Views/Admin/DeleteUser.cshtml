@@ -1,14 +1,18 @@
 ﻿@model BTAPLON.Models.User
 @{
-    ViewData["Title"] = "Delete User";
+    ViewData["Title"] = "Xóa người dùng";
 }
 
-<h2>Delete User</h2>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h4 mb-3 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Xóa người dùng</h1>
+        <p>Bạn có chắc chắn muốn xóa tài khoản <strong>@Model.FullName</strong> (@Model.Email)?</p>
 
-<p>Are you sure you want to delete: <strong>@Model.FullName</strong> (@Model.Email)?</p>
-
-<form asp-action="DeleteUser" method="post">
-    <input type="hidden" asp-for="UserID" />
-    <button type="submit">Yes, delete</button>
-    <a asp-action="Users">Cancel</a>
-</form>
+        <form asp-action="DeleteUser" method="post" class="d-flex gap-2">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="UserID" />
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Xóa</button>
+            <a asp-action="Users" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i>Hủy</a>
+        </form>
+</div>
+</div>

@@ -34,6 +34,7 @@ namespace BTAPLON.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult AddUser(User user)
         {
             if (!string.IsNullOrWhiteSpace(user.PasswordHash) && !PasswordHelper.IsBcryptHash(user.PasswordHash))
@@ -94,6 +95,7 @@ namespace BTAPLON.Controllers
         }
 
         [HttpPost, ActionName("DeleteUser")]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteUserConfirmed(int id)
         {
             var user = _context.Users.Find(id);

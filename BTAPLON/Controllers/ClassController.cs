@@ -1,13 +1,16 @@
-﻿using BTAPLON.Data;
+﻿using System;
+using System.Linq;
+using BTAPLON.Data;
 using BTAPLON.Filters;
 using BTAPLON.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace BTAPLON.Controllers
 {
-    [SessionAuthorize("Admin")]
+    [SessionAuthorize("Admin", "Teacher")]
     public class ClassController : Controller
     {
         public IActionResult Index1()
@@ -28,19 +31,41 @@ namespace BTAPLON.Controllers
         // GET: /Class
         public async Task<IActionResult> Index()
         {
-            var list = await _context.Classes
+            var role = HttpContext.Session.GetString("UserRole") ?? string.Empty;
+            var userId = HttpContext.Session.GetInt32("UserID");
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var query = _context.Classes
                 .Include(c => c.Course)
+                .AsQueryable();
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                query = query.Where(c => c.Course != null && c.Course.TeacherID == userId);
+            }
+
+            var list = await query
+                .OrderBy(c => c.ClassCode)
+                .ThenBy(c => c.ClassID)
                 .ToListAsync();
 
+            ViewBag.CanManage = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase);
+            ViewBag.IsTeacher = string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase);
             return View(list);
         }
         // CREATE
+        [SessionAuthorize("Admin")]
         public IActionResult Create()
         {
             ViewBag.CourseID = new SelectList(_context.Courses, "CourseID", "CourseName");
             return View();
         }
         [HttpPost]
+        [SessionAuthorize("Admin")]
         public IActionResult Create(Class model)
         {
             if (ModelState.IsValid)
@@ -55,6 +80,7 @@ namespace BTAPLON.Controllers
         }
 
         // EDIT GET
+        [SessionAuthorize("Admin")]
         public IActionResult Edit(int id)
         {
             var cls = _context.Classes.Find(id);
@@ -65,6 +91,7 @@ namespace BTAPLON.Controllers
         }
 
         // EDIT POST
+        [SessionAuthorize("Admin")]
         [HttpPost]
         public IActionResult Edit(Class model)
         {
@@ -80,6 +107,7 @@ namespace BTAPLON.Controllers
         }
 
         // DELETE GET
+        [SessionAuthorize("Admin")]
         public IActionResult Delete(int id)
         {
             var cls = _context.Classes.Find(id);
@@ -89,6 +117,7 @@ namespace BTAPLON.Controllers
         }
 
         // DELETE POST
+        [SessionAuthorize("Admin")]
         [HttpPost, ActionName("Delete")]
         public IActionResult DeleteConfirmed(int id)
         {

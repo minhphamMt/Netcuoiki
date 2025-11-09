@@ -1,0 +1,83 @@
+﻿﻿@using System
+@using System.Linq
+@model IEnumerable<BTAPLON.Models.ViewModels.StudentAssignmentListItemViewModel>
+@{
+    var assignmentList = Model?.ToList() ?? new List<BTAPLON.Models.ViewModels.StudentAssignmentListItemViewModel>();
+    var now = DateTime.Now;
+    ViewData["Title"] = ViewData["Title"] ?? "Bài tập của tôi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Bài tập của tôi</h1>
+        <p class="text-muted mb-0">Theo dõi tiến độ nộp bài và thời hạn của các bài tập trong những lớp bạn tham gia.</p>
+    </div>
+</div>
+
+@if (!assignmentList.Any())
+{
+    <div class="alert alert-info">
+        Hiện tại bạn chưa có bài tập nào được giao. Hãy kiểm tra lại sau hoặc trao đổi với giảng viên phụ trách.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Bài tập</th>
+                    <th>Lớp</th>
+                    <th>Khóa học</th>
+                    <th>Hạn nộp</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var assignment in assignmentList)
+                {
+                    var isOverdue = assignment.DueDate.HasValue && assignment.DueDate.Value < now && !assignment.IsSubmitted;
+                    <tr class="@(isOverdue ? "table-warning" : string.Empty)">
+                        <td>
+                            <div class="fw-semibold">@assignment.Title</div>
+                            @if (!string.IsNullOrWhiteSpace(assignment.Description))
+                            {
+                                <div class="small text-muted text-truncate" style="max-width: 360px;">@assignment.Description</div>
+                            }
+                        </td>
+                        <td>@(string.IsNullOrWhiteSpace(assignment.ClassCode) ? "Không xác định" : assignment.ClassCode)</td>
+                        <td>@(string.IsNullOrWhiteSpace(assignment.CourseName) ? "" : assignment.CourseName)</td>
+                        <td>
+                            @if (assignment.DueDate.HasValue)
+                            {
+                                <span>@assignment.DueDate.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không có</span>
+                            }
+                        </td>
+                        <td>
+                            @if (assignment.IsSubmitted)
+                            {
+                                <span class="badge bg-success">Đã nộp</span>
+                                @if (assignment.SubmittedAt.HasValue)
+                                {
+                                    <div class="small text-muted">@assignment.SubmittedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                                }
+                            }
+                            else if (isOverdue)
+                            {
+                                <span class="badge bg-danger">Quá hạn</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Chưa nộp</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,32 +1,69 @@
-﻿@model IEnumerable<BTAPLON.Models.Class>
+﻿﻿@using System.Linq
+@model IEnumerable<BTAPLON.Models.Class>
+@{
+    var canManage = ViewBag.CanManage as bool? ?? false;
+    var isTeacher = ViewBag.IsTeacher as bool? ?? false;
+    ViewData["Title"] = canManage ? "Quản lý lớp học" : "Lớp giảng dạy";
+}
 
-<h2>Class List</h2>
-
-<a asp-action="Create" class="btn btn-success mb-2">Create New Class</a>
-
-<table class="table table-bordered">
-    <tr>
-        <th>Class ID</th>
-        <th>Class Code</th>
-        <th>Semester</th>
-        <th>Năm</th>
-        <th>Khóa học</th>
-        <th>Chức năng</th>
-    </tr>
-
-    @foreach (var item in Model)
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1">@(canManage ? "Quản lý lớp học" : "Danh sách lớp giảng dạy")</h2>
+        <p class="text-muted mb-0">Theo dõi các lớp học và truy cập nhanh vào diễn đàn thảo luận.</p>
+    </div>
+    @if (canManage)
     {
-        <tr>
-            <td>@item.ClassID</td>
-            <td>@item.ClassCode</td>
-            <td>@item.Semester</td>
-            <td>@item.Year</td>
-            <td>@item.Course?.CourseName</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ClassID" class="btn btn-primary btn-sm">Edit</a>
-                <a asp-action="Delete" asp-route-id="@item.ClassID" class="btn btn-danger btn-sm">Delete</a>
-                <a asp-controller="Forum" asp-action="Index" asp-route-classId="@item.ClassID" class="btn btn-info btn-sm">Diễn đàn</a>
-            </td>
-        </tr>
+        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Tạo lớp học mới</a>
     }
-</table>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">
+        @(canManage
+            ? "Chưa có lớp học nào trong hệ thống. Hãy tạo lớp học đầu tiên của bạn."
+            : "Bạn chưa được phân công lớp giảng dạy nào. Vui lòng liên hệ quản trị viên để được hỗ trợ.")
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã lớp</th>
+                    <th>Học kỳ</th>
+                    <th>Năm học</th>
+                    <th>Khóa học</th>
+                    <th class="text-end">Tùy chọn</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@(!string.IsNullOrWhiteSpace(item.ClassCode) ? item.ClassCode : $"Lớp #{item.ClassID}")</td>
+                        <td>@item.Semester</td>
+                        <td>@item.Year</td>
+                        <td>@item.Course?.CourseName</td>
+                        <td class="text-end">
+                            <a asp-controller="Forum" asp-action="Index" asp-route-classId="@item.ClassID" class="btn btn-outline-primary btn-sm me-1">Diễn đàn</a>
+                            @if (canManage)
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.ClassID" class="btn btn-outline-secondary btn-sm me-1">Chỉnh sửa</a>
+                                <a asp-action="Delete" asp-route-id="@item.ClassID" class="btn btn-outline-danger btn-sm">Xóa</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (isTeacher && !canManage)
+    {
+        <div class="alert alert-secondary mt-3">
+            Bạn có thể quản lý chi tiết lớp học từ mục <strong>Bảng điều khiển</strong> và truy cập các công cụ khác trong khóa học.
+        </div>
+    }
+}

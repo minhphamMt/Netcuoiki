@@ -12,7 +12,17 @@
 
     var role = Context.Session.GetString("UserRole");
     var email = Context.Session.GetString("UserEmail");
-    var displayRole = string.IsNullOrEmpty(role) ? "Khách" : role;
+    var displayRole = "Khách";
+    if (!string.IsNullOrEmpty(role))
+    {
+        displayRole = role switch
+        {
+            "Admin" => "Quản trị viên",
+            "Teacher" => "Giảng viên",
+            "Student" => "Học viên",
+            _ => role
+        };
+    }
     var pageTitle = ViewData["Title"] as string ?? "Bảng điều khiển";
 
     var userInitials = "U";
@@ -58,7 +68,7 @@
                     <span class="lms-brand-icon"><i class="bi bi-mortarboard"></i></span>
                     <div class="lms-brand-text">
                         <span class="lms-brand-title">BTAPLON LMS</span>
-                        <span class="lms-brand-subtitle">Learning Hub</span>
+                        <span class="lms-brand-subtitle">Nền tảng học tập</span>
                     </div>
                 </a>
                 <button type="button" class="lms-sidebar-close d-lg-none" data-sidebar-toggle aria-label="Đóng menu">
@@ -86,7 +96,7 @@
                 {
                     <a class="lms-nav-link @isActive("Dashboard", "Index")" asp-controller="Dashboard" asp-action="Index">
                         <i class="bi bi-speedometer2"></i>
-                        <span>Dashboard</span>
+                        <span>Bảng điều khiển</span>
                     </a>
                     <a class="lms-nav-link @isActive("Notification", "Index")" asp-controller="Notification" asp-action="Index">
                         <i class="bi bi-bell"></i>
@@ -98,6 +108,10 @@
 
                 @if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
                 {
+                    <a class="lms-nav-link @isActive("Admin", "Users")" asp-controller="Admin" asp-action="Users">
+                        <i class="bi bi-person-gear"></i>
+                        <span>Người dùng</span>
+                    </a>
                     <a class="lms-nav-link @isActive("Course", "Index")" asp-controller="Course" asp-action="Index">
                         <i class="bi bi-journal-bookmark"></i>
                         <span>Quản lý khóa học</span>
@@ -136,6 +150,11 @@
                 }
                 else if (string.Equals(role, "Student", StringComparison.OrdinalIgnoreCase))
                 {
+
+                    <a class="lms-nav-link @isActive("Assignment", "MyAssignments")" asp-controller="Assignment" asp-action="MyAssignments">
+                        <i class="bi bi-clipboard-check"></i>
+                        <span>Bài tập của tôi</span>
+                    </a>
                     <a class="lms-nav-link @isActive("Exam", "Available")" asp-controller="Exam" asp-action="Available">
                         <i class="bi bi-pencil-square"></i>
                         <span>Kỳ thi của tôi</span>

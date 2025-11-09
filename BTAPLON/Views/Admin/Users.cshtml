@@ -1,18 +1,22 @@
 ﻿@model List<BTAPLON.Models.User>
 
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Danh sách User</h2>
-    <a class="btn btn-primary" asp-action="AddUser">+ Thêm User mới</a>
+    <h1 class="h3 mb-0">Danh sách người dùng</h1>
+    <a class="btn btn-primary" asp-action="AddUser"><i class="bi bi-plus-lg me-1"></i>Thêm người dùng</a>
 </div>
 
 <table class="table table-bordered table-striped">
     <thead class="table-light">
         <tr>
-            <th>ID</th>
-            <th>Full Name</th>
+            <th>Mã</th>
+            <th>Họ và tên</th>
             <th>Email</th>
-            <th>Role</th>
-            <th style="width:150px">Actions</th>
+            <th>Vai trò</th>
+            <th style="width: 180px" class="text-center">Thao tác</th>
         </tr>
     </thead>
 
@@ -23,10 +27,30 @@
                 <td>@u.UserID</td>
                 <td>@u.FullName</td>
                 <td>@u.Email</td>
-                <td>@u.Role</td>
                 <td>
-                    <a class="btn btn-warning btn-sm" asp-action="EditUser" asp-route-id="@u.UserID">Edit</a>
-                    <a class="btn btn-danger btn-sm ms-1" asp-action="DeleteUser" asp-route-id="@u.UserID">Delete</a>
+                    @switch (u.Role)
+                    {
+                        case "Admin":
+                            @:Quản trị viên
+                            break;
+                        case "Teacher":
+                            @:Giảng viên
+                            break;
+                        case "Student":
+                            @:Học viên
+                            break;
+                        default:
+                            @u.Role
+                            break;
+                    }
+                </td>
+                <td class="text-center">
+                    <a class="btn btn-outline-primary btn-sm" asp-action="EditUser" asp-route-id="@u.UserID">
+                        <i class="bi bi-pencil-square me-1"></i>Chỉnh sửa
+                    </a>
+                    <a class="btn btn-outline-danger btn-sm ms-1" asp-action="DeleteUser" asp-route-id="@u.UserID">
+                        <i class="bi bi-trash me-1"></i>Xóa
+                    </a>
                 </td>
             </tr>
         }
