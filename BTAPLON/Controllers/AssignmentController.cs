@@ -31,11 +31,32 @@ namespace BTAPLON.Controllers
         }
 
         // LIST
-        public IActionResult Index()
+        public IActionResult Index(string? searchTerm)
         {
-            var list = _context.Assignments
-                .Include(a => a.Class)
+            var query = _context.Assignments
+               .Include(a => a.Class)!
+                   .ThenInclude(c => c.Course)
+               .AsQueryable();
+
+            var trimmedSearch = searchTerm?.Trim();
+            if (!string.IsNullOrWhiteSpace(trimmedSearch))
+            {
+                var normalized = trimmedSearch.ToLower();
+                query = query.Where(a =>
+                    a.Title.ToLower().Contains(normalized) ||
+                    a.AssignmentID.ToString().Contains(normalized) ||
+                    (a.Description != null && a.Description.ToLower().Contains(normalized)) ||
+                    (a.Class != null && (
+                        (!string.IsNullOrEmpty(a.Class.ClassCode) && a.Class.ClassCode.ToLower().Contains(normalized)) ||
+                        (a.Class.Course != null && a.Class.Course.CourseName != null && a.Class.Course.CourseName.ToLower().Contains(normalized))
+                    )));
+            }
+
+            var list = query
+                .OrderByDescending(a => a.DueDate ?? DateTime.MaxValue)
+                .ThenBy(a => a.AssignmentID)
                 .ToList();
+            ViewData["SearchTerm"] = trimmedSearch;
 
             return View(list);
         }

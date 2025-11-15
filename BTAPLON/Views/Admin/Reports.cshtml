@@ -1,0 +1,163 @@
+﻿@model BTAPLON.Models.ViewModels.AdminReportViewModel
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "Báo cáo thống kê";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Báo cáo tổng hợp</h1>
+        <p class="text-muted mb-0">Theo dõi hiệu quả hoạt động học tập và giảng dạy trong hệ thống.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted text-uppercase small mb-2">Người dùng</div>
+                <div class="display-6 fw-bold mb-2">@Model.TotalUsers</div>
+                <div class="d-flex flex-wrap gap-2 small">
+                    <span class="badge bg-primary-subtle text-primary">Sinh viên: @Model.TotalStudents</span>
+                    <span class="badge bg-success-subtle text-success">Giảng viên: @Model.TotalTeachers</span>
+                    <span class="badge bg-secondary-subtle text-secondary">Quản trị: @Model.TotalAdmins</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted text-uppercase small mb-2">Khóa học &amp; Lớp học</div>
+                <div class="display-6 fw-bold mb-2">@Model.TotalCourses</div>
+                <div class="text-muted">@Model.TotalClasses lớp đang hoạt động</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted text-uppercase small mb-2">Bài tập &amp; Kỳ thi</div>
+                <div class="display-6 fw-bold mb-2">@Model.TotalAssignments</div>
+                <div class="text-muted">@Model.TotalExams kỳ thi • @Model.ActiveExams đang mở</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted text-uppercase small mb-2">Tương tác học viên</div>
+                <div class="display-6 fw-bold mb-2">@Model.TotalEnrollments</div>
+                <div class="text-muted">@Model.TotalNotifications thông báo đã gửi</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 border-bottom">
+                <h5 class="mb-0">Ghi danh 6 tháng gần nhất</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.MonthlyEnrollments.Any())
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var month in Model.MonthlyEnrollments)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold">@month.Label</span>
+                                <span class="badge bg-primary rounded-pill">@month.EnrollmentCount</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="text-muted">Chưa có dữ liệu ghi danh trong khoảng thời gian này.</div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 border-bottom">
+                <h5 class="mb-0">Lớp học có nhiều học viên nhất</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.TopClasses.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Lớp học</th>
+                                    <th>Khóa học</th>
+                                    <th class="text-end">Học viên</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cls in Model.TopClasses)
+                                {
+                                    <tr>
+                                        <td>@cls.ClassCode</td>
+                                        <td>@cls.CourseName</td>
+                                        <td class="text-end"><span class="badge bg-secondary-subtle text-secondary">@cls.StudentCount</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted">Chưa có dữ liệu ghi danh cho các lớp.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 border-bottom">
+                <h5 class="mb-0">Giảng viên hoạt động tích cực</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.TopTeachers.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Giảng viên</th>
+                                    <th class="text-center">Lớp phụ trách</th>
+                                    <th class="text-center">Bài tập</th>
+                                    <th class="text-center">Kỳ thi</th>
+                                    <th class="text-center">Tổng hoạt động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var teacher in Model.TopTeachers)
+                                {
+                                    <tr>
+                                        <td>@teacher.TeacherName</td>
+                                        <td class="text-center">@teacher.ClassCount</td>
+                                        <td class="text-center">@teacher.AssignmentCount</td>
+                                        <td class="text-center">@teacher.ExamCount</td>
+                                        <td class="text-center"><span class="badge bg-primary">@teacher.TotalActivities</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted">Chưa có dữ liệu về hoạt động của giảng viên.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

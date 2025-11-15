@@ -62,7 +62,7 @@ namespace BTAPLON.Controllers
         }
 
         // TEACHER: list exams created by user
-        public IActionResult Index()
+        public IActionResult Index(string? searchTerm)
         {
             var redirect = RequireLogin();
             if (redirect != null) return redirect;
@@ -83,10 +83,25 @@ namespace BTAPLON.Controllers
                 examsQuery = examsQuery.Where(e => e.CreatorID == teacherId ||
                     (e.Class != null && e.Class.Course != null && e.Class.Course.TeacherID == teacherId));
             }
+            var trimmedSearch = searchTerm?.Trim();
+            if (!string.IsNullOrWhiteSpace(trimmedSearch))
+            {
+                var normalized = trimmedSearch.ToLower();
+                examsQuery = examsQuery.Where(e =>
+                    e.Title.ToLower().Contains(normalized) ||
+                    (e.Description != null && e.Description.ToLower().Contains(normalized)) ||
+                    (e.Class != null && (
+                        (!string.IsNullOrEmpty(e.Class.ClassCode) && e.Class.ClassCode.ToLower().Contains(normalized)) ||
+                        (e.Class.Course != null && e.Class.Course.CourseName != null && e.Class.Course.CourseName.ToLower().Contains(normalized))
+                    )) ||
+                    e.ExamID.ToString().Contains(normalized));
+            }
 
             var exams = examsQuery
                 .OrderByDescending(e => e.CreatedAt)
                 .ToList();
+
+            ViewData["SearchTerm"] = trimmedSearch;
 
             return View(exams);
         }

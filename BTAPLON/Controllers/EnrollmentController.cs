@@ -28,13 +28,36 @@ namespace BTAPLON.Controllers
         }
 
         // LIST
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm)
         {
-            var list = await _context.Enrollments
-                .Include(e => e.Class)
-                .Include(e => e.Student)
+            var query = _context.Enrollments
+                 .Include(e => e.Class)!
+                     .ThenInclude(c => c.Course)
+                 .Include(e => e.Student)
+                  .AsQueryable();
+
+            var trimmedSearch = searchTerm?.Trim();
+            if (!string.IsNullOrWhiteSpace(trimmedSearch))
+            {
+                var normalized = trimmedSearch.ToLower();
+                query = query.Where(e =>
+                    e.EnrollmentID.ToString().Contains(normalized) ||
+                    (e.Class != null && (
+                        (!string.IsNullOrEmpty(e.Class.ClassCode) && e.Class.ClassCode.ToLower().Contains(normalized)) ||
+                        (e.Class.Course != null && e.Class.Course.CourseName != null && e.Class.Course.CourseName.ToLower().Contains(normalized))
+                    )) ||
+                    (e.Student != null && (
+                        (e.Student.FullName != null && e.Student.FullName.ToLower().Contains(normalized)) ||
+                        (e.Student.Email != null && e.Student.Email.ToLower().Contains(normalized))
+                    )));
+            }
+
+            var list = await query
+                .OrderByDescending(e => e.EnrolledAt)
+                .ThenBy(e => e.EnrollmentID)
                 .ToListAsync();
 
+            ViewData["SearchTerm"] = trimmedSearch;
             return View(list);
         }
 

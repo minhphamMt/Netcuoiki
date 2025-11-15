@@ -14,6 +14,8 @@ namespace BTAPLON.Models.ViewModels
         public IList<NotificationDisplayViewModel> Notifications { get; set; } = new List<NotificationDisplayViewModel>();
 
         public NotificationFormInput Form { get; set; } = new NotificationFormInput();
+
+        public string? SearchTerm { get; set; }
     }
 
     public class NotificationDisplayViewModel

@@ -4,6 +4,7 @@
     var canManage = ViewBag.CanManage as bool? ?? false;
     var isTeacher = ViewBag.IsTeacher as bool? ?? false;
     ViewData["Title"] = canManage ? "Quản lý lớp học" : "Lớp giảng dạy";
+    var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -16,6 +17,17 @@
         <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Tạo lớp học mới</a>
     }
 </div>
+
+<form method="get" asp-action="Index" class="mb-3">
+    <div class="input-group">
+        <input type="search" name="searchTerm" value="@searchTerm" class="form-control" placeholder="Tìm kiếm theo mã lớp, khóa học, học kỳ..." />
+        @if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            <a asp-action="Index" class="btn btn-outline-secondary">Xóa</a>
+        }
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Tìm kiếm</button>
+    </div>
+</form>
 
 @if (Model == null || !Model.Any())
 {

@@ -26,7 +26,7 @@ namespace BTAPLON.Controllers
         // ----------------------------
         // INDEX
         // ----------------------------
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             var role = HttpContext.Session.GetString("UserRole");
@@ -34,7 +34,7 @@ namespace BTAPLON.Controllers
             if (userId == null)
                 return RedirectToAction("Login", "Account");
 
-            var viewModel = await BuildIndexViewModelAsync(userId.Value, role, null);
+            var viewModel = await BuildIndexViewModelAsync(userId.Value, role, null, searchTerm);
             return View(viewModel);
         }
 
@@ -60,7 +60,7 @@ namespace BTAPLON.Controllers
 
             if (!ModelState.IsValid)
             {
-                var invalidModel = await BuildIndexViewModelAsync(userId.Value, role, form);
+                var invalidModel = await BuildIndexViewModelAsync(userId.Value, role, form, null);
                 return View("Index", invalidModel);
             }
 
@@ -75,7 +75,7 @@ namespace BTAPLON.Controllers
             if (teacherClass == null)
             {
                 ModelState.AddModelError("Form.ClassId", "Bạn chỉ có thể gửi thông báo cho lớp mà bạn phụ trách.");
-                var invalidModel = await BuildIndexViewModelAsync(userId.Value, role, form);
+                var invalidModel = await BuildIndexViewModelAsync(userId.Value, role, form, null);
                 return View("Index", invalidModel);
             }
 
@@ -238,7 +238,7 @@ namespace BTAPLON.Controllers
         // PRIVATE HELPERS
         // ----------------------------
 
-        private async Task<NotificationIndexViewModel> BuildIndexViewModelAsync(int userId, string? role, NotificationFormInput? form)
+        private async Task<NotificationIndexViewModel> BuildIndexViewModelAsync(int userId, string? role, NotificationFormInput? form, string? searchTerm = null)
         {
             var isTeacher = string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase);
             var isStudent = string.Equals(role, "Student", StringComparison.OrdinalIgnoreCase);
@@ -263,6 +263,24 @@ namespace BTAPLON.Controllers
             else if (!isAdmin)
             {
                 query = query.Where(n => n.CreatedByID == userId);
+            }
+
+            var trimmedSearch = searchTerm?.Trim();
+            if (!string.IsNullOrWhiteSpace(trimmedSearch))
+            {
+                var normalized = trimmedSearch.ToLower();
+                query = query.Where(n =>
+                    n.Title.ToLower().Contains(normalized) ||
+                    (n.Content != null && n.Content.ToLower().Contains(normalized)) ||
+                    (n.Class != null && (
+                        (!string.IsNullOrEmpty(n.Class.ClassCode) && n.Class.ClassCode.ToLower().Contains(normalized)) ||
+                        (n.Class.Course != null && n.Class.Course.CourseName != null && n.Class.Course.CourseName.ToLower().Contains(normalized))
+                    )) ||
+                    (n.CreatedBy != null && (
+                        (n.CreatedBy.FullName != null && n.CreatedBy.FullName.ToLower().Contains(normalized)) ||
+                        (n.CreatedBy.Email != null && n.CreatedBy.Email.ToLower().Contains(normalized))
+                    )) ||
+                    n.NotificationID.ToString().Contains(normalized));
             }
 
             var notifications = await query
@@ -305,7 +323,8 @@ namespace BTAPLON.Controllers
                 CanCreate = isTeacher,
                 TeacherClasses = teacherClasses,
                 Notifications = notifications,
-                Form = form ?? new NotificationFormInput()
+                Form = form ?? new NotificationFormInput(),
+                SearchTerm = trimmedSearch
             };
         }
 

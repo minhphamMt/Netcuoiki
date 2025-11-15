@@ -25,11 +25,31 @@ namespace BTAPLON.Controllers
         }
 
         // GET: /Course
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm)
         {
-            var list = await _context.Courses
+            var query = _context.Courses
                 .Include(c => c.Teacher)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var normalized = searchTerm.Trim().ToLower();
+                query = query.Where(c =>
+                    c.CourseName.ToLower().Contains(normalized) ||
+                    c.CourseID.ToString().Contains(normalized) ||
+                    (c.Teacher != null && (
+                        (c.Teacher.FullName != null && c.Teacher.FullName.ToLower().Contains(normalized)) ||
+                        (c.Teacher.Email != null && c.Teacher.Email.ToLower().Contains(normalized))
+                    )));
+            }
+
+            var list = await query
+                .OrderBy(c => c.CourseName)
+                .ThenBy(c => c.CourseID)
                 .ToListAsync();
+
+            ViewData["SearchTerm"] = searchTerm?.Trim();
+
 
             return View(list);
         }

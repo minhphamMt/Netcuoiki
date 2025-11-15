@@ -29,7 +29,7 @@ namespace BTAPLON.Controllers
         }
 
         // GET: /Class
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm)
         {
             var role = HttpContext.Session.GetString("UserRole") ?? string.Empty;
             var userId = HttpContext.Session.GetInt32("UserID");
@@ -48,6 +48,16 @@ namespace BTAPLON.Controllers
                 query = query.Where(c => c.Course != null && c.Course.TeacherID == userId);
             }
 
+            var trimmedSearch = searchTerm?.Trim();
+            if (!string.IsNullOrWhiteSpace(trimmedSearch))
+            {
+                var normalized = trimmedSearch.ToLower();
+                query = query.Where(c =>
+                    (!string.IsNullOrEmpty(c.ClassCode) && c.ClassCode.ToLower().Contains(normalized)) ||
+                    (!string.IsNullOrEmpty(c.Semester) && c.Semester.ToLower().Contains(normalized)) ||
+                    (c.Year != null && c.Year.Value.ToString().Contains(normalized)) ||
+                    (c.Course != null && c.Course.CourseName != null && c.Course.CourseName.ToLower().Contains(normalized)));
+            }
             var list = await query
                 .OrderBy(c => c.ClassCode)
                 .ThenBy(c => c.ClassID)
@@ -55,6 +65,7 @@ namespace BTAPLON.Controllers
 
             ViewBag.CanManage = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase);
             ViewBag.IsTeacher = string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase);
+            ViewData["SearchTerm"] = trimmedSearch;
             return View(list);
         }
         // CREATE

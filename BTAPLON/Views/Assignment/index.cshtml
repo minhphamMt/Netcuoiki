@@ -2,6 +2,7 @@
 @{
     var role = Context.Session.GetString("UserRole");
     ViewData["Title"] = "Danh sách bài tập";
+    var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -10,8 +11,18 @@
     {
         <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1"></i>Thêm bài tập</a>
     }
-</table>
 </div>
+
+<form method="get" asp-action="Index" class="mb-3">
+    <div class="input-group">
+        <input type="search" name="searchTerm" value="@searchTerm" class="form-control" placeholder="Tìm kiếm theo tiêu đề, lớp học..." />
+        @if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            <a asp-action="Index" class="btn btn-outline-secondary">Xóa</a>
+        }
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Tìm kiếm</button>
+    </div>
+</form>
 
 <div class="table-responsive">
     <table class="table table-bordered table-striped align-middle">
