@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<EduDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("EduConnection")));
@@ -15,9 +15,10 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EduDbContext>();
     dbContext.Database.Migrate();
+    //SeedData.EnsureSeedData(dbContext);
 }
 
-// Configure the HTTP request pipeline.
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
