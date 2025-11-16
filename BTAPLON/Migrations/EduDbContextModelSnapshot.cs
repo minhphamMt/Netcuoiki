@@ -603,13 +603,13 @@ namespace BTAPLON.Migrations
 
                 b.Navigation("CreatedBy");
 
-                b.Navigation("Receipts ");
+                b.Navigation("NotificationReceipts");
             });
 
             modelBuilder.Entity("BTAPLON.Models.NotificationReceipt", b =>
             {
                 b.HasOne("BTAPLON.Models.Notification", "Notification")
-                    .WithMany("Receipts")
+                    .WithMany("NotificationReceipts")
                     .HasForeignKey("NotificationID")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();

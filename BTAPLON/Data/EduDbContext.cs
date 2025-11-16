@@ -132,10 +132,10 @@ namespace BTAPLON.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Notification>()
-    .HasOne(n => n.Class)
-    .WithMany(c => c.Notifications!)
-    .HasForeignKey(n => n.ClassID)
-    .OnDelete(DeleteBehavior.Cascade);
+               .HasOne(n => n.Class)
+                .WithMany(c => c.Notifications!)
+                .HasForeignKey(n => n.ClassID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.CreatedBy)
@@ -143,11 +143,11 @@ namespace BTAPLON.Data
                 .HasForeignKey(n => n.CreatedByID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<NotificationReceipt>()
-               .HasOne(r => r.Notification)
-               .WithMany(n => n.Receipts!)
-               .HasForeignKey(r => r.NotificationID)
-               .OnDelete(DeleteBehavior.Cascade);
+           modelBuilder.Entity<Notification>()
+                .HasMany(n => n.NotificationReceipts!)
+                .WithOne(r => r.Notification)
+                .HasForeignKey(r => r.NotificationID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<NotificationReceipt>()
                 .HasOne(r => r.User)
