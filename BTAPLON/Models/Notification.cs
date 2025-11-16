@@ -32,6 +32,6 @@ namespace BTAPLON.Models
         public User? CreatedBy { get; set; }
 
         [ValidateNever]
-        public ICollection<NotificationReceipt>? Receipts { get; set; }
+        public ICollection<NotificationReceipt>? Receipts { get; set; } = new List<NotificationReceipt>();
     }
 }

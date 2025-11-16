@@ -603,7 +603,7 @@ namespace BTAPLON.Migrations
 
                 b.Navigation("CreatedBy");
 
-                b.Navigation("Receipts");
+                b.Navigation("Receipts ");
             });
 
             modelBuilder.Entity("BTAPLON.Models.NotificationReceipt", b =>
