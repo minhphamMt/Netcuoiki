@@ -87,8 +87,8 @@ namespace BTAPLON.Migrations
             modelBuilder.Entity("BTAPLON.Models.Class", b =>
                 {
                     b.Property<int>("ClassID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    .ValueGeneratedOnAdd()
+        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassID"));
 
@@ -111,6 +111,18 @@ namespace BTAPLON.Migrations
                     b.HasIndex("CourseID");
 
                     b.ToTable("Classes");
+
+                    b.Navigation("Assignments");
+
+                    b.Navigation("DiscussionThreads");
+
+                    b.Navigation("Enrollments");
+
+                    b.Navigation("Exams");
+
+                    b.Navigation("Notifications");
+
+                    b.Navigation("Questions");
                 });
 
             modelBuilder.Entity("BTAPLON.Models.Course", b =>
@@ -585,6 +597,25 @@ namespace BTAPLON.Migrations
 
             });
 
+            modelBuilder.Entity("BTAPLON.Models.NotificationReceipt", b =>
+            {
+                b.HasOne("BTAPLON.Models.Notification", "Notification")
+                    .WithMany("NotificationReceipts")
+                    .HasForeignKey("NotificationID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("BTAPLON.Models.User", "User")
+                    .WithMany("NotificationReceipts")
+                    .HasForeignKey("UserID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Notification");
+
+                b.Navigation("User");
+            });
+
             modelBuilder.Entity("BTAPLON.Models.Notification", b =>
             {
                 b.HasOne("BTAPLON.Models.Class", "Class")
@@ -604,25 +635,6 @@ namespace BTAPLON.Migrations
                 b.Navigation("CreatedBy");
 
                 b.Navigation("NotificationReceipts");
-            });
-
-            modelBuilder.Entity("BTAPLON.Models.NotificationReceipt", b =>
-            {
-                b.HasOne("BTAPLON.Models.Notification", "Notification")
-                    .WithMany("NotificationReceipts")
-                    .HasForeignKey("NotificationID")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-
-                b.HasOne("BTAPLON.Models.User", "User")
-                    .WithMany("NotificationReceipts")
-                    .HasForeignKey("UserID")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-
-                b.Navigation("Notification");
-
-                b.Navigation("User");
             });
 
             modelBuilder.Entity("BTAPLON.Models.Assignment", b =>
@@ -847,17 +859,14 @@ namespace BTAPLON.Migrations
             modelBuilder.Entity("BTAPLON.Models.Class", b =>
             {
                 b.Navigation("Assignments");
-
                 b.Navigation("DiscussionThreads");
-
                 b.Navigation("Enrollments");
-
                 b.Navigation("Exams");
-
                 b.Navigation("Notifications");
-
                 b.Navigation("Questions");
             });
+
+
 
             modelBuilder.Entity("BTAPLON.Models.Course", b =>
             {
