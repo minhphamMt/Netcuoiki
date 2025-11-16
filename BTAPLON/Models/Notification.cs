@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
@@ -29,5 +30,8 @@ namespace BTAPLON.Models
 
         [ValidateNever]
         public User? CreatedBy { get; set; }
+
+        [ValidateNever]
+        public ICollection<NotificationReceipt>? Receipts { get; set; }
     }
 }

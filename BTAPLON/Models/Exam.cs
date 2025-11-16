@@ -24,6 +24,7 @@ namespace BTAPLON.Models
 
         public DateTime? StartTime { get; set; }
 
+        [Display(Name = "Ngày kết thúc")]
         public DateTime? EndTime { get; set; }
 
         public bool IsPublished { get; set; }

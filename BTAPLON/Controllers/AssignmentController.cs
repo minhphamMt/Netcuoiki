@@ -62,7 +62,7 @@ namespace BTAPLON.Controllers
         }
 
         // CREATE GET
-        [SessionAuthorize("Admin")]
+        [SessionAuthorize("Admin", "Teacher")]
         public IActionResult Create()
         {
             ViewBag.ClassID = new SelectList(_context.Classes, "ClassID", "ClassCode");
@@ -72,7 +72,7 @@ namespace BTAPLON.Controllers
         // CREATE POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [SessionAuthorize("Admin")]
+        [SessionAuthorize("Admin", "Teacher")]
         public IActionResult Create(Assignment model)
         {
             if (!ModelState.IsValid)
@@ -87,7 +87,7 @@ namespace BTAPLON.Controllers
         }
 
         // EDIT GET
-        [SessionAuthorize("Admin")]
+        [SessionAuthorize("Admin", "Teacher")]
         public IActionResult Edit(int id)
         {
             var a = _context.Assignments
@@ -103,7 +103,7 @@ namespace BTAPLON.Controllers
         // EDIT POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [SessionAuthorize("Admin")]
+        [SessionAuthorize("Admin", "Teacher")]
         public IActionResult Edit(Assignment model)
         {
             if (!ModelState.IsValid)
@@ -118,7 +118,7 @@ namespace BTAPLON.Controllers
         }
 
         // DELETE
-        [SessionAuthorize("Admin")]
+        [SessionAuthorize("Admin", "Teacher")]
         public IActionResult Delete(int id)
         {
             var a = _context.Assignments.Find(id);
@@ -141,6 +141,51 @@ namespace BTAPLON.Controllers
             if (a == null) return NotFound();
 
             return View(a);
+        }
+
+        [SessionAuthorize("Student")]
+        public async Task<IActionResult> StudentDetails(int id)
+        {
+            var userId = HttpContext.Session.GetInt32("UserID");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var assignment = await _context.Assignments
+                .Include(a => a.Class)!
+                    .ThenInclude(c => c.Course)!
+                        .ThenInclude(course => course.Teacher)
+                .Include(a => a.Class)!
+                    .ThenInclude(c => c.Enrollments)
+                .FirstOrDefaultAsync(a => a.AssignmentID == id);
+
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            var isEnrolled = assignment.Class?.Enrollments?.Any(e => e.StudentID == userId) ?? false;
+            if (!isEnrolled)
+            {
+                return Forbid();
+            }
+
+            var submission = await _context.Submissions
+                .Include(s => s.Assignment)
+                .Where(s => s.AssignmentID == id && s.StudentID == userId)
+                .OrderByDescending(s => s.SubmittedAt)
+                .FirstOrDefaultAsync();
+
+            var viewModel = new StudentAssignmentDetailViewModel
+            {
+                Assignment = assignment,
+                Submission = submission
+            };
+
+            ViewData["Title"] = "Chi tiết bài tập";
+
+            return View("StudentDetails", viewModel);
         }
         [SessionAuthorize("Student")]
         public async Task<IActionResult> MyAssignments()

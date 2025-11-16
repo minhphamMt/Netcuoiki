@@ -13,4 +13,12 @@ namespace BTAPLON.Models.ViewModels
         public bool IsSubmitted { get; set; }
         public DateTime? SubmittedAt { get; set; }
     }
+
+    public class StudentAssignmentDetailViewModel
+    {
+        public Assignment Assignment { get; set; } = null!;
+        public Submission? Submission { get; set; }
+
+        public bool IsOverdue => Assignment.DueDate.HasValue && Assignment.DueDate.Value < DateTime.Now;
+    }
 }

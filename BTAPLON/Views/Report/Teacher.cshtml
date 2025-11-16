@@ -1,0 +1,94 @@
+﻿@model BTAPLON.Models.ViewModels.TeacherPerformanceReportViewModel
+@using System.Linq
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "Báo cáo giảng dạy";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Báo cáo giảng dạy</h1>
+    <p class="text-muted mb-0">Tổng quan hoạt động giảng dạy, lớp học và kết quả học viên.</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Lớp phụ trách</div>
+            <div class="display-6 fw-semibold">@Model.TotalClasses</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Học viên</div>
+            <div class="display-6 fw-semibold">@Model.TotalStudents</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Bài tập đã giao</div>
+            <div class="display-6 fw-semibold">@Model.AssignmentCount</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Kỳ thi đã tạo</div>
+            <div class="display-6 fw-semibold">@Model.ExamCount</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Điểm TB bài tập</div>
+            <div class="display-6 fw-semibold">@(Model.AverageAssignmentScore?.ToString("0.##") ?? "-")</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Điểm TB kỳ thi</div>
+            <div class="display-6 fw-semibold">@(Model.AverageExamScore?.ToString("0.##") ?? "-")</div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Chi tiết lớp học</h5>
+        @if (!Model.Classes.Any())
+        {
+            <p class="text-muted mb-0">Bạn chưa được phân công lớp nào.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Lớp</th>
+                            <th>Khóa học</th>
+                            <th>Học viên</th>
+                            <th>Bài tập</th>
+                            <th>Kỳ thi</th>
+                            <th>Điểm TB bài tập</th>
+                            <th>Điểm TB kỳ thi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cls in Model.Classes)
+                        {
+                            <tr>
+                                <td>@cls.ClassCode</td>
+                                <td>@cls.CourseName</td>
+                                <td>@cls.StudentCount</td>
+                                <td>@cls.AssignmentCount</td>
+                                <td>@cls.ExamCount</td>
+                                <td>@(cls.AverageAssignmentScore?.ToString("0.##") ?? "-")</td>
+                                <td>@(cls.AverageExamScore?.ToString("0.##") ?? "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

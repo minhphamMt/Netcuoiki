@@ -38,6 +38,12 @@
                 <input asp-for="StartTime" class="form-control" type="datetime-local" />
                 <span class="form-text">Nếu bỏ trống, đề sẽ mở ngay khi bấm "Mở đề".</span>
             </div>
+            <div class="mb-3">
+                <label asp-for="EndTime" class="form-label">Ngày kết thúc</label>
+                <input asp-for="EndTime" class="form-control" type="datetime-local" />
+                <span asp-validation-for="EndTime" class="text-danger"></span>
+                <span class="form-text">Hệ thống sẽ tự động đóng bài thi khi đến thời gian này.</span>
+            </div>
             <div class="form-check mb-3">
                 <input asp-for="PreventBackNavigation" class="form-check-input" />
                 <label asp-for="PreventBackNavigation" class="form-check-label">Chặn quay lại (anti-cheat)</label>

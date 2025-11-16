@@ -51,6 +51,34 @@ namespace BTAPLON.Controllers
             return assignedTeacherId == teacherId;
         }
 
+        private void AutoCloseExpiredExams()
+        {
+            var now = DateTime.Now;
+            var expired = _context.Exams
+                .Where(e => e.IsPublished && e.EndTime.HasValue && e.EndTime <= now)
+                .ToList();
+
+            if (!expired.Any())
+            {
+                return;
+            }
+
+            foreach (var exam in expired)
+            {
+                exam.IsPublished = false;
+            }
+
+            _context.SaveChanges();
+        }
+
+        private void ValidateExamSchedule(Exam exam)
+        {
+            if (exam.EndTime.HasValue && exam.StartTime.HasValue && exam.EndTime <= exam.StartTime)
+            {
+                ModelState.AddModelError(nameof(Exam.EndTime), "Thời gian kết thúc phải sau thời gian bắt đầu.");
+            }
+        }
+
         private IActionResult? RequireLogin()
         {
             if (CurrentUserId == null)
@@ -66,6 +94,8 @@ namespace BTAPLON.Controllers
         {
             var redirect = RequireLogin();
             if (redirect != null) return redirect;
+
+            AutoCloseExpiredExams();
 
             if (!IsTeacher && !IsAdmin)
             {
@@ -117,6 +147,7 @@ namespace BTAPLON.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            AutoCloseExpiredExams();
             PopulateClassesDropDown();
             return View(new Exam());
         }
@@ -134,6 +165,8 @@ namespace BTAPLON.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            ValidateExamSchedule(model);
+
             if (!ModelState.IsValid)
             {
                 PopulateClassesDropDown(model.ClassID);
@@ -143,7 +176,7 @@ namespace BTAPLON.Controllers
             model.CreatorID = CurrentUserId!.Value;
             model.CreatedAt = DateTime.Now;
             model.IsPublished = false;
-            if (model.StartTime.HasValue && model.DurationMinutes > 0)
+            if (!model.EndTime.HasValue && model.StartTime.HasValue && model.DurationMinutes > 0)
             {
                 model.EndTime = model.StartTime.Value.AddMinutes(model.DurationMinutes);
             }
@@ -160,6 +193,7 @@ namespace BTAPLON.Controllers
             var redirect = RequireLogin();
             if (redirect != null) return redirect;
 
+            AutoCloseExpiredExams();
             var exam = await _context.Exams
                 .Include(e => e.Class)
                 .ThenInclude(c => c.Course)
@@ -191,6 +225,7 @@ namespace BTAPLON.Controllers
             if (!IsAdmin && (!IsTeacher || !TeacherCanManageExam(exam)))
                 return Forbid();
 
+            ValidateExamSchedule(exam);
             if (!ModelState.IsValid)
             {
                 PopulateClassesDropDown(exam.ClassID);
@@ -209,10 +244,13 @@ namespace BTAPLON.Controllers
             existingExam.DurationMinutes = exam.DurationMinutes;
             existingExam.StartTime = exam.StartTime;
             existingExam.IsPublished = exam.IsPublished;
+            existingExam.EndTime = exam.EndTime;
 
-            // ✅ Tự động cập nhật EndTime
-            if (existingExam.StartTime.HasValue && existingExam.DurationMinutes > 0)
+            if (!existingExam.EndTime.HasValue && existingExam.StartTime.HasValue && existingExam.DurationMinutes > 0)
+            {
                 existingExam.EndTime = existingExam.StartTime.Value.AddMinutes(existingExam.DurationMinutes);
+            }
+            existingExam.EndTime = existingExam.StartTime.Value.AddMinutes(existingExam.DurationMinutes);
 
             try
             {
@@ -244,6 +282,7 @@ namespace BTAPLON.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            AutoCloseExpiredExams();
             var exam = _context.Exams
                     .Include(e => e.Class)
                      .ThenInclude(c => c.Course)
@@ -411,11 +450,12 @@ namespace BTAPLON.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Publish(int id, DateTime? startTime, int durationMinutes)
+        public IActionResult Publish(int id, DateTime? startTime, int durationMinutes, DateTime? endTime)
         {
             var redirect = RequireLogin();
             if (redirect != null) return redirect;
 
+            AutoCloseExpiredExams();
             var exam = _context.Exams
                 .Include(e => e.Class)
                   .ThenInclude(c => c.Course)
@@ -449,7 +489,21 @@ namespace BTAPLON.Controllers
                 exam.StartTime = DateTime.Now;
             }
 
-            exam.EndTime = exam.StartTime?.AddMinutes(exam.DurationMinutes);
+            if (endTime.HasValue)
+            {
+                if (exam.StartTime.HasValue && endTime <= exam.StartTime)
+                {
+                    TempData["QuestionError"] = "Thời gian kết thúc phải sau thời gian bắt đầu.";
+                    return RedirectToAction(nameof(Manage), new { id });
+                }
+
+                exam.EndTime = endTime;
+            }
+            else if (exam.StartTime.HasValue && exam.DurationMinutes > 0)
+            {
+                exam.EndTime = exam.StartTime.Value.AddMinutes(exam.DurationMinutes);
+            }
+
             exam.IsPublished = true;
             exam.PublishedAt = DateTime.Now;
 
@@ -466,6 +520,7 @@ namespace BTAPLON.Controllers
             var redirect = RequireLogin();
             if (redirect != null) return redirect;
 
+            AutoCloseExpiredExams();
             var exam = _context.Exams
                 .Include(e => e.Class)
                   .ThenInclude(c => c.Course)
@@ -495,6 +550,7 @@ namespace BTAPLON.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            AutoCloseExpiredExams();
             var studentId = CurrentUserId!.Value;
             var classIds = _context.Enrollments
                 .Where(e => e.StudentID == studentId)
@@ -530,6 +586,7 @@ namespace BTAPLON.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            AutoCloseExpiredExams();
             var exam = _context.Exams
                 .Include(e => e.Class)
                    .ThenInclude(c => c.Course)

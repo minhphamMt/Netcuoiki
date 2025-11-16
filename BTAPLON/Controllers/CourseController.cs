@@ -102,7 +102,18 @@ namespace BTAPLON.Controllers
                 return View(course);
             }
 
-            _context.Courses.Update(course);
+            var existingCourse = _context.Courses
+               .FirstOrDefault(c => c.CourseID == course.CourseID);
+
+            if (existingCourse == null)
+            {
+                return NotFound();
+            }
+
+            existingCourse.CourseName = course.CourseName;
+            existingCourse.TeacherID = course.TeacherID;
+            existingCourse.Description = course.Description;
+
             _context.SaveChanges();
 
             return RedirectToAction("Index");

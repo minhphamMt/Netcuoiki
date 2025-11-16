@@ -259,6 +259,43 @@ body.sidebar-open .lms-sidebar-overlay {
     transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
+.lms-nav-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lms-nav-indicator {
+    position: absolute;
+    top: -0.35rem;
+    right: -0.35rem;
+    background-color: #ef4444;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0.1rem 0.4rem;
+    min-width: 1.2rem;
+    text-align: center;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.9);
+}
+
+.lms-nav-badge {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #f97316, #ef4444);
+    box-shadow: 0 6px 14px rgba(239, 68, 68, 0.32);
+}
     .lms-nav-link i {
         font-size: 1.2rem;
     }

@@ -13,6 +13,11 @@ namespace BTAPLON.Migrations
     [DbContext(typeof(EduDbContext))]
     partial class EduDbContextModelSnapshot : ModelSnapshot
     {
+        public void PopulateModel(ModelBuilder modelBuilder)
+        {
+            BuildModel(modelBuilder);
+        }
+
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
@@ -517,6 +522,33 @@ namespace BTAPLON.Migrations
                 b.ToTable("Notifications");
             });
 
+            modelBuilder.Entity("BTAPLON.Models.NotificationReceipt", b =>
+            {
+                b.Property<int>("NotificationReceiptID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationReceiptID"));
+
+                b.Property<int>("NotificationID")
+                    .HasColumnType("int");
+
+                b.Property<DateTime>("ReadAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<int>("UserID")
+                    .HasColumnType("int");
+
+                b.HasKey("NotificationReceiptID");
+
+                b.HasIndex("UserID");
+
+                b.HasIndex("NotificationID", "UserID")
+                    .IsUnique();
+
+                b.ToTable("NotificationReceipts");
+            });
+
             modelBuilder.Entity("BTAPLON.Models.User", b =>
             {
                 b.Property<int>("UserID")
@@ -570,6 +602,27 @@ namespace BTAPLON.Migrations
                 b.Navigation("Class");
 
                 b.Navigation("CreatedBy");
+
+                b.Navigation("Receipts");
+            });
+
+            modelBuilder.Entity("BTAPLON.Models.NotificationReceipt", b =>
+            {
+                b.HasOne("BTAPLON.Models.Notification", "Notification")
+                    .WithMany("Receipts")
+                    .HasForeignKey("NotificationID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("BTAPLON.Models.User", "User")
+                    .WithMany("NotificationReceipts")
+                    .HasForeignKey("UserID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Notification");
+
+                b.Navigation("User");
             });
 
             modelBuilder.Entity("BTAPLON.Models.Assignment", b =>
@@ -840,6 +893,7 @@ namespace BTAPLON.Migrations
 
                     b.Navigation("ExamsCreated");
                     b.Navigation("ForumPosts");
+                    b.Navigation("NotificationReceipts");
                     b.Navigation("NotificationsCreated");
                     b.Navigation("QuestionsAsked");
 

@@ -78,15 +78,20 @@
                 <form asp-action="Publish" asp-route-id="@Model.ExamID" method="post" class="mb-2">
                     @Html.AntiForgeryToken()
                     <div class="row g-2 align-items-end">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Thời gian bắt đầu</label>
                             <input class="form-control" type="datetime-local" name="startTime" value="@Model.StartTime?.ToString("yyyy-MM-ddTHH:mm")" />
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label">Thời lượng (phút)</label>
                             <input class="form-control" type="number" min="1" max="600" name="durationMinutes" value="@Model.DurationMinutes" />
                         </div>
-                        <div class="col-md-3 text-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Ngày kết thúc</label>
+                            <input class="form-control" type="datetime-local" name="endTime" value="@Model.EndTime?.ToString("yyyy-MM-ddTHH:mm")" />
+                            <div class="form-text">Đề sẽ tự đóng khi đến thời gian này.</div>
+                        </div>
+                        <div class="col-md-2 text-end">
                             <button type="submit" class="btn btn-success mt-3">Mở đề</button>
                         </div>
                     </div>

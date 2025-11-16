@@ -66,4 +66,12 @@ namespace BTAPLON.Models.ViewModels
 
         public IList<SelectListItem> TeacherClasses { get; set; } = new List<SelectListItem>();
     }
+    public class NotificationIndicatorViewModel
+    {
+        public int UnreadCount { get; set; }
+
+        public bool HasUnread => UnreadCount > 0;
+
+        public string DisplayCount => UnreadCount > 99 ? "99+" : UnreadCount.ToString();
+    }
 }

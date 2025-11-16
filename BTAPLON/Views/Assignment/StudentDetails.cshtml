@@ -1,0 +1,111 @@
+﻿@model BTAPLON.Models.ViewModels.StudentAssignmentDetailViewModel
+@using System
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "Chi tiết bài tập";
+    var assignment = Model.Assignment;
+    var submission = Model.Submission;
+    var dueDate = assignment.DueDate;
+    var isSubmitted = submission != null;
+    var scoreDisplay = submission?.Score?.ToString("0.##") ?? "-";
+    var teacherName = assignment.Class?.Course?.Teacher?.FullName
+        ?? assignment.Class?.Course?.Teacher?.Email
+        ?? "Chưa cập nhật";
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h1 class="h4 mb-1">@assignment.Title</h1>
+                        <p class="text-muted mb-0">
+                            @(assignment.Class?.ClassCode ?? "Lớp không xác định") · @assignment.Class?.Course?.CourseName
+                        </p>
+                    </div>
+                    <span class="badge @(Model.IsOverdue && !isSubmitted ? "bg-danger" : "bg-secondary")">
+                        @(Model.IsOverdue && !isSubmitted ? "Quá hạn" : (isSubmitted ? "Đã nộp" : "Đang chờ"))
+                    </span>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="text-uppercase text-muted">Mô tả</h6>
+                    <p class="mb-0">@(string.IsNullOrWhiteSpace(assignment.Description) ? "Không có mô tả" : assignment.Description)</p>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3">
+                            <div class="text-muted text-uppercase small">Hạn nộp</div>
+                            <div class="fw-semibold">
+                                @(dueDate.HasValue? dueDate.Value.ToString("dd/MM/yyyy HH:mm") : "Không giới hạn")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3">
+                            <div class="text-muted text-uppercase small">Điểm</div>
+                            <div class="fw-semibold">@scoreDisplay</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <h5 class="h6 text-uppercase text-muted">Nộp bài</h5>
+                    <form asp-controller="Submission" asp-action="Submit" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="assignmentID" value="@assignment.AssignmentID" />
+                        <div class="row g-2 align-items-center">
+                            <div class="col-lg-8">
+                                <input type="file" class="form-control" name="fileUpload" id="fileUpload" />
+                            </div>
+                            <div class="col-lg-4 text-lg-end">
+                                <button type="submit" class="btn btn-primary w-100">Nộp bài</button>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2">Hãy đảm bảo chọn đúng tệp cần nộp. Bạn có thể nộp lại nếu cần cập nhật.</small>
+                    </form>
+                </div>
+
+                @if (submission != null)
+                {
+                    <div class="alert alert-success mt-4">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="fw-semibold">Bài nộp mới nhất</div>
+                                <div class="small text-muted">@submission.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                            <div>
+                                @if (!string.IsNullOrEmpty(submission.FilePath))
+                                {
+                                    <a class="btn btn-outline-light btn-sm" href="@submission.FilePath" target="_blank">Xem tệp</a>
+                                }
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(submission.Feedback))
+                        {
+                            <hr />
+                            <div>
+                                <div class="fw-semibold mb-1">Nhận xét của giảng viên</div>
+                                <p class="mb-0">@submission.Feedback</p>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title h6 text-uppercase text-muted">Thông tin lớp</h5>
+                <p class="mb-1"><strong>Lớp:</strong> @assignment.Class?.ClassCode</p>
+                <p class="mb-1"><strong>Khóa học:</strong> @assignment.Class?.Course?.CourseName</p>
+                <p class="mb-0"><strong>Giảng viên:</strong> @teacherName</p>
+            </div>
+        </div>
+        <a asp-action="MyAssignments" class="btn btn-outline-secondary w-100">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+        </a>
+    </div>
+</div>

@@ -1,0 +1,119 @@
+﻿@model BTAPLON.Models.ViewModels.StudentLearningReportViewModel
+@using System.Linq
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "Báo cáo học tập";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">Báo cáo học tập</h1>
+    <p class="text-muted mb-0">Tổng hợp điểm số và tiến độ học tập của bạn trong các lớp đã tham gia.</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Bài tập đã giao</div>
+            <div class="display-6 fw-semibold">@Model.TotalAssignments</div>
+            <div class="small text-muted">@Model.CompletedAssignments đã nộp</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Điểm trung bình bài tập</div>
+            <div class="display-6 fw-semibold">@(Model.AverageAssignmentScore?.ToString("0.##") ?? "-")</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Kỳ thi đã giao</div>
+            <div class="display-6 fw-semibold">@Model.TotalExams</div>
+            <div class="small text-muted">@Model.CompletedExams đã làm</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="border rounded-3 p-3 h-100">
+            <div class="text-muted text-uppercase small">Điểm trung bình kỳ thi</div>
+            <div class="display-6 fw-semibold">@(Model.AverageExamScore?.ToString("0.##") ?? "-")</div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Bài tập đã nộp</h5>
+            <a asp-controller="Assignment" asp-action="MyAssignments" class="btn btn-outline-primary btn-sm">Xem tất cả</a>
+        </div>
+        @if (!Model.Assignments.Any())
+        {
+            <p class="text-muted mb-0">Bạn chưa nộp bài tập nào.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Bài tập</th>
+                            <th>Lớp</th>
+                            <th>Hạn nộp</th>
+                            <th>Đã nộp</th>
+                            <th>Điểm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var assignment in Model.Assignments)
+                        {
+                            <tr>
+                                <td>@assignment.Title</td>
+                                <td>@assignment.ClassCode · @assignment.CourseName</td>
+                                <td>@(assignment.DueDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</td>
+                                <td>@assignment.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@(assignment.Score?.ToString("0.##") ?? "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Kỳ thi đã tham gia</h5>
+            <a asp-controller="Exam" asp-action="Available" class="btn btn-outline-primary btn-sm">Kỳ thi của tôi</a>
+        </div>
+        @if (!Model.Exams.Any())
+        {
+            <p class="text-muted mb-0">Bạn chưa tham gia kỳ thi nào.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kỳ thi</th>
+                            <th>Lớp</th>
+                            <th>Thời gian nộp</th>
+                            <th>Điểm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var exam in Model.Exams)
+                        {
+                            <tr>
+                                <td>@exam.Title</td>
+                                <td>@exam.ClassCode · @exam.CourseName</td>
+                                <td>@exam.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@(exam.Score?.ToString("0.##") ?? "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
