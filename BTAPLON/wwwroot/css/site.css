@@ -266,19 +266,14 @@ body.sidebar-open .lms-sidebar-overlay {
     justify-content: center;
 }
 
-.lms-nav-indicator {
+..lms-nav-dot {
     position: absolute;
-    top: -0.35rem;
-    right: -0.35rem;
+    top: -0.1rem;
+    right: -0.1rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
     background-color: #ef4444;
-    color: #fff;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    line-height: 1;
-    padding: 0.1rem 0.4rem;
-    min-width: 1.2rem;
-    text-align: center;
     box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.9);
 }
 

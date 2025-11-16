@@ -1,9 +1,0 @@
-﻿@model NotificationIndicatorViewModel
-
-@if (Model.HasUnread)
-{
-    <span class="lms-nav-indicator" aria-label="@($"Bạn có {Model.DisplayCount} thông báo mới")">
-        <span>@Model.DisplayCount</span>
-        <span class="visually-hidden">Thông báo chưa đọc</span>
-    </span>
-}

@@ -56,22 +56,6 @@ namespace BTAPLON.Models.ViewModels
         public string? Content { get; set; }
     }
 
-    public class NotificationEditViewModel
-    {
-        public int Id { get; set; }
-
-        public string Heading { get; set; } = string.Empty;
-
-        public NotificationFormInput Form { get; set; } = new NotificationFormInput();
-
-        public IList<SelectListItem> TeacherClasses { get; set; } = new List<SelectListItem>();
-    }
-    public class NotificationIndicatorViewModel
-    {
-        public int UnreadCount { get; set; }
-
-        public bool HasUnread => UnreadCount > 0;
-
-        public string DisplayCount => UnreadCount > 99 ? "99+" : UnreadCount.ToString();
-    }
+ 
+    
 }

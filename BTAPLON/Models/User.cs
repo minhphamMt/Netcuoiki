@@ -34,8 +34,7 @@ namespace BTAPLON.Models
         public ICollection<Forum.Answer>? AnswersProvided { get; set; }
         [ValidateNever]
         public ICollection<Notification>? NotificationsCreated { get; set; }
-        [ValidateNever]
-        public ICollection<NotificationReceipt>? NotificationReceipts { get; set; }
+     
     }
 
 }

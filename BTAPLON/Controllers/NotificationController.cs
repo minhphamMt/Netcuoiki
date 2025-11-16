@@ -309,7 +309,7 @@ namespace BTAPLON.Controllers
                 })
                 .ToListAsync();
 
-            await MarkNotificationsAsReadAsync(notifications.Select(n => n.Id), userId);
+          
 
             IList<SelectListItem> teacherClasses = new List<SelectListItem>();
             if (isTeacher)
@@ -374,37 +374,6 @@ namespace BTAPLON.Controllers
                     Content = notification.Content
                 }
             };
-        }
-        private async Task MarkNotificationsAsReadAsync(IEnumerable<int> notificationIds, int userId)
-        {
-            var ids = notificationIds.Distinct().ToList();
-            if (ids.Count == 0)
-            {
-                return;
-            }
-
-            var alreadyTracked = await _context.NotificationReceipts
-                .Where(r => r.UserID == userId && ids.Contains(r.NotificationID))
-                .Select(r => r.NotificationID)
-                .ToListAsync();
-
-            var now = DateTime.UtcNow;
-
-            var newReceipts = ids
-                .Except(alreadyTracked)
-                .Select(id => new NotificationReceipt
-                {
-                    NotificationID = id,
-                    UserID = userId,
-                    ReadAt = now
-                })
-                .ToList();
-
-            if (newReceipts.Count > 0)
-            {
-                _context.NotificationReceipts.AddRange(newReceipts);
-                await _context.SaveChangesAsync();
-            }
         }
     }
 }

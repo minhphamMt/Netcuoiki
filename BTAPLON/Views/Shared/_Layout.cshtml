@@ -137,8 +137,11 @@
                     </a>
                     <a class="lms-nav-link @isActive("Notification", "Index")" asp-controller="Notification" asp-action="Index">
                         <span class="lms-nav-icon">
-                            <i class="bi bi-bell"></i>
-                            @await Component.InvokeAsync("NotificationIndicator")
+                            <i class="bi bi-bell@(unreadNotificationCount > 0 ? "-fill" : string.Empty)"></i>
+                            @if (unreadNotificationCount > 0)
+                            {
+                                <span class="lms-nav-dot" aria-label="Bạn có thông báo mới"></span>
+                            }
                         </span>
                         <span>Thông báo</span>
                         @if (unreadNotificationCount > 0)

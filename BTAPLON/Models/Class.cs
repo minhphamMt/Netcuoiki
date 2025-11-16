@@ -11,9 +11,10 @@ namespace BTAPLON.Models
         [Required]
         public int CourseID { get; set; }
 
-        public string ClassCode { get; set; } = string.Empty;
-        public string Semester { get; set; } = string.Empty;
+        public string? ClassCode { get; set; }
+        public string? Semester { get; set; }
         public int? Year { get; set; }
+
 
 
         [ValidateNever]

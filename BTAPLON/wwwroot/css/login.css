@@ -13,8 +13,8 @@
 .login-bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.7)), url('/images/nenNEU2.jpg') no-repeat center center/cover;
-    filter: blur(6px);
+    background: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.7)), url('/images/nenNEU.jpg') no-repeat center center/cover;
+    filter: blur(20px);
     z-index: 0;
 }
 
