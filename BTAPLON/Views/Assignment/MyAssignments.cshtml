@@ -1,89 +1,203 @@
-﻿﻿@using System
+﻿@using System
 @using System.Linq
 @model IEnumerable<BTAPLON.Models.ViewModels.StudentAssignmentListItemViewModel>
+
 @{
     var assignmentList = Model?.ToList() ?? new List<BTAPLON.Models.ViewModels.StudentAssignmentListItemViewModel>();
     var now = DateTime.Now;
-    ViewData["Title"] = ViewData["Title"] ?? "Bài tập của tôi";
+    ViewData["Title"] = "Bài tập của tôi";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1">Bài tập của tôi</h1>
-        <p class="text-muted mb-0">Theo dõi tiến độ nộp bài và thời hạn của các bài tập trong những lớp bạn tham gia.</p>
-    </div>
+<!-- HEADER -->
+<div class="dashboard-header mb-4 p-4 rounded-4">
+    <h1 class="fw-bold text-white mb-1">
+        <i class="fa-solid fa-book-open me-2"></i>Bài tập của tôi
+    </h1>
+    <p class="text-white-50 mb-0">Theo dõi tiến độ nộp bài và thời hạn của các bài tập trong những lớp bạn tham gia.</p>
 </div>
 
+
+<!-- NO ASSIGNMENTS -->
 @if (!assignmentList.Any())
 {
-    <div class="alert alert-info">
-        Hiện tại bạn chưa có bài tập nào được giao. Hãy kiểm tra lại sau hoặc trao đổi với giảng viên phụ trách.
+    <div class="alert alert-info shadow-sm rounded-4 p-3">
+        <i class="fa-solid fa-circle-info me-2"></i>
+        Hiện tại bạn chưa có bài tập nào. Hãy kiểm tra lại sau hoặc trao đổi với giảng viên.
     </div>
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Bài tập</th>
-                    <th>Lớp</th>
-                    <th>Khóa học</th>
-                    <th>Hạn nộp</th>
-                    <th>Trạng thái</th>
-                    <th class="text-end">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var assignment in assignmentList)
-                {
-                    var isOverdue = assignment.DueDate.HasValue && assignment.DueDate.Value < now && !assignment.IsSubmitted;
-                    <tr class="@(isOverdue ? "table-warning" : string.Empty)">
-                        <td>
-                            <div class="fw-semibold">@assignment.Title</div>
-                            @if (!string.IsNullOrWhiteSpace(assignment.Description))
-                            {
-                                <div class="small text-muted text-truncate" style="max-width: 360px;">@assignment.Description</div>
-                            }
-                        </td>
-                        <td>@(string.IsNullOrWhiteSpace(assignment.ClassCode) ? "Không xác định" : assignment.ClassCode)</td>
-                        <td>@(string.IsNullOrWhiteSpace(assignment.CourseName) ? "" : assignment.CourseName)</td>
-                        <td>
-                            @if (assignment.DueDate.HasValue)
-                            {
-                                <span>@assignment.DueDate.Value.ToString("dd/MM/yyyy HH:mm")</span>
-                            }
-                            else
-                            {
-                                <span class="text-muted">Không có</span>
-                            }
-                        </td>
-                        <td>
-                            @if (assignment.IsSubmitted)
-                            {
-                                <span class="badge bg-success">Đã nộp</span>
-                                @if (assignment.SubmittedAt.HasValue)
-                                {
-                                    <div class="small text-muted">@assignment.SubmittedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
-                                }
-                            }
-                            else if (isOverdue)
-                            {
-                                <span class="badge bg-danger">Quá hạn</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">Chưa nộp</span>
-                            }
-                        </td>
-                        <td class="text-end">
-                            <a class="btn btn-outline-primary btn-sm" asp-action="StudentDetails" asp-route-id="@assignment.AssignmentID">
-                                Xem chi tiết
-                            </a>
-                        </td>
+    <!-- TABLE -->
+    <div class="dashboard-card p-3 shadow-sm rounded-4">
+        <div class="table-responsive">
+            <table class="table modern-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Bài tập</th>
+                        <th>Lớp</th>
+                        <th>Khóa học</th>
+                        <th>Hạn nộp</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Thao tác</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    @foreach (var assignment in assignmentList)
+                    {
+                        var isOverdue = assignment.DueDate.HasValue &&
+                        assignment.DueDate.Value < now &&
+                        !assignment.IsSubmitted;
+
+                        <tr class="@(isOverdue ? "table-row-warning" : "")">
+
+                            <!-- Title & Description -->
+                            <td>
+                                <div class="fw-semibold">@assignment.Title</div>
+
+                                @if (!string.IsNullOrWhiteSpace(assignment.Description))
+                                {
+                                    <div class="small text-muted description-truncate">
+                                        @assignment.Description
+                                    </div>
+                                }
+                            </td>
+
+                            <!-- Class -->
+                            <td>
+                                <span class="badge class-badge">@assignment.ClassCode</span>
+                            </td>
+
+                            <!-- Course -->
+                            <td>@assignment.CourseName</td>
+
+                            <!-- Due Date -->
+                            <td>
+                                @if (assignment.DueDate.HasValue)
+                                {
+                                    <span>
+                                        <i class="fa-solid fa-clock me-1 text-muted"></i>
+                                        @assignment.DueDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Không có</span>
+                                }
+                            </td>
+
+                            <!-- Status -->
+                            <td>
+                                @if (assignment.IsSubmitted)
+                                {
+                                    <span class="badge status-badge done">Đã nộp</span>
+                                    @if (assignment.SubmittedAt.HasValue)
+                                    {
+                                        <div class="small text-muted">
+                                            @assignment.SubmittedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    }
+                                }
+                                else if (isOverdue)
+                                {
+                                    <span class="badge status-badge overdue">Quá hạn</span>
+                                }
+                                else
+                                {
+                                    <span class="badge status-badge pending">Chưa nộp</span>
+                                }
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="text-end">
+                                <a class="btn btn-outline-primary btn-sm px-3"
+                                   asp-action="StudentDetails"
+                                   asp-route-id="@assignment.AssignmentID">
+                                    <i class="fa-solid fa-eye me-1"></i>Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
     </div>
 }
+
+
+<!-- STYLES -->
+<style>
+
+    /* HEADER */
+    .dashboard-header {
+        background: linear-gradient(135deg, #36d1dc, #5b86e5);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0,0,0,.12);
+    }
+
+    .dashboard-card {
+        background: white;
+        border-radius: 18px;
+    }
+
+    /* Modern Table */
+    .modern-table thead {
+        background: #f8f9fa;
+        text-transform: uppercase;
+        font-size: .75rem;
+        color: #6c757d;
+    }
+
+    .modern-table tbody tr:hover {
+        background: #f5f7fa;
+    }
+
+    /* Class badge */
+    .class-badge {
+        background: #e7f5ff;
+        color: #0b7285;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 12px;
+    }
+
+    /* Description truncate */
+    .description-truncate {
+        max-width: 360px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Table warning style */
+    .table-row-warning {
+        background: #fff4e6 !important;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: .85rem;
+        font-weight: 600;
+    }
+
+        .status-badge.done {
+            background: #e6fcf5;
+            color: #0ca678;
+        }
+
+        .status-badge.pending {
+            background: #edf2ff;
+            color: #364fc7;
+        }
+
+        .status-badge.overdue {
+            background: #ffe3e3;
+            color: #c92a2a;
+        }
+
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />

@@ -1,36 +1,86 @@
 ﻿@model BTAPLON.Models.Course
+@{
+    ViewData["Title"] = "Chỉnh sửa khóa học";
+}
 
-<h2>Sửa Khóa học</h2>
+<div class="container mt-4" style="max-width: 720px;">
 
-<form method="post">
-    <input type="hidden" asp-for="CourseID" />
-
-    <div class="form-group">
-        <label>Tên khóa học</label>
-        <input class="form-control" asp-for="CourseName" required />
+    <!-- PAGE HEADER -->
+    <div class="page-header mb-4">
+        <h1 class="fw-bold mb-1">
+            <i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa khóa học
+        </h1>
+        <p class="text-muted mb-0">Cập nhật thông tin khóa học và giáo viên phụ trách.</p>
     </div>
 
-    <div class="form-group">
-        <label>Giáo viên phụ trách</label>
-        <select class="form-control" asp-for="TeacherID">
-            <option value="">-- chọn giáo viên --</option>
-            @foreach(var t in ViewBag.Teachers)
-            {
-                <option value="@t.UserID" selected="@(Model.TeacherID == t.UserID ? "selected" : null)">
-                    @t.FullName
-                </option>
+    <!-- FORM CARD -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form method="post">
+                @Html.AntiForgeryToken()
 
-            }
-        </select>
+                <input type="hidden" asp-for="CourseID" />
+
+                <!-- COURSE NAME -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-book text-primary me-1"></i>Tên khóa học
+                    </label>
+                    <input class="form-control rounded-3"
+                           asp-for="CourseName"
+                           placeholder="Nhập tên khóa học..."
+                           required />
+                </div>
+
+                <!-- TEACHER -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-user-tie text-primary me-1"></i>Giáo viên phụ trách
+                    </label>
+                    <select class="form-select rounded-3" asp-for="TeacherID">
+                        <option value="">-- chọn giáo viên --</option>
+
+                        @foreach (var t in ViewBag.Teachers)
+                        {
+                            <option value="@t.UserID" selected="@(Model.TeacherID == t.UserID)">
+                                @t.FullName
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-align-left text-primary me-1"></i>Mô tả
+                    </label>
+                    <textarea class="form-control rounded-3"
+                              asp-for="Description"
+                              rows="4"
+                              placeholder="Nhập mô tả chi tiết về khóa học..."></textarea>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fa-solid fa-check-circle me-1"></i>Lưu thay đổi
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-light border px-4">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+                    </a>
+                </div>
+
+            </form>
+        </div>
     </div>
+</div>
 
-    <div class="form-group">
-        <label>Mô tả</label>
-        <textarea class="form-control" asp-for="Description"></textarea>
-    </div>
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <br />
-
-    <button type="submit" class="btn btn-success">Lưu</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+<style>
+    .page-header h1 {
+        font-size: 1.55rem;
+    }
+</style>

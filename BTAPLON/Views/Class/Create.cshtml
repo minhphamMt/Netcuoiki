@@ -1,31 +1,79 @@
 ﻿@model BTAPLON.Models.Class
+@{
+    ViewData["Title"] = "Tạo lớp học";
+}
 
-<h2>Tạo lớp học</h2>
+<div class="container mt-4" style="max-width: 700px;">
 
-<form asp-action="Create" method="post">
-    <div asp-validation-summary="All" class="text-danger"></div>
-
-    <div class="form-group">
-        <label>Course</label>
-        <select asp-for="CourseID" asp-items="ViewBag.CourseID" class="form-control"></select>
+    <div class="page-header mb-4">
+        <h1 class="fw-bold mb-1"><i class="fa-solid fa-school me-2"></i>Tạo lớp học</h1>
+        <p class="text-muted mb-0">Nhập thông tin lớp học để bắt đầu quản lý học viên và bài giảng.</p>
     </div>
 
-    <div class="form-group">
-        <label>Class Code</label>
-        <input asp-for="ClassCode" class="form-control" />
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <!-- COURSE -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-book me-1 text-primary"></i>Khóa học
+                    </label>
+                    <select asp-for="CourseID" asp-items="ViewBag.CourseID" class="form-select rounded-3"></select>
+                    <span asp-validation-for="CourseID" class="text-danger small"></span>
+                </div>
+
+                <!-- CLASS CODE -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-hashtag me-1 text-primary"></i>Mã lớp
+                    </label>
+                    <input asp-for="ClassCode" class="form-control rounded-3" placeholder="VD: FE101, PRC202..." />
+                    <span asp-validation-for="ClassCode" class="text-danger small"></span>
+                </div>
+
+                <!-- SEMESTER -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-calendar-days me-1 text-primary"></i>Học kỳ
+                    </label>
+                    <input asp-for="Semester" class="form-control rounded-3" placeholder="Ví dụ: Spring, Fall..." />
+                    <span asp-validation-for="Semester" class="text-danger small"></span>
+                </div>
+
+                <!-- YEAR -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-calendar-check me-1 text-primary"></i>Năm học
+                    </label>
+                    <input asp-for="Year" class="form-control rounded-3" placeholder="Ví dụ: 2025" />
+                    <span asp-validation-for="Year" class="text-danger small"></span>
+                </div>
+
+                <!-- BUTTONS -->
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fa-solid fa-check-circle me-1"></i>Tạo lớp
+                    </button>
+                    <a asp-action="Index" class="btn btn-light border px-4">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+                    </a>
+                </div>
+            </form>
+
+        </div>
     </div>
+</div>
 
-    <div class="form-group">
-        <label>Semester</label>
-        <input asp-for="Semester" class="form-control" />
-    </div>
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <div class="form-group">
-        <label>Year</label>
-        <input asp-for="Year" class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Tạo Lớp</button>
-    <a asp-action="Index" class="btn btn-secondary  mt-1">Quay lại</a>
-
-</form>
+<style>
+    .page-header h1 {
+        font-size: 1.6rem;
+    }
+</style>

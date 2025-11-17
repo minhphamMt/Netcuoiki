@@ -1,32 +1,85 @@
 ﻿@model BTAPLON.Models.Class
+@{
+    ViewData["Title"] = "Chỉnh sửa lớp học";
+}
 
-<div class="container mt-4">
-    <h3 class="mb-3">Chỉnh sửa thông tin</h3>
+<div class="container mt-4" style="max-width: 700px;">
 
-    <form asp-action="Edit" class="card p-4 shadow-sm">
-        <input type="hidden" asp-for="ClassID" />
+    <!-- PAGE HEADER -->
+    <div class="page-header mb-4">
+        <h1 class="fw-bold mb-1">
+            <i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa lớp học
+        </h1>
+        <p class="text-muted mb-0">Cập nhật thông tin lớp học và khóa học liên quan.</p>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">khóa học</label>
-            <select asp-for="CourseID" asp-items="ViewBag.CourseID" class="form-select"></select>
+    <!-- FORM CARD -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="ClassID" />
+
+                <!-- COURSE -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-book-open text-primary me-1"></i>Khóa học
+                    </label>
+                    <select asp-for="CourseID" asp-items="ViewBag.CourseID" class="form-select rounded-3"></select>
+                    <span asp-validation-for="CourseID" class="text-danger small"></span>
+                </div>
+
+                <!-- CLASS CODE -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-hashtag text-primary me-1"></i>Mã lớp
+                    </label>
+                    <input asp-for="ClassCode" class="form-control rounded-3" placeholder="VD: FE101, JAV02..." />
+                    <span asp-validation-for="ClassCode" class="text-danger small"></span>
+                </div>
+
+                <!-- SEMESTER -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-calendar-week text-primary me-1"></i>Kỳ học
+                    </label>
+                    <input asp-for="Semester" class="form-control rounded-3" placeholder="Spring / Summer / Fall..." />
+                    <span asp-validation-for="Semester" class="text-danger small"></span>
+                </div>
+
+                <!-- YEAR -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-calendar-check text-primary me-1"></i>Năm học
+                    </label>
+                    <input asp-for="Year" type="number" class="form-control rounded-3" placeholder="2025" />
+                    <span asp-validation-for="Year" class="text-danger small"></span>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fa-solid fa-check-circle me-1"></i>Lưu thay đổi
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-light border px-4">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+                    </a>
+                </div>
+
+            </form>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Class Code</label>
-            <input asp-for="ClassCode" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Kì học</label>
-            <input asp-for="Semester" class="form-control" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Năm</label>
-            <input asp-for="Year" type="number" class="form-control" />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-        <a asp-action="Index" class="btn btn-secondary  mt-1">Quay lại</a>
-    </form>
+    </div>
 </div>
+
+<!-- ICON LIB -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<!-- EXTRA STYLE -->
+<style>
+    .page-header h1 {
+        font-size: 1.55rem;
+    }
+</style>

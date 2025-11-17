@@ -3,43 +3,90 @@
     ViewData["Title"] = $"Bài nộp - {Model.Title}";
 }
 
-<h2>@ViewData["Title"]</h2>
-<div class="mb-3 text-muted">Lớp: @Model.Class?.ClassCode (@Model.Class?.Course?.CourseName)</div>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="fw-bold">
+            <i class="fa-solid fa-folder-open text-primary me-2"></i>
+            @ViewData["Title"]
+        </h2>
+        <div class="text-muted mt-1">
+            <i class="fa-solid fa-chalkboard me-1"></i>
+            Lớp: <strong>@Model.Class?.ClassCode</strong> · @Model.Class?.Course?.CourseName
+        </div>
+    </div>
+
+    <a asp-action="Index" class="btn btn-outline-secondary shadow-sm">
+        <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+    </a>
+</div>
 
 @if (TempData["Message"] != null)
 {
-    <div class="alert alert-success">@TempData["Message"]</div>
+    <div class="alert alert-success shadow-sm">
+        <i class="fa-solid fa-circle-check me-1"></i>@TempData["Message"]
+    </div>
 }
 
 @if (Model.Submissions == null || !Model.Submissions.Any())
 {
-    <div class="alert alert-info">Chưa có sinh viên nào nộp bài.</div>
+    <div class="alert alert-info shadow-sm">
+        <i class="fa-solid fa-info-circle me-1"></i>
+        Chưa có sinh viên nào nộp bài.
+    </div>
 }
 else
 {
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Sinh viên</th>
-            <th>Thời gian bắt đầu</th>
-            <th>Thời gian nộp</th>
-            <th>Điểm</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var submission in Model.Submissions.OrderByDescending(s => s.SubmittedAt))
-        {
-            <tr>
-                <td>@submission.Student?.FullName</td>
-                <td>@submission.StartedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>@submission.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>@(submission.Score?.ToString("0.##") ?? "Chưa chấm")</td>
-                <td>
-                    <a asp-action="GradeSubmission" asp-route-submissionId="@submission.ExamSubmissionID" class="btn btn-sm btn-primary">Chấm bài</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th><i class="fa-solid fa-user me-1"></i> Sinh viên</th>
+                        <th><i class="fa-solid fa-hourglass-start me-1"></i> Bắt đầu</th>
+                        <th><i class="fa-solid fa-paper-plane me-1"></i> Nộp bài</th>
+                        <th><i class="fa-solid fa-star me-1"></i> Điểm</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var submission in Model.Submissions.OrderByDescending(s => s.SubmittedAt))
+                    {
+                        var isGraded = submission.Score.HasValue;
+                        <tr class="@(isGraded ? "table-success" : "")">
+                            <td>
+                                <strong>@submission.Student?.FullName</strong>
+                                <div class="text-muted small">@submission.Student?.Email</div>
+                            </td>
+                            <td>@submission.StartedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@submission.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+
+                            <td>
+                                @if (submission.Score.HasValue)
+                                {
+                                    <span class="badge bg-success px-3 py-2">
+                                        @submission.Score?.ToString("0.##")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary px-3 py-2">Chưa chấm</span>
+                                }
+                            </td>
+
+                            <td class="text-end">
+                                <a asp-action="GradeSubmission"
+                                   asp-route-submissionId="@submission.ExamSubmissionID"
+                                   class="btn btn-primary btn-sm shadow-sm">
+                                    <i class="fa-solid fa-pen-to-square me-1"></i>Chấm bài
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }

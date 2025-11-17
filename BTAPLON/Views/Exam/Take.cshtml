@@ -2,152 +2,218 @@
 @{
     ViewData["Title"] = Model.Exam.Title;
     var seconds = Model.RemainingSeconds;
+
+    var questions = Model.Exam.Questions?.OrderBy(q => q.DisplayOrder).ToList() ?? new List<Question>();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h2>@Model.Exam.Title</h2>
-        <div class="text-muted">Thời lượng còn lại: <span id="timer" class="fw-bold text-danger"></span></div>
-    </div>
-    <div>
-        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#confirmSubmitModal">Nộp bài</button>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .question-nav a {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        font-weight: 600;
+    }
+
+    .question-answered {
+        background-color: #d1e7dd !important;
+        border-color: #0f5132 !important;
+        color: #0f5132 !important;
+    }
+
+    .question-active {
+        border: 2px solid #0d6efd !important;
+    }
+
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: white;
+        padding: 15px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+
+
+<div class="sticky-header mb-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold"><i class="fa-solid fa-file-pen me-2"></i>@Model.Exam.Title</h2>
+            <div class="text-muted">
+                <i class="fa-solid fa-hourglass-half me-1"></i>
+                Còn lại:
+                <span id="timer" class="fw-bold text-danger"></span>
+            </div>
+        </div>
+        <button type="button" class="btn btn-danger px-4" data-bs-toggle="modal" data-bs-target="#confirmSubmitModal">
+            <i class="fa-solid fa-paper-plane me-1"></i>Nộp bài
+        </button>
     </div>
 </div>
 
-<form asp-action="Submit" asp-route-id="@Model.Exam.ExamID" method="post" id="examForm">
-    @Html.AntiForgeryToken()
-    <input type="hidden" id="remainingSeconds" value="@seconds" />
-    <div class="mb-3">
-        <div class="alert alert-info">
-            Vui lòng không tải lại hoặc rời khỏi trang khi đang làm bài. Bài thi sẽ tự động nộp khi hết thời gian.
-        </div>
+
+<div class="row">
+    <!-- LEFT: Questions -->
+    <div class="col-lg-9">
+        <form asp-action="Submit" asp-route-id="@Model.Exam.ExamID" method="post" id="examForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="remainingSeconds" value="@seconds" />
+
+            <div class="alert alert-info">
+                <i class="fa-solid fa-circle-info me-1"></i>
+                Không tải lại hoặc rời khỏi trang. Bài sẽ tự nộp khi hết thời gian.
+            </div>
+
+            @for (int i = 0; i < questions.Count; i++)
+            {
+                var question = questions[i];
+                var answer = Model.Answers.ContainsKey(question.QuestionID)
+                ? Model.Answers[question.QuestionID]
+                : null;
+
+                <div class="card mb-4" id="q-@question.QuestionID">
+                    <div class="card-header bg-light">
+                        <strong>Câu @(i + 1):</strong> @question.Prompt
+                        <span class="badge bg-secondary ms-2">@question.Points điểm</span>
+                    </div>
+
+                    <div class="card-body">
+                        @if (question.IsMultipleChoice)
+                        {
+                            foreach (var choice in question.Choices)
+                            {
+                                var check = answer?.SelectedChoiceId == choice.ChoiceID;
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           name="answers[@question.QuestionID]"
+                                           value="@choice.ChoiceID"
+                                           @(check ? "checked" : "")
+                                           onchange="markAnswered(@question.QuestionID)"
+                                           id="choice_@choice.ChoiceID" />
+                                    <label class="form-check-label" for="choice_@choice.ChoiceID">
+                                        @choice.Text
+                                    </label>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <textarea class="form-control"
+                              rows="4"
+                              name="answers[@question.QuestionID]"
+                              oninput="markAnswered(@question.QuestionID)">@answer?.AnswerText</textarea>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="d-flex justify-content-end mt-3">
+                <button type="button" class="btn btn-danger px-4" data-bs-toggle="modal" data-bs-target="#confirmSubmitModal">
+                    <i class="fa-solid fa-paper-plane me-1"></i>Nộp bài
+                </button>
+            </div>
+
+        </form>
     </div>
 
-    @{
-        var orderedQuestions = Model.Exam.Questions?.OrderBy(q => q.DisplayOrder).ToList() ?? new List<Question>();
-    }
-    @for (int i = 0; i < orderedQuestions.Count; i++)
-    {
-        var question = orderedQuestions[i];
-        var answer = Model.Answers.ContainsKey(question.QuestionID) ? Model.Answers[question.QuestionID] : null;
-        <div class="card mb-3">
-            <div class="card-header">
-                <strong>Câu @(i + 1):</strong> @question.Prompt
-                <span class="badge bg-light text-dark ms-2">@question.Points điểm</span>
+    <!-- RIGHT: Sidebar -->
+    <div class="col-lg-3 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">
+                <i class="fa-solid fa-list-ol me-1"></i>Danh sách câu hỏi
             </div>
             <div class="card-body">
-                @if (question.IsMultipleChoice)
-                {
-                    @foreach (var choice in question.Choices ?? Enumerable.Empty<Choice>())
+                <div class="d-flex flex-wrap gap-2 question-nav">
+                    @foreach (var q in questions)
                     {
-                        var isChecked = answer?.SelectedChoiceId == choice.ChoiceID;
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="answers[@question.QuestionID]" value="@choice.ChoiceID" @(isChecked ? "checked" : null) id="choice_@choice.ChoiceID">
-                            <label class="form-check-label" for="choice_@choice.ChoiceID">@choice.Text</label>
-                        </div>
+                        var answered = Model.Answers.ContainsKey(q.QuestionID)
+                        && (!string.IsNullOrWhiteSpace(Model.Answers[q.QuestionID]?.AnswerText)
+                        || Model.Answers[q.QuestionID]?.SelectedChoiceId != null);
+
+                        <a href="#q-@q.QuestionID"
+                           id="nav-q-@q.QuestionID"
+                           class="btn btn-outline-secondary @(answered ? "question-answered" : "")">
+                            @q.DisplayOrder
+                        </a>
                     }
-                }
-                else
-                {
-                    <textarea class="form-control" name="answers[@question.QuestionID]" rows="4">@answer?.AnswerText</textarea>
-                }
+                </div>
             </div>
         </div>
-    }
-
-    <div class="d-flex justify-content-between">
-        <span class="text-muted">Bài thi sẽ lưu toàn bộ câu trả lời khi bạn bấm "Nộp bài" hoặc hết thời gian.</span>
-        <button type="submit" class="btn btn-primary">Nộp bài</button>
     </div>
-</form>
+</div>
 
-<!-- Modal confirm -->
-<div class="modal fade" id="confirmSubmitModal" tabindex="-1" aria-hidden="true">
+
+<!-- Confirm submit modal -->
+<div class="modal fade" id="confirmSubmitModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Xác nhận nộp bài</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><i class="fa-solid fa-circle-question me-1"></i>Xác nhận nộp bài</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
                 Bạn chắc chắn muốn nộp bài ngay bây giờ?
             </div>
+
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tiếp tục làm</button>
-                <button type="button" class="btn btn-primary" id="confirmSubmitButton">Nộp bài</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Tiếp tục làm</button>
+                <button class="btn btn-danger" id="confirmSubmitButton">
+                    <i class="fa-solid fa-paper-plane me-1"></i>Nộp bài
+                </button>
             </div>
         </div>
     </div>
 </div>
 
+
 @section Scripts {
     <script>
+        // TIME COUNTDOWN
         (function () {
-            const remainingInput = document.getElementById('remainingSeconds');
-            let seconds = parseInt(remainingInput.value);
-            const timerLabel = document.getElementById('timer');
-            const form = document.getElementById('examForm');
-            const modalButton = document.getElementById('confirmSubmitButton');
+            let seconds = parseInt(document.getElementById("remainingSeconds").value);
+            const timerLabel = document.getElementById("timer");
+            const form = document.getElementById("examForm");
             let submitted = false;
 
-            function formatTime(sec) {
-                const minutes = Math.floor(sec / 60);
-                const seconds = sec % 60;
-                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            function fmt(sec) {
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
             }
 
-            function updateTimer() {
-                timerLabel.textContent = formatTime(seconds);
-                if (seconds <= 0) {
-                    clearInterval(interval);
-                    if (!submitted) {
-                        submitted = true;
-                        if (typeof form.requestSubmit === 'function') {
-                            form.requestSubmit();
-                        } else {
-                            form.submit();
-                        }
-                    }
+            function tick() {
+                timerLabel.textContent = fmt(seconds);
+
+                if (seconds <= 0 && !submitted) {
+                    submitted = true;
+                    form.submit();
                 }
                 seconds--;
             }
 
-            const interval = setInterval(updateTimer, 1000);
-            updateTimer();
+            setInterval(tick, 1000);
+            tick();
 
-            form.addEventListener('submit', function () {
+            // Confirm modal
+            document.getElementById("confirmSubmitButton").onclick = function () {
                 submitted = true;
-                window.removeEventListener('beforeunload', beforeUnloadHandler);
-            });
-
-            modalButton.addEventListener('click', function () {
-                document.querySelector('#confirmSubmitModal .btn-close').click();
-                if (!submitted) {
-                    submitted = true;
-                    if (typeof form.requestSubmit === 'function') {
-                        form.requestSubmit();
-                    } else {
-                        form.submit();
-                    }
-                }
-            });
-
-            function beforeUnloadHandler(event) {
-                event.preventDefault();
-                event.returnValue = '';
-            }
-
-            window.addEventListener('beforeunload', beforeUnloadHandler);
-
-            @if (Model.Exam.PreventBackNavigation)
-            {
-                    <text>
-                    history.pushState(null, '', location.href);
-                    window.onpopstate = function () {
-                        history.pushState(null, '', location.href);
-                    };
-                    </text>
-            }
+                form.submit();
+            };
         })();
+
+        // Highlight answered questions
+        function markAnswered(qid) {
+            const nav = document.getElementById("nav-q-" + qid);
+            nav.classList.add("question-answered");
+        }
     </script>
 }

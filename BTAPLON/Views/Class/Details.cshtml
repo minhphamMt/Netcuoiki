@@ -1,62 +1,101 @@
 ﻿@model BTAPLON.Models.ViewModels.ClassDetailViewModel
 @using System
 @using System.Linq
+
 @{
     var cls = Model.Class;
-    ViewData["Title"] = ViewData["Title"] ?? $"Chi tiết lớp {cls.ClassCode ?? cls.ClassID.ToString()}";
+    ViewData["Title"] = $"Chi tiết lớp {cls.ClassCode ?? ("#" + cls.ClassID)}";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1">@(!string.IsNullOrWhiteSpace(cls.ClassCode) ? cls.ClassCode : $"Lớp #{cls.ClassID}")</h1>
-        <p class="text-muted mb-0">@Model.CourseName · @cls.Semester @cls.Year</p>
-    </div>
-    <div class="text-end">
-        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Quay lại</a>
+<!-- HEADER -->
+<div class="class-header rounded-4 p-4 mb-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="fw-bold text-white mb-1">
+                <i class="fa-solid fa-chalkboard-user me-2"></i>
+                @(!string.IsNullOrWhiteSpace(cls.ClassCode) ? cls.ClassCode : $"Lớp #{cls.ClassID}")
+            </h1>
+            <p class="text-white-50 mb-0">
+                @Model.CourseName · @cls.Semester @cls.Year
+            </p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-light border px-4">
+            <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+        </a>
     </div>
 </div>
 
+
 <div class="row g-4">
+
+    <!-- LEFT SIDE -->
     <div class="col-lg-8">
+
+        <!-- STATS GRID -->
         <div class="row g-3 mb-4">
+
             <div class="col-md-4">
-                <div class="border rounded-3 p-3 h-100">
-                    <div class="text-muted text-uppercase small">Học viên</div>
-                    <div class="display-6 fw-semibold">@Model.StudentCount</div>
+                <div class="stats-card p-3 rounded-4 shadow-sm">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted text-uppercase small">Học viên</div>
+                            <div class="display-6 fw-bold">@Model.StudentCount</div>
+                        </div>
+                        <i class="fa-solid fa-users stats-icon"></i>
+                    </div>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="border rounded-3 p-3 h-100">
-                    <div class="text-muted text-uppercase small">Bài tập</div>
-                    <div class="display-6 fw-semibold">@Model.AssignmentCount</div>
+                <div class="stats-card p-3 rounded-4 shadow-sm">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted text-uppercase small">Bài tập</div>
+                            <div class="display-6 fw-bold">@Model.AssignmentCount</div>
+                        </div>
+                        <i class="fa-solid fa-file-lines stats-icon"></i>
+                    </div>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="border rounded-3 p-3 h-100">
-                    <div class="text-muted text-uppercase small">Kỳ thi</div>
-                    <div class="display-6 fw-semibold">@Model.ExamCount</div>
+                <div class="stats-card p-3 rounded-4 shadow-sm">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted text-uppercase small">Kỳ thi</div>
+                            <div class="display-6 fw-bold">@Model.ExamCount</div>
+                        </div>
+                        <i class="fa-solid fa-pen-to-square stats-icon"></i>
+                    </div>
                 </div>
             </div>
+
         </div>
 
-        <div class="card shadow-sm mb-4">
+        <!-- UPCOMING ASSIGNMENTS -->
+        <div class="card shadow-sm rounded-4 mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="card-title mb-0">Bài tập sắp tới</h5>
-                    <a asp-controller="Assignment" asp-action="Index" class="text-decoration-none">Quản lý</a>
+                    <h5 class="fw-bold mb-0">📘 Bài tập sắp tới</h5>
+                    <a asp-controller="Assignment" asp-action="Index" class="btn btn-sm btn-outline-primary rounded-pill">Quản lý</a>
                 </div>
+
                 @if (!Model.UpcomingAssignments.Any())
                 {
-                    <p class="text-muted mb-0">Chưa có bài tập nào sắp tới.</p>
+                    <p class="text-muted">Không có bài tập sắp tới.</p>
                 }
                 else
                 {
                     <ul class="list-group list-group-flush">
                         @foreach (var assignment in Model.UpcomingAssignments)
                         {
-                            <li class="list-group-item px-0">
+                            <li class="list-group-item px-0 py-3">
                                 <div class="fw-semibold">@assignment.Title</div>
-                                <div class="small text-muted">Hạn: @(assignment.DueDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</div>
+                                <div class="small text-muted">
+                                    <i class="fa-regular fa-clock me-1"></i>
+                                    @(assignment.DueDate?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")
+                                </div>
                             </li>
                         }
                     </ul>
@@ -64,25 +103,76 @@
             </div>
         </div>
 
-        <div class="card shadow-sm">
+        <!-- UPCOMING EXAMS -->
+        <div class="card shadow-sm rounded-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="card-title mb-0">Kỳ thi sắp tới</h5>
-                    <a asp-controller="Exam" asp-action="Index" class="text-decoration-none">Quản lý</a>
+                    <h5 class="fw-bold mb-0">📝 Kỳ thi sắp tới</h5>
+                    <a asp-controller="Exam" asp-action="Index" class="btn btn-sm btn-outline-primary rounded-pill">Quản lý</a>
                 </div>
+
                 @if (!Model.UpcomingExams.Any())
                 {
-                    <p class="text-muted mb-0">Chưa có kỳ thi nào được lên lịch.</p>
+                    <p class="text-muted">Không có kỳ thi được lên lịch.</p>
                 }
                 else
                 {
                     <ul class="list-group list-group-flush">
                         @foreach (var exam in Model.UpcomingExams)
                         {
-                            <li class="list-group-item px-0">
+                            <li class="list-group-item px-0 py-3">
                                 <div class="fw-semibold">@exam.Title</div>
                                 <div class="small text-muted">
-                                    Bắt đầu: @(exam.StartTime?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định") · Thời lượng: @exam.DurationMinutes phút
+                                    <i class="fa-solid fa-hourglass me-1"></i>
+                                    Bắt đầu: @(exam.StartTime?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác định")
+                                    · ⏱ @exam.DurationMinutes phút
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="col-lg-4">
+
+        <!-- TEACHER CARD -->
+        <div class="card shadow-sm rounded-4 mb-4">
+            <div class="card-body">
+                <h5 class="text-uppercase text-muted small fw-bold mb-3">Giảng viên phụ trách</h5>
+
+                <div class="d-flex align-items-center">
+                    <i class="fa-solid fa-user-tie teacher-icon me-3"></i>
+                    <div>
+                        <div class="fw-semibold">@Model.TeacherName</div>
+                        <div class="text-muted small">Khóa học: @Model.CourseName</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STUDENT LIST -->
+        <div class="card shadow-sm rounded-4">
+            <div class="card-body">
+                <h5 class="text-uppercase text-muted small fw-bold mb-3">Danh sách học viên</h5>
+
+                @if (!Model.Students.Any())
+                {
+                    <p class="text-muted">Chưa có học viên ghi danh.</p>
+                }
+                else
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var student in Model.Students)
+                        {
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="fa-solid fa-circle-user student-avatar me-3"></i>
+                                <div>
+                                    <div class="fw-semibold">@student.FullName</div>
+                                    <div class="small text-muted">@student.Email</div>
                                 </div>
                             </li>
                         }
@@ -91,36 +181,50 @@
             </div>
         </div>
     </div>
-
-    <div class="col-lg-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="card-title h6 text-uppercase text-muted">Giảng viên phụ trách</h5>
-                <p class="mb-1 fw-semibold">@Model.TeacherName</p>
-                <p class="text-muted mb-0">Khóa học: @Model.CourseName</p>
-            </div>
-        </div>
-
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title h6 text-uppercase text-muted">Danh sách học viên</h5>
-                @if (!Model.Students.Any())
-                {
-                    <p class="text-muted mb-0">Chưa có học viên ghi danh.</p>
-                }
-                else
-                {
-                    <ul class="list-unstyled mb-0">
-                        @foreach (var student in Model.Students)
-                        {
-                            <li class="mb-2">
-                                <div class="fw-semibold">@(!string.IsNullOrWhiteSpace(student.FullName) ? student.FullName : student.Email)</div>
-                                <div class="small text-muted">@student.Email</div>
-                            </li>
-                        }
-                    </ul>
-                }
-            </div>
-        </div>
-    </div>
 </div>
+
+
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<!-- STYLES -->
+<style>
+
+    /* Header */
+    .class-header {
+        background: linear-gradient(135deg, #4e54c8, #8f94fb);
+        color: white;
+    }
+
+    /* Stats Cards */
+    .stats-card {
+        background: #ffffff;
+        border: 1px solid #eef1f6;
+    }
+
+    .stats-icon {
+        font-size: 32px;
+        color: #5c7cfa;
+        opacity: .8;
+    }
+
+    /* Teacher & Student Icons */
+    .teacher-icon {
+        font-size: 42px;
+        color: #4c6ef5;
+    }
+
+    .student-avatar {
+        font-size: 36px;
+        color: #adb5bd;
+    }
+
+    /* List Hover */
+    .list-group-item {
+        transition: background .15s;
+    }
+
+        .list-group-item:hover {
+            background: #f8f9fa;
+        }
+</style>

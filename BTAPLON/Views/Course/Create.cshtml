@@ -1,31 +1,85 @@
 ﻿@model BTAPLON.Models.Course
+@{
+    ViewData["Title"] = "Thêm Khóa học";
+}
 
-<h2>Thêm Khóa học</h2>
+<div class="container mt-4" style="max-width: 720px;">
 
-<form method="post">
-    <div class="form-group">
-        <label>Tên khóa học</label>
-        <input class="form-control" name="CourseName" required />
+    <!-- PAGE HEADER -->
+    <div class="page-header mb-4">
+        <h1 class="fw-bold mb-1">
+            <i class="fa-solid fa-book-open-reader me-2"></i>Thêm khóa học mới
+        </h1>
+        <p class="text-muted mb-0">Tạo khóa học và gán giáo viên phụ trách để bắt đầu quản lý nội dung giảng dạy.</p>
     </div>
 
-    <div class="form-group">
-        <label>Giáo viên phụ trách</label>
-        <select class="form-control" name="TeacherID">
-            <option value="">-- chọn giáo viên --</option>
-            @foreach (var t in ViewBag.Teachers)
-            {
-                <option value="@t.UserID">@t.FullName</option>
-            }
-        </select>
+    <!-- FORM CARD -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- COURSE NAME -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-book text-primary me-1"></i>Tên khóa học
+                    </label>
+                    <input class="form-control rounded-3"
+                           name="CourseName"
+                           placeholder="VD: Lập trình C#, Cơ sở dữ liệu, Kỹ năng mềm..."
+                           required />
+                </div>
+
+                <!-- TEACHER -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-user-tie text-primary me-1"></i>Giáo viên phụ trách
+                    </label>
+
+                    <select class="form-select rounded-3" name="TeacherID">
+                        <option value="">-- chọn giáo viên --</option>
+                        @foreach (var t in ViewBag.Teachers)
+                        {
+                            <option value="@t.UserID">@t.FullName</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-align-left text-primary me-1"></i>Mô tả
+                    </label>
+                    <textarea class="form-control rounded-3"
+                              rows="4"
+                              name="Description"
+                              placeholder="Nhập mô tả chi tiết về khóa học (không bắt buộc)..."></textarea>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fa-solid fa-check-circle me-1"></i>Lưu khóa học
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-light border px-4">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
     </div>
+</div>
 
-    <div class="form-group">
-        <label>Mô tả</label>
-        <textarea class="form-control" name="Description"></textarea>
-    </div>
 
-    <br />
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <button type="submit" class="btn btn-success">Lưu</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+<style>
+    .page-header h1 {
+        font-size: 1.55rem;
+    }
+</style>

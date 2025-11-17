@@ -1,70 +1,163 @@
 ﻿@model IEnumerable<BTAPLON.Models.Assignment>
+
 @{
     var role = Context.Session.GetString("UserRole");
     ViewData["Title"] = "Danh sách bài tập";
     var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Danh sách bài tập</h1>
+<!-- HEADER -->
+<div class="dashboard-header mb-4 p-4 rounded-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="fw-bold text-white mb-1">
+            <i class="fa-solid fa-list-check me-2"></i>Danh sách bài tập
+        </h1>
+        <p class="text-white-50 mb-0">Quản lý và theo dõi các bài tập trong hệ thống.</p>
+    </div>
+
     @if (role == "Teacher" || role == "Admin")
     {
-        <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1"></i>Thêm bài tập</a>
+        <a class="btn btn-light shadow-sm px-4" asp-action="Create">
+            <i class="fa-solid fa-circle-plus me-2"></i>Thêm bài tập
+        </a>
     }
 </div>
 
-<form method="get" asp-action="Index" class="mb-3">
-    <div class="input-group">
-        <input type="search" name="searchTerm" value="@searchTerm" class="form-control" placeholder="Tìm kiếm theo tiêu đề, lớp học..." />
-        @if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            <a asp-action="Index" class="btn btn-outline-secondary">Xóa</a>
-        }
-        <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Tìm kiếm</button>
-    </div>
-</form>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-striped align-middle">
-        <thead class="table-light">
-            <tr>
-                <th style="width: 80px">Mã</th>
-                <th style="width: 160px">Lớp</th>
-                <th>Tiêu đề</th>
-                <th style="width: 180px">Hạn nộp</th>
-                <th style="width: 240px" class="text-center">Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+<!-- SEARCH BOX -->
+<div class="dashboard-card p-3 shadow-sm rounded-4 mb-3">
+    <form method="get" asp-action="Index">
+        <div class="input-group input-group-lg search-box">
+            <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <input type="search" name="searchTerm" value="@searchTerm" class="form-control border-start-0"
+                   placeholder="Tìm kiếm theo tiêu đề, lớp học..." />
+
+            @if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                <tr>
-                    <td>@item.AssignmentID</td>
-                    <td>
-                        @item.Class?.ClassCode
-                        <div class="text-muted small">@item.Class?.Course?.CourseName</div>
-                    </td>
-                    <td>@item.Title</td>
-                    <td>@item.DueDate?.ToString("dd/MM/yyyy")</td>
-                    <td class="text-center">
-                        @if (role == "Teacher" || role == "Admin")
-                        {
-                            <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@item.AssignmentID">
-                                <i class="bi bi-pencil-square me-1"></i>Sửa
-                            </a>
-                            <a class="btn btn-outline-danger btn-sm ms-1" asp-action="Delete" asp-route-id="@item.AssignmentID">
-                                <i class="bi bi-trash me-1"></i>Xóa
-                            </a>
-                        }
-                        @if (role == "Student" || role == "Admin")
-                        {
-                            <a class="btn btn-outline-info btn-sm ms-1" asp-action="Details" asp-route-id="@item.AssignmentID">
-                                <i class="bi bi-eye me-1"></i>Chi tiết
-                            </a>
-                        }
-                    </td>
-                </tr>
+                <a asp-action="Index" class="btn btn-outline-secondary">Xóa</a>
             }
-        </tbody>
-    </table>
+
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="fa-solid fa-search me-2"></i>Tìm kiếm
+            </button>
+        </div>
+    </form>
 </div>
+
+
+<!-- TABLE -->
+<div class="dashboard-card shadow-sm p-3 rounded-4">
+    <div class="table-responsive">
+        <table class="table modern-table align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 80px">Mã</th>
+                    <th style="width: 200px">Lớp</th>
+                    <th>Tiêu đề</th>
+                    <th style="width: 180px">Hạn nộp</th>
+                    <th class="text-center" style="width: 240px">Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@item.AssignmentID</td>
+
+                        <td>
+                            <span class="badge class-badge">@item.Class?.ClassCode</span>
+                            <div class="small text-muted">@item.Class?.Course?.CourseName</div>
+                        </td>
+
+                        <td>@item.Title</td>
+
+                        <td>
+                            <i class="fa-solid fa-clock me-1 text-muted"></i>
+                            @item.DueDate?.ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td class="text-center">
+
+                            <!-- Teacher / Admin buttons -->
+                            @if (role == "Teacher" || role == "Admin")
+                            {
+                                <a class="btn btn-outline-primary btn-sm me-1"
+                                   asp-action="Edit" asp-route-id="@item.AssignmentID">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+
+                                <a class="btn btn-outline-danger btn-sm me-1"
+                                   asp-action="Delete" asp-route-id="@item.AssignmentID">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            }
+
+                            <!-- Student / Admin details -->
+                            @if (role == "Student" || role == "Admin")
+                            {
+                                <a class="btn btn-outline-info btn-sm"
+                                   asp-action="Details" asp-route-id="@item.AssignmentID">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- CUSTOM STYLES -->
+<style>
+
+    /* HEADER */
+    .dashboard-header {
+        background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0,0,0,.12);
+    }
+
+    /* CARD */
+    .dashboard-card {
+        background: #fff;
+        border-radius: 18px;
+    }
+
+    /* SEARCH BOX */
+    .search-box input:focus {
+        box-shadow: 0 0 0 3px rgba(255,65,108,.25) !important;
+        border-color: #ff416c;
+    }
+
+    /* Modern table */
+    .modern-table thead {
+        background: #f8f9fa;
+        text-transform: uppercase;
+        font-size: .75rem;
+        color: #6c757d;
+    }
+
+    .modern-table tbody tr:hover {
+        background: #f5f7fa;
+    }
+
+    /* Class badge */
+    .class-badge {
+        background: #e7f5ff;
+        color: #1c7ed6;
+        padding: 5px 10px;
+        font-size: .8rem;
+        border-radius: 12px;
+    }
+
+    /* Buttons */
+    .btn-sm i {
+        font-size: .9rem;
+    }
+
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />

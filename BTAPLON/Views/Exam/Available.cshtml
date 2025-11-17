@@ -4,48 +4,152 @@
     var submissions = ViewBag.Submissions as IEnumerable<ExamSubmission> ?? Enumerable.Empty<ExamSubmission>();
 }
 
-<h2>@ViewData["Title"]</h2>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<!-- HEADER -->
+<div class="page-header mb-4 p-4 rounded-4 shadow-sm">
+    <h1 class="fw-bold text-white mb-0">
+        <i class="fa-solid fa-file-pen me-2"></i>@ViewData["Title"]
+    </h1>
+</div>
 
 @if (TempData["QuestionError"] != null)
 {
-    <div class="alert alert-warning">@TempData["QuestionError"]</div>
+    <div class="alert alert-warning shadow-sm rounded-3">
+        <i class="fa-solid fa-circle-exclamation me-1"></i>@TempData["QuestionError"]
+    </div>
 }
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">Hiện chưa có bài thi nào mở cho bạn.</div>
+    <div class="alert alert-info shadow-sm rounded-3">
+        <i class="fa-solid fa-circle-info me-1"></i>
+        Hiện chưa có bài thi nào mở cho bạn.
+    </div>
 }
 else
 {
-<div class="row row-cols-1 row-cols-md-2 g-4">
-    @foreach (var exam in Model)
-    {
-        var submission = submissions.FirstOrDefault(s => s.ExamID == exam.ExamID);
-        <div class="col">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">@exam.Title</h5>
-                    <p class="card-text">@exam.Description</p>
-                    <ul class="list-unstyled small text-muted">
-                        <li><strong>Lớp:</strong> @exam.Class?.ClassCode (@exam.Class?.Course?.CourseName)</li>
-                        <li><strong>Thời lượng:</strong> @exam.DurationMinutes phút</li>
-                        <li><strong>Bắt đầu:</strong> @exam.StartTime?.ToString("dd/MM/yyyy HH:mm")</li>
-                        <li><strong>Kết thúc:</strong> @exam.EndTime?.ToString("dd/MM/yyyy HH:mm")</li>
-                    </ul>
-                </div>
-                <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
-                    @if (submission != null && submission.IsFinalized)
-                    {
-                        <span class="badge bg-success">Đã nộp</span>
-                        <a asp-action="Result" asp-route-submissionId="@submission.ExamSubmissionID" class="btn btn-outline-info btn-sm">Xem kết quả</a>
-                    }
-                    else
-                    {
-                    <a asp-action="Take" asp-route-id="@exam.ExamID" class="btn btn-primary">Bắt đầu làm</a>
-                    }
+    <div class="row g-4 row-cols-1 row-cols-md-2">
+        @foreach (var exam in Model)
+        {
+            var submission = submissions.FirstOrDefault(s => s.ExamID == exam.ExamID);
+            var isFinished = submission?.IsFinalized == true;
+            var isOpen = exam.StartTime <= DateTime.Now && exam.EndTime >= DateTime.Now;
+
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 rounded-4 exam-card">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold mb-1">@exam.Title</h5>
+
+                            <!-- BADGE TRẠNG THÁI -->
+                            @if (isFinished)
+                            {
+                                <span class="badge status-badge bg-success">
+                                    <i class="fa-solid fa-check me-1"></i>Đã nộp
+                                </span>
+                            }
+                            else if (isOpen)
+                            {
+                                <span class="badge status-badge bg-primary">
+                                    <i class="fa-solid fa-unlock me-1"></i>Đang mở
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge status-badge bg-secondary">
+                                    <i class="fa-solid fa-clock me-1"></i>Chưa mở
+                                </span>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(exam.Description))
+                        {
+                            <p class="text-muted small mb-3">@exam.Description</p>
+                        }
+
+                        <ul class="list-unstyled text-muted small mb-0">
+                            <li>
+                                <i class="fa-solid fa-users-rectangle me-2"></i>
+                                <strong>Lớp:</strong> @exam.Class?.ClassCode (@exam.Class?.Course?.CourseName)
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-clock me-2"></i>
+                                <strong>Thời lượng:</strong> @exam.DurationMinutes phút
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-hourglass-start me-2"></i>
+                                <strong>Bắt đầu:</strong> @exam.StartTime?.ToString("dd/MM/yyyy HH:mm")
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-hourglass-end me-2"></i>
+                                <strong>Kết thúc:</strong> @exam.EndTime?.ToString("dd/MM/yyyy HH:mm")
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <!-- FOOTER BUTTONS -->
+                    <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
+
+                        @if (isFinished)
+                        {
+                            <a asp-action="Result"
+                               asp-route-submissionId="@submission.ExamSubmissionID"
+                               class="btn btn-outline-info btn-sm">
+                                <i class="fa-solid fa-eye me-1"></i>Kết quả
+                            </a>
+                        }
+                        else if (isOpen)
+                        {
+                            <a asp-action="Take"
+                               asp-route-id="@exam.ExamID"
+                               class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-pen-to-square me-1"></i>Làm bài
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted small fst-italic">
+                                <i class="fa-solid fa-lock me-1"></i>Chưa đến thời gian
+                            </span>
+                        }
+                    </div>
+
                 </div>
             </div>
-        </div>
-    }
-</div>
+
+        }
+    </div>
 }
+
+<style>
+
+    /* HEADER */
+    .page-header {
+        background: linear-gradient(135deg, #4e54c8, #8f94fb);
+        color: white;
+    }
+
+    /* Card */
+    .exam-card {
+        transition: 0.18s ease;
+    }
+
+        .exam-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+        }
+
+    /* Badge */
+    .status-badge {
+        padding: 6px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+</style>

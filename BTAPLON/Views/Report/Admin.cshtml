@@ -1,0 +1,303 @@
+﻿@model BTAPLON.Models.ViewModels.AdminReportViewModel
+@using System.Linq
+@{
+    ViewData["Title"] = "Báo cáo Quản Trị";
+}
+
+<!-- HEADER -->
+<div class="dashboard-header mb-4 p-4 rounded-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h1 class="fw-bold text-white mb-1">@ViewData["Title"]</h1>
+            <p class="text-white-50 mb-0">Tổng hợp dữ liệu toàn hệ thống – cập nhật theo thời gian thực.</p>
+        </div>
+
+        <div class="dropdown">
+            <button class="btn btn-light btn-sm dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown">
+                <i class="fa-solid fa-file-arrow-down me-2"></i> Xuất báo cáo
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+                <li><a class="dropdown-item" asp-controller="Report" asp-action="ExportAdmin" asp-route-format="pdf">📄 Tải PDF</a></li>
+                <li><a class="dropdown-item" asp-controller="Report" asp-action="ExportAdmin" asp-route-format="word">📝 Tải Word</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<!-- KPI STATISTICS -->
+<div class="row g-3 mb-4">
+
+    @* 1 *@
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-icon bg-primary-subtle text-primary"><i class="fa-solid fa-users"></i></div>
+            <div class="kpi-label">Người dùng</div>
+            <div class="kpi-value">@Model.TotalUsers</div>
+            <div class="kpi-sub">@Model.TotalAdmins quản trị viên</div>
+        </div>
+    </div>
+
+    @* 2 *@
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-icon bg-success-subtle text-success"><i class="fa-solid fa-user-graduate"></i></div>
+            <div class="kpi-label">Học viên</div>
+            <div class="kpi-value">@Model.TotalStudents</div>
+        </div>
+    </div>
+
+    @* 3 *@
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-icon bg-warning-subtle text-warning"><i class="fa-solid fa-chalkboard-user"></i></div>
+            <div class="kpi-label">Giảng viên</div>
+            <div class="kpi-value">@Model.TotalTeachers</div>
+        </div>
+    </div>
+
+    @* 4 *@
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-icon bg-info-subtle text-info"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div class="kpi-label">Ghi danh</div>
+            <div class="kpi-value">@Model.TotalEnrollments</div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- SECOND KPI ROW -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-icon bg-danger-subtle text-danger"><i class="fa-solid fa-book"></i></div>
+            <div class="kpi-label">Khóa học</div>
+            <div class="kpi-value">@Model.TotalCourses</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-icon bg-secondary-subtle text-secondary"><i class="fa-solid fa-school"></i></div>
+            <div class="kpi-label">Lớp học</div>
+            <div class="kpi-value">@Model.TotalClasses</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-icon bg-purple-subtle text-purple"><i class="fa-solid fa-tasks"></i></div>
+            <div class="kpi-label">Bài tập</div>
+            <div class="kpi-value">@Model.TotalAssignments</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="kpi-card shadow-sm">
+            <div class="kpi-icon bg-teal-subtle text-teal"><i class="fa-solid fa-file-circle-check"></i></div>
+            <div class="kpi-label">Kỳ thi</div>
+            <div class="kpi-value">@Model.TotalExams</div>
+            <div class="kpi-sub text-teal">@Model.ActiveExams đang mở</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ENROLLMENT CHART + TOP CLASSES -->
+<div class="row g-3">
+
+    <!-- Monthly enrollments -->
+    <div class="col-lg-6">
+        <div class="dashboard-card shadow-sm">
+            <h5 class="card-title mb-3 fw-semibold">📊 Ghi danh theo tháng</h5>
+
+            @if (!Model.MonthlyEnrollments.Any())
+            {
+                <p class="text-muted">Chưa có dữ liệu.</p>
+            }
+            else
+            {
+                <table class="table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Lượt ghi danh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var i in Model.MonthlyEnrollments)
+                        {
+                            <tr>
+                                <td>@i.Label</td>
+                                <td class="fw-semibold">@i.EnrollmentCount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+
+    <!-- TOP CLASSES + TEACHERS -->
+    <div class="col-lg-6">
+
+        <!-- Top classes -->
+        <div class="dashboard-card shadow-sm mb-3">
+            <h5 class="card-title mb-3 fw-semibold">🏆 Lớp có nhiều học viên</h5>
+
+            @if (!Model.TopClasses.Any())
+            {
+                <p class="text-muted">Chưa có dữ liệu lớp học.</p>
+            }
+            else
+            {
+                <table class="table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Lớp</th>
+                            <th>Khóa học</th>
+                            <th>Học viên</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cls in Model.TopClasses)
+                        {
+                            <tr>
+                                <td>@cls.ClassCode</td>
+                                <td>@cls.CourseName</td>
+                                <td class="fw-bold">@cls.StudentCount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <!-- Top teachers -->
+        <div class="dashboard-card shadow-sm">
+            <h5 class="card-title mb-3 fw-semibold">👨‍🏫 Giảng viên nổi bật</h5>
+
+            @if (!Model.TopTeachers.Any())
+            {
+                <p class="text-muted">Chưa có dữ liệu giảng viên.</p>
+            }
+            else
+            {
+                <table class="table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Giảng viên</th>
+                            <th>Lớp</th>
+                            <th>Bài tập</th>
+                            <th>Kỳ thi</th>
+                            <th>Tổng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model.TopTeachers)
+                        {
+                            <tr>
+                                <td>@t.TeacherName</td>
+                                <td>@t.ClassCount</td>
+                                <td>@t.AssignmentCount</td>
+                                <td>@t.ExamCount</td>
+                                <td class="fw-bold">@t.TotalActivities</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+    </div>
+</div>
+
+
+
+<!-- ================= CUSTOM CSS ================= -->
+<style>
+
+    /* Gradient Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, #4e54c8, #8f94fb);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    /* KPI Cards */
+    .kpi-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 1.4rem;
+        position: relative;
+        overflow: hidden;
+        transition: 0.25s ease;
+    }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+
+    .kpi-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+
+    .kpi-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #6c757d;
+        letter-spacing: .5px;
+    }
+
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .kpi-sub {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    /* Dashboard Cards */
+    .dashboard-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 1.5rem;
+        transition: .2s ease;
+    }
+
+        .dashboard-card:hover {
+            background: #f8f9fa;
+        }
+
+    /* Modern Table */
+    .modern-table thead {
+        background: #f1f3f5;
+    }
+
+    .modern-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .modern-table th {
+        font-weight: 600;
+        color: #495057;
+    }
+</style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />

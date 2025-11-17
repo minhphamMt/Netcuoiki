@@ -10,7 +10,14 @@
     --lms-border: #e2e8f0;
     --lms-shadow: 0 24px 48px rgba(15, 23, 42, 0.1);
 }
+.lms-sidebar {
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+}
 
+    .lms-sidebar::-webkit-scrollbar {
+        display: none; /* Chrome, Edge */
+    }
 *, *::before, *::after {
     box-sizing: border-box;
 }

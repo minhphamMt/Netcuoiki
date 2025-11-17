@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Chi tiết bài tập";
+
     var userRole = Context.Session.GetString("UserRole");
     var userId = Context.Session.GetInt32("UserID");
     var isAdmin = string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase);
@@ -10,60 +11,186 @@
     var canGrade = isAdmin || isTeacher;
 }
 
-<h2>Chi tiết bài tập</h2>
+<!-- HEADER -->
+<div class="dashboard-header mb-4 p-4 rounded-4">
+    <h1 class="fw-bold text-white mb-1">
+        <i class="fa-solid fa-book-open-reader me-2"></i>Chi tiết bài tập
+    </h1>
+    <p class="text-white-50 mb-0">Xem thông tin và danh sách bài nộp của học viên.</p>
+</div>
 
-<p><strong>Lớp:</strong> @Model.Class?.ClassCode</p>
-<p><strong>Tiêu đề:</strong> @Model.Title</p>
-<p><strong>Mô tả:</strong> @Model.Description</p>
-<p><strong>Thời gian tạo:</strong> @Model.DueDate?.ToShortDateString()</p>
+<div class="card shadow-sm p-4 rounded-4 mb-4">
 
-<hr />
+    <!-- Assignment Info -->
+    <h4 class="fw-bold mb-3"><i class="fa-solid fa-file-lines me-2"></i>Thông tin bài tập</h4>
 
-<h4>Nộp bài</h4>
+    <div class="detail-item"><strong>Lớp:</strong> @Model.Class?.ClassCode</div>
+    <div class="detail-item"><strong>Tiêu đề:</strong> @Model.Title</div>
+    <div class="detail-item"><strong>Mô tả:</strong> @Model.Description</div>
+    <div class="detail-item"><strong>Hạn nộp:</strong> @Model.DueDate?.ToString("dd/MM/yyyy")</div>
+</div>
 
-<form asp-controller="Submission" asp-action="Submit" method="post" enctype="multipart/form-data">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="assignmentID" value="@Model.AssignmentID" />
-    <input type="file" class="form-control mb-2" name="fileUpload" id="fileUpload" />
 
-    <button type="submit" class="btn btn-primary">Nộp bài</button>
-</form>
+<!-- Submit Work -->
+<div class="card shadow-sm p-4 rounded-4 mb-4">
+    <h4 class="fw-bold mb-3"><i class="fa-solid fa-upload me-2"></i>Nộp bài</h4>
 
-<hr />
+    <form asp-controller="Submission" asp-action="Submit" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
 
-<h4>Danh sách bài nộp</h4>
+        <input type="hidden" name="assignmentID" value="@Model.AssignmentID" />
 
-<table class="table table-bordered">
-    <tr>
-        <th>Học sinh</th>
-        <th>File</th>
-        <th>Thời gian nộp</th>
-        <th>Điểm</th>
-        <th>Đánh giá</th>
-        @if (canGrade)
-        {
-            <th>Actions</th>
-        }
-    </tr>
-    @foreach (var s in Model.Submissions ?? new List<BTAPLON.Models.Submission>())
-    {
-        <tr>
-            <td>@s.Student?.FullName</td>
-            <td><a href="@s.FilePath" target="_blank">Xem file</a></td>
-            <td>@s.SubmittedAt</td>
-            <td>@(s.Score?.ToString("0.##") ?? "-")</td>
-            <td>@(string.IsNullOrWhiteSpace(s.Feedback) ? "-" : s.Feedback)</td>
-            @if (canGrade)
-            {
-                <td>
-                    <a class="btn btn-sm btn-primary" asp-controller="Submission" asp-action="Grade" asp-route-id="@s.SubmissionID">Chấm</a>
-                </td>
-            }
-        </tr>
+        <div class="input-group mb-3">
+            <label class="input-group-text bg-light"><i class="fa-solid fa-file-arrow-up"></i></label>
+            <input type="file" name="fileUpload" id="fileUpload" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary px-4">
+            <i class="fa-solid fa-paper-plane me-2"></i>Nộp bài
+        </button>
+    </form>
+</div>
+
+
+<!-- Submissions -->
+<div class="card shadow-sm p-4 rounded-4">
+    <h4 class="fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i>Danh sách bài nộp</h4>
+
+    <div class="table-responsive">
+        <table class="table modern-table align-middle">
+            <thead>
+                <tr>
+                    <th>Học sinh</th>
+                    <th>Tệp</th>
+                    <th>Thời gian nộp</th>
+                    <th>Điểm</th>
+                    <th>Nhận xét</th>
+                    @if (canGrade)
+                    {
+                        <th class="text-center">Chấm</th>
+                    }
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var s in Model.Submissions ?? new List<BTAPLON.Models.Submission>())
+                {
+                    <tr>
+                        <td class="fw-semibold">@s.Student?.FullName</td>
+
+                        <td>
+                            <a href="@s.FilePath" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                <i class="fa-solid fa-file-lines me-1"></i>Xem tệp
+                            </a>
+                        </td>
+
+                        <td>@s.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+
+                        <td>
+                            @if (s.Score.HasValue)
+                            {
+                                <span class="score-badge score-ok">@s.Score.Value.ToString("0.##")</span>
+                            }
+                            else
+                            {
+                                <span class="score-badge score-null">-</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (string.IsNullOrWhiteSpace(s.Feedback))
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                            else
+                            {
+                                <span class="feedback-badge">@s.Feedback</span>
+                            }
+                        </td>
+
+                        @if (canGrade)
+                        {
+                            <td class="text-center">
+                                <a class="btn btn-primary btn-sm px-3"
+                                   asp-controller="Submission" asp-action="Grade"
+                                   asp-route-id="@s.SubmissionID">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<a class="btn btn-secondary mt-3 px-4" asp-action="Index">
+    <i class="fa-solid fa-arrow-left me-2"></i>Quay lại
+</a>
+
+
+<!-- STYLES -->
+<style>
+
+    /* Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-</table>
 
-<a class="btn btn-secondary" asp-action="Index">Back</a>
+    .detail-item {
+        font-size: 1.05rem;
+        margin-bottom: 6px;
+    }
+
+    /* Table */
+    .modern-table thead {
+        background: #f8f9fa;
+    }
+
+    .modern-table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: .75rem;
+        color: #6c757d;
+    }
+
+    .modern-table tbody tr:hover {
+        background: #f5f7fa !important;
+    }
+
+    /* Score badge */
+    .score-badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .score-ok {
+        background: #e3fceb;
+        color: #2b8a3e;
+    }
+
+    .score-null {
+        background: #f1f3f5;
+        color: #868e96;
+    }
+
+    /* Feedback */
+    .feedback-badge {
+        background: #e7f5ff;
+        color: #1c7ed6;
+        padding: 4px 10px;
+        border-radius: 12px;
+        display: inline-block;
+    }
+
+</style>
+
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

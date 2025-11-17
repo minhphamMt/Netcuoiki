@@ -1,38 +1,76 @@
 ﻿@model BTAPLON.Models.ViewModels.EnrollmentBulkCreateViewModel
 @using System.Collections.Generic
 
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
 <div class="container mt-4">
-    <h2 class="mb-3">Thêm vào lớp </h2>
+    <h2 class="fw-bold mb-4">
+        <i class="fa-solid fa-user-plus text-primary me-2"></i>Thêm học viên vào lớp
+    </h2>
 
-    <form method="post" class="card p-4 shadow" style="max-width:500px">
+    <form method="post" class="card p-4 shadow-sm border-0 rounded-4" style="max-width: 550px;">
 
+        <!-- Select class -->
         <div class="mb-3">
-            <label class="form-label">Class</label>
-            @Html.DropDownListFor(m => m.ClassID, Model.ClassOptions, "-- select class --",
-                        new { @class = "form-select" })
-            @Html.ValidationMessageFor(m => m.ClassID, null, new { @class = "text-danger" })
+            <label class="form-label fw-semibold">
+                <i class="fa-solid fa-door-open me-1 text-primary"></i>Chọn lớp học
+            </label>
+            @Html.DropDownListFor(
+                        m => m.ClassID,
+                        Model.ClassOptions,
+                        "-- Chọn lớp --",
+                        new { @class = "form-select rounded-3" }
+                        )
+            @Html.ValidationMessageFor(m => m.ClassID, null, new { @class = "text-danger mt-1" })
         </div>
 
+        <!-- Student list -->
         <div class="mb-3">
-            <label class="form-label">Students</label>
-            <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+            <label class="form-label fw-semibold">
+                <i class="fa-solid fa-users me-1 text-primary"></i>Danh sách học viên
+            </label>
+
+            <div class="border rounded-4 p-3 shadow-sm bg-light"
+                 style="max-height: 300px; overflow-y: auto;">
+
                 @{
                     var selected = Model.StudentIDs ?? new List<int>();
                 }
+
                 @foreach (var student in Model.StudentOptions)
                 {
-                    var isChecked = int.TryParse(student.Value, out var studentId) && selected.Contains(studentId);
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="StudentIDs" value="@student.Value" id="student_@student.Value" @(isChecked ? "checked" : "") />
-                        <label class="form-check-label" for="student_@student.Value">@student.Text</label>
+                    var isChecked =
+                    int.TryParse(student.Value, out var studentId) &&
+                    selected.Contains(studentId);
+
+                    <div class="form-check mb-1">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="StudentIDs"
+                               value="@student.Value"
+                               id="student_@student.Value"
+                               @(isChecked ? "checked" : "") />
+
+                        <label class="form-check-label" for="student_@student.Value">
+                            <i class="fa-solid fa-user-graduate text-secondary me-1"></i>
+                            @student.Text
+                        </label>
                     </div>
                 }
             </div>
-            @Html.ValidationMessageFor(m => m.StudentIDs, null, new { @class = "text-danger" })
+
+            @Html.ValidationMessageFor(m => m.StudentIDs, null, new { @class = "text-danger mt-1" })
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Lưu</button>
-        <a asp-action="Index" class="btn btn-secondary mt-1">Quay lại</a>
+        <!-- Buttons -->
+        <button type="submit" class="btn btn-primary w-100 rounded-3 py-2">
+            <i class="fa-solid fa-floppy-disk me-1"></i>Lưu danh sách
+        </button>
 
+        <a asp-action="Index"
+           class="btn btn-outline-secondary w-100 mt-2 rounded-3 py-2">
+            <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+        </a>
     </form>
 </div>

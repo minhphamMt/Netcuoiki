@@ -4,165 +4,265 @@
     var questionForm = ViewBag.QuestionForm as ExamQuestionFormViewModel ?? new ExamQuestionFormViewModel { ExamID = Model.ExamID };
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2>@Model.Title</h2>
-        <div class="text-muted">Lớp: @Model.Class?.ClassCode - @Model.Class?.Course?.CourseName</div>
-        <div class="text-muted">Thời lượng: @Model.DurationMinutes phút</div>
+        <h2 class="fw-bold">
+            <i class="fa-solid fa-sliders text-primary me-2"></i>@Model.Title
+        </h2>
+
+        <div class="text-muted small">
+            <i class="fa-solid fa-school-flag me-1"></i>@Model.Class?.ClassCode · @Model.Class?.Course?.CourseName
+        </div>
+
+        <div class="text-muted small">
+            <i class="fa-solid fa-clock me-1"></i>@Model.DurationMinutes phút
+        </div>
+
         @if (Model.IsPublished)
         {
-            <span class="badge bg-success mt-2">Đang mở cho sinh viên</span>
+            <span class="badge bg-success mt-2 px-3 py-2">
+                <i class="fa-solid fa-unlock me-1"></i>Đang mở cho sinh viên
+            </span>
         }
         else
         {
-        <span class="badge bg-secondary mt-2">Chưa mở</span>
+            <span class="badge bg-secondary mt-2 px-3 py-2">
+                <i class="fa-solid fa-lock me-1"></i>Chưa mở
+            </span>
         }
     </div>
-    <div>
-        <a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a>
-    </div>
+
+    <a asp-action="Index" class="btn btn-outline-secondary shadow-sm">
+        <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+    </a>
 </div>
 
 @if (TempData["Message"] != null)
 {
-    <div class="alert alert-success">@TempData["Message"]</div>
+    <div class="alert alert-success shadow-sm">
+        <i class="fa-solid fa-circle-check me-2"></i>@TempData["Message"]
+    </div>
 }
 @if (TempData["QuestionError"] != null)
 {
-    <div class="alert alert-danger">@TempData["QuestionError"]</div>
+    <div class="alert alert-danger shadow-sm">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>@TempData["QuestionError"]
+    </div>
 }
 
 <div class="row">
+    <!-- LEFT COLUMN -->
     <div class="col-lg-6">
-        <div class="card mb-4">
-            <div class="card-header bg-light">Thêm câu hỏi</div>
+
+        <!-- Add Question -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light fw-semibold">
+                <i class="fa-solid fa-plus me-1 text-primary"></i>Thêm câu hỏi
+            </div>
+
             <div class="card-body">
                 <form asp-action="AddQuestion" method="post">
                     @Html.AntiForgeryToken()
+
                     <input type="hidden" name="ExamID" value="@Model.ExamID" />
+
                     <div class="mb-3">
-                        <label class="form-label">Nội dung câu hỏi</label>
+                        <label class="form-label fw-semibold">Nội dung câu hỏi</label>
                         <textarea name="Prompt" class="form-control" rows="3">@questionForm.Prompt</textarea>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Điểm</label>
-                        <input type="number" step="0.5" min="0" name="Points" class="form-control" value="@questionForm.Points" />
+                        <label class="form-label fw-semibold">Điểm</label>
+                        <input type="number" step="0.5" min="0" name="Points"
+                               class="form-control" value="@questionForm.Points" />
                     </div>
+
                     <div class="form-check form-switch mb-3">
                         @Html.CheckBox("IsMultipleChoice", questionForm.IsMultipleChoice, new { @class = "form-check-input" })
-                        <label class="form-check-label" for="IsMultipleChoice">Câu hỏi trắc nghiệm</label>
+                        <label class="form-check-label fw-semibold">Câu hỏi trắc nghiệm</label>
                     </div>
+
                     <div class="mb-3">
-                        <h6>Phương án trả lời</h6>
-                        <p class="text-muted small">Đánh dấu đáp án đúng. Bỏ trống nếu là tự luận.</p>
+                        <h6 class="fw-bold">Phương án trả lời</h6>
+                        <p class="text-muted small">Đánh dấu đáp án đúng (bỏ trống nếu tự luận).</p>
+
                         @for (int i = 0; i < questionForm.Choices.Count; i++)
                         {
-                            <div class="input-group mb-2">
-                                <span class="input-group-text">@(i + 1)</span>
-                                <input type="text" name="Choices[@i].Text" value="@questionForm.Choices[i].Text" class="form-control" placeholder="Nội dung đáp án" />
-                                <div class="input-group-text">
-                                    @Html.CheckBox($"Choices[{i}].IsCorrect", questionForm.Choices[i].IsCorrect, new { @class = "form-check-input mt-0" })
-                                </div>
-                            </div>
-                            
-                        }
+                            <div class="input-group mb-2 shadow-sm">
+                                <span class="input-group-text bg-primary text-white fw-bold">@((i + 1))</span>
+                                <input type="text"
+                                       name="Choices[@i].Text"
+                                       value="@questionForm.Choices[i].Text"
+                                       class="form-control"
+                                       placeholder="Nội dung đáp án" />
+
+                                <span class="input-group-text">
+                                    @Html.CheckBox($"Choices[{i}].IsCorrect", questionForm.Choices[i].IsCorrect,
+                                    new { @class = "form-check-input mt-0" })
+                            </span>
+                        </div>
+                                                }
                     </div>
-                    <button type="submit" class="btn btn-primary">Thêm câu hỏi</button>
+
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                        <i class="fa-solid fa-plus me-1"></i>Thêm câu hỏi
+                    </button>
                 </form>
             </div>
         </div>
-        <div class="card">
-            <div class="card-header bg-light">Mở bài thi</div>
+
+        <!-- Publish Block -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light fw-semibold">
+                <i class="fa-solid fa-bolt text-warning me-1"></i>Mở bài thi
+            </div>
+
             <div class="card-body">
-                <p>Bài thi sẽ mở theo thời gian đã cấu hình. Bạn có thể cập nhật thời gian bên dưới.</p>
-                <form asp-action="Publish" asp-route-id="@Model.ExamID" method="post" class="mb-2">
+                <p class="small text-muted">
+                    Bài thi sẽ mở theo bộ thời gian được đặt bên dưới.
+                </p>
+
+                <form asp-action="Publish" asp-route-id="@Model.ExamID" method="post">
                     @Html.AntiForgeryToken()
-                    <div class="row g-2 align-items-end">
+
+                    <div class="row g-3 align-items-end">
                         <div class="col-md-4">
-                            <label class="form-label">Thời gian bắt đầu</label>
-                            <input class="form-control" type="datetime-local" name="startTime" value="@Model.StartTime?.ToString("yyyy-MM-ddTHH:mm")" />
+                            <label class="form-label fw-semibold">Thời gian bắt đầu</label>
+                            <input class="form-control" type="datetime-local" name="startTime"
+                                   value="@Model.StartTime?.ToString("yyyy-MM-ddTHH:mm")" />
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Thời lượng (phút)</label>
-                            <input class="form-control" type="number" min="1" max="600" name="durationMinutes" value="@Model.DurationMinutes" />
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Thời lượng</label>
+                            <input class="form-control" type="number" min="1" max="600"
+                                   name="durationMinutes" value="@Model.DurationMinutes" />
                         </div>
+
                         <div class="col-md-4">
-                            <label class="form-label">Ngày kết thúc</label>
-                            <input class="form-control" type="datetime-local" name="endTime" value="@Model.EndTime?.ToString("yyyy-MM-ddTHH:mm")" />
-                            <div class="form-text">Đề sẽ tự đóng khi đến thời gian này.</div>
+                            <label class="form-label fw-semibold">Kết thúc</label>
+                            <input class="form-control" type="datetime-local" name="endTime"
+                                   value="@Model.EndTime?.ToString("yyyy-MM-ddTHH:mm")" />
                         </div>
-                        <div class="col-md-2 text-end">
-                            <button type="submit" class="btn btn-success mt-3">Mở đề</button>
+
+                        <div class="col-md-12 text-end">
+                            <button class="btn btn-success mt-2 shadow-sm" type="submit">
+                                <i class="fa-solid fa-play me-1"></i>Mở đề
+                            </button>
                         </div>
                     </div>
                 </form>
+
                 @if (Model.IsPublished)
                 {
-                    <form asp-action="Close" asp-route-id="@Model.ExamID" method="post">
+                    <form asp-action="Close" asp-route-id="@Model.ExamID" method="post" class="mt-3">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-warning" onclick="return confirm('Đóng bài thi?')">Đóng bài thi</button>
+
+                        <button class="btn btn-warning shadow-sm"
+                                onclick="return confirm('Đóng bài thi?')">
+                            <i class="fa-solid fa-lock me-1"></i>Đóng bài thi
+                        </button>
                     </form>
                 }
             </div>
         </div>
     </div>
+
+    <!-- RIGHT COLUMN -->
     <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header bg-light">Danh sách câu hỏi (@(Model.Questions?.Count ?? 0))</div>
+        <div class="card shadow-sm">
+            <div class="card-header bg-light fw-semibold">
+                <i class="fa-solid fa-question-circle text-primary me-1"></i>
+                Danh sách câu hỏi (@(Model.Questions?.Count ?? 0))
+            </div>
+
             <div class="card-body">
                 @if (Model.Questions == null || !Model.Questions.Any())
                 {
-                    <div class="alert alert-info">Chưa có câu hỏi nào.</div>
+                    <div class="alert alert-info shadow-sm">
+                        <i class="fa-solid fa-info-circle me-1"></i>Chưa có câu hỏi nào.
+                    </div>
                 }
                 else
                 {
-                <div class="accordion" id="questionAccordion">
-                    @{
-                        var index = 0;
-                    }
-                    @foreach (var question in Model.Questions.OrderBy(q => q.DisplayOrder))
-                    {
-                        var collapseId = $"collapse{index}";
-                        <div class="accordion-item">
-                                <h2 className="accordion-header" id={"heading" + index}>
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId">
-                                Câu @(index + 1): @question.Prompt
-                            </button>
-                        </h2>
-                        <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#questionAccordion">
-                            <div class="accordion-body">
-                                <div class="d-flex justify-content-between">
-                                    <span>Điểm: @question.Points</span>
-                                    <form asp-action="DeleteQuestion" asp-route-id="@question.QuestionID" method="post" onsubmit="return confirm('Xoá câu hỏi này?');">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Xoá</button>
-                                    </form>
-                                </div>
-                                @if (question.IsMultipleChoice)
-                                {
-                                    <ul class="list-group list-group-flush mt-3">
-                                        @foreach (var choice in question.Choices ?? Enumerable.Empty<Choice>())
+                    <div class="accordion" id="questionAccordion">
+                        @{
+                            var idx = 0;
+                        }
+
+                        @foreach (var q in Model.Questions.OrderBy(q => q.DisplayOrder))
+                        {
+                            var collapseId = $"collapse{idx}";
+                            <div class="accordion-item shadow-sm mb-2">
+
+                                <h2 class="accordion-header" id="heading@idx">
+                                    <button class="accordion-button collapsed fw-semibold"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId">
+
+                                        <i class="fa-solid fa-circle-question text-primary me-2"></i>
+                                        Câu @(idx + 1): @q.Prompt
+                                    </button>
+                                </h2>
+
+                                <div id="@collapseId"
+                                     class="accordion-collapse collapse"
+                                     data-bs-parent="#questionAccordion">
+
+                                    <div class="accordion-body">
+
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="fw-semibold">
+                                                <i class="fa-solid fa-star me-1 text-warning"></i>
+                                                Điểm: @q.Points
+                                            </span>
+
+                                            <form asp-action="DeleteQuestion"
+                                                  asp-route-id="@q.QuestionID"
+                                                  method="post"
+                                                  onsubmit="return confirm('Xóa câu hỏi này?');">
+                                                @Html.AntiForgeryToken()
+                                                <button class="btn btn-sm btn-outline-danger shadow-sm">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        @if (q.IsMultipleChoice)
                                         {
-                                            <li class="list-group-item d-flex justify-content-between">
-                                                <span>@choice.Text</span>
-                                                @if (choice.IsCorrect)
+                                            <ul class="list-group list-group-flush">
+                                                @foreach (var c in q.Choices)
                                                 {
-                                                    <span class="badge bg-success">Đúng</span>
+                                                    <li class="list-group-item d-flex justify-content-between">
+                                                        <span>@c.Text</span>
+
+                                                        @if (c.IsCorrect)
+                                                        {
+                                                            <span class="badge bg-success">
+                                                                <i class="fa-solid fa-check"></i> Đúng
+                                                            </span>
+                                                        }
+                                                    </li>
                                                 }
-                                            </li>
+                                            </ul>
                                         }
-                                    </ul>
-                                }
-                                else
-                                {
-                                <p class="mt-3 text-muted">Câu hỏi tự luận.</p>
-                                }
+                                        else
+                                        {
+                                            <p class="text-muted fst-italic mt-3">
+                                                <i class="fa-solid fa-pen"></i> Câu hỏi tự luận.
+                                            </p>
+                                        }
+
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+
+                            idx++;
+                        }
                     </div>
-                    index++;
-                                        }
-                </div>
                 }
             </div>
         </div>

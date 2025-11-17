@@ -1,40 +1,135 @@
 ﻿@model BTAPLON.Models.Assignment
 
-<div class="container mt-4" style="max-width:800px;">
-    <h2 class="mb-3">Tạo bài tập</h2>
+@{
+    ViewData["Title"] = "Tạo bài tập";
+}
 
-    <form asp-action="Create" method="post" class="card p-4 shadow-sm">
+<!-- HEADER -->
+<div class="dashboard-header mb-4 p-4 rounded-4">
+    <h1 class="fw-bold text-white mb-1">
+        <i class="fa-solid fa-file-circle-plus me-2"></i>Tạo bài tập mới
+    </h1>
+    <p class="text-white-50 mb-0">Thêm bài tập cho lớp học mà bạn phụ trách.</p>
+</div>
+
+
+<!-- FORM CONTAINER -->
+<div class="form-container mx-auto">
+    <form asp-action="Create" method="post" class="dashboard-card shadow-sm p-4 rounded-4">
         @Html.AntiForgeryToken()
+
+        <!-- Validation summary -->
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <!-- Class -->
         <div class="mb-3">
-            <label class="form-label">Class</label>
-            <select asp-for="ClassID" asp-items="ViewBag.ClassID" class="form-select"></select>
-            <span asp-validation-for="ClassID" class="text-danger"></span>
+            <label class="form-label fw-semibold">Lớp học</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-school"></i></span>
+                <select asp-for="ClassID" asp-items="ViewBag.ClassID" class="form-select"></select>
+            </div>
+            <span asp-validation-for="ClassID" class="text-danger small"></span>
         </div>
 
+        <!-- Title -->
         <div class="mb-3">
-            <label class="form-label">Title</label>
-            <input asp-for="Title" class="form-control" />
-            <span asp-validation-for="Title" class="text-danger"></span>
+            <label class="form-label fw-semibold">Tiêu đề</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-tag"></i></span>
+                <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề bài tập..." />
+            </div>
+            <span asp-validation-for="Title" class="text-danger small"></span>
         </div>
 
+        <!-- Description -->
         <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
-            <span asp-validation-for="Description" class="text-danger"></span>
+            <label class="form-label fw-semibold">Mô tả</label>
+            <textarea asp-for="Description" class="form-control description-box"
+                      placeholder="Nhập mô tả chi tiết..."></textarea>
+            <span asp-validation-for="Description" class="text-danger small"></span>
         </div>
 
+        <!-- Due Date -->
         <div class="mb-3">
-            <label class="form-label">Due Date</label>
-            <input type="date" asp-for="DueDate" class="form-control" />
-            <span asp-validation-for="DueDate" class="text-danger"></span>
+            <label class="form-label fw-semibold">Hạn nộp</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-calendar-days"></i></span>
+                <input type="date" asp-for="DueDate" class="form-control" />
+            </div>
+            <span asp-validation-for="DueDate" class="text-danger small"></span>
         </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        <!-- BUTTONS -->
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="fa-solid fa-floppy-disk me-2"></i>Lưu
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary px-4">
+                <i class="fa-solid fa-arrow-left me-2"></i>Hủy
+            </a>
         </div>
+
     </form>
 </div>
+
+
+<!-- CUSTOM STYLE (same design language as previous pages) -->
+<style>
+
+    /* Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, #ee0979, #ff6a00);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+
+    .form-container {
+        max-width: 650px;
+    }
+
+    /* Card */
+    .dashboard-card {
+        background: #fff;
+        border-radius: 18px;
+        transition: .2s ease;
+    }
+
+        .dashboard-card:hover {
+            background: #f8f9fa;
+        }
+
+    /* Inputs */
+    .input-group-text {
+        border-right: none;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 0 12px 12px 0;
+        border-left: none;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #ff6a00;
+            box-shadow: 0 0 0 3px rgba(255,106,0,0.25);
+        }
+
+    /* Description */
+    .description-box {
+        border-radius: 12px;
+        min-height: 130px;
+        resize: vertical;
+    }
+
+    /* Buttons */
+    button, a.btn {
+        border-radius: 12px !important;
+    }
+</style>
+
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

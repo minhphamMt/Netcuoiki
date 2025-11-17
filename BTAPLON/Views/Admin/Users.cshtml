@@ -5,66 +5,171 @@
     var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Danh sách người dùng</h1>
-    <a class="btn btn-primary" asp-action="AddUser"><i class="bi bi-plus-lg me-1"></i>Thêm người dùng</a>
+<!-- HEADER -->
+<div class="dashboard-header mb-4 p-4 rounded-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="fw-bold text-white mb-1"><i class="fa-solid fa-users-gear me-2"></i>Quản lý người dùng</h1>
+        <p class="text-white-50 mb-0">Danh sách toàn bộ người dùng trong hệ thống.</p>
+    </div>
+
+    <a class="btn btn-light shadow-sm" asp-action="AddUser">
+        <i class="fa-solid fa-user-plus me-2"></i>Thêm người dùng
+    </a>
 </div>
 
-<form method="get" asp-action="Users" class="mb-3">
-    <div class="input-group">
-        <input type="search" name="searchTerm" value="@searchTerm" class="form-control" placeholder="Tìm kiếm theo tên, email hoặc vai trò..." />
-        @if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            <a asp-action="Users" class="btn btn-outline-secondary">Xóa</a>
-        }
-        <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Tìm kiếm</button>
-    </div>
-</form>
 
-<table class="table table-bordered table-striped">
-    <thead class="table-light">
-        <tr>
-            <th>Mã</th>
-            <th>Họ và tên</th>
-            <th>Email</th>
-            <th>Vai trò</th>
-            <th style="width: 180px" class="text-center">Thao tác</th>
-        </tr>
-    </thead>
+<!-- SEARCH BAR -->
+<div class="dashboard-card shadow-sm p-3 mb-3">
+    <form method="get" asp-action="Users">
+        <div class="input-group input-group-lg search-box">
+            <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <input type="search" name="searchTerm" value="@searchTerm"
+                   class="form-control border-start-0"
+                   placeholder="Tìm kiếm theo tên, email hoặc vai trò..." />
 
-    <tbody>
-        @foreach (var u in Model)
-        {
+            @if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                <a asp-action="Users" class="btn btn-outline-secondary">Xóa</a>
+            }
+
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="fa-solid fa-search me-2"></i>Tìm kiếm
+            </button>
+        </div>
+    </form>
+</div>
+
+
+<!-- USER TABLE -->
+<div class="dashboard-card shadow-sm p-3">
+    <table class="table modern-table align-middle">
+        <thead>
             <tr>
-                <td>@u.UserID</td>
-                <td>@u.FullName</td>
-                <td>@u.Email</td>
-                <td>
-                    @switch (u.Role)
-                    {
-                        case "Admin":
-                            @:Quản trị viên
-                            break;
-                        case "Teacher":
-                            @:Giảng viên
-                            break;
-                        case "Student":
-                            @:Học viên
-                            break;
-                        default:
-                            @u.Role
-                            break;
-                    }
-                </td>
-                <td class="text-center">
-                    <a class="btn btn-outline-primary btn-sm" asp-action="EditUser" asp-route-id="@u.UserID">
-                        <i class="bi bi-pencil-square me-1"></i>Chỉnh sửa
-                    </a>
-                    <a class="btn btn-outline-danger btn-sm ms-1 mt-1" asp-action="DeleteUser" asp-route-id="@u.UserID">
-                        <i class="bi bi-trash me-1"></i>Xóa
-                    </a>
-                </td>
+                <th style="width:80px">Mã</th>
+                <th>Họ và tên</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th class="text-center" style="width: 160px">Thao tác</th>
             </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td class="fw-semibold">@u.UserID</td>
+                    <td>@u.FullName</td>
+                    <td>@u.Email</td>
+                    <td>
+                        @switch (u.Role)
+                        {
+                            case "Admin":
+                                <span class="role-badge role-admin">Quản trị viên</span>
+                                break;
+                            case "Teacher":
+                                <span class="role-badge role-teacher">Giảng viên</span>
+                                break;
+                            case "Student":
+                                <span class="role-badge role-student">Học viên</span>
+                                break;
+                            default:
+                                <span class="role-badge">@u.Role</span>
+                                break;
+                        }
+                    </td>
+
+                    <td class="text-center">
+                        <a class="btn btn-outline-primary btn-sm me-1"
+                           asp-action="EditUser" asp-route-id="@u.UserID">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+
+                        <a class="btn btn-outline-danger btn-sm"
+                           asp-action="DeleteUser" asp-route-id="@u.UserID">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<!-- CUSTOM STYLE -->
+<style>
+
+    /* Header Gradient */
+    .dashboard-header {
+        background: linear-gradient(135deg, #fc5c7d, #6a82fb);
+        color: white;
+    }
+
+    /* Dashboard Card */
+    .dashboard-card {
+        background: #fff;
+        border-radius: 18px;
+    }
+
+    /* Search Box */
+    .search-box input {
+        border-left: none !important;
+        box-shadow: none !important;
+    }
+
+        .search-box input:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,.25) !important;
         }
-    </tbody>
-</table>
+
+    /* Modern Table */
+    .modern-table thead {
+        background: #f1f3f5;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .modern-table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: .75rem;
+        letter-spacing: .5px;
+        color: #495057;
+    }
+
+    .modern-table tbody tr {
+        transition: .2s;
+    }
+
+        .modern-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+    /* Role Colors */
+    .role-badge {
+        padding: 4px 10px;
+        border-radius: 40px;
+        font-size: .8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .role-admin {
+        background: #ffe0e6;
+        color: #d6336c;
+    }
+
+    .role-teacher {
+        background: #e7f5ff;
+        color: #1c7ed6;
+    }
+
+    .role-student {
+        background: #ebfbee;
+        color: #2f9e44;
+    }
+
+</style>
+
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />

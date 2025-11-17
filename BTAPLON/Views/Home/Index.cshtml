@@ -1,103 +1,138 @@
 ﻿@{
     ViewData["Title"] = "Trang chủ hệ thống LMS";
-    Layout = "_Layout"; // nếu bạn dùng layout chung
+    Layout = "_Layout";
 }
 
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .stat-card:hover {
+        transform: translateY(-5px);
+        transition: 0.3s;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+
+    .course-card:hover {
+        transform: translateY(-6px);
+        transition: 0.3s;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    }
+</style>
+
 <div class="container mt-4">
-    <!-- Banner -->
-    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm text-center"
-         style="background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white;">
-        <div class="container py-5">
-            <h1 class="display-5 fw-bold" style="color:aliceblue">🎓 Hệ thống Quản lý Học tập</h1>
-            <p class="col-lg-8 mx-auto fs-5" style="color:aliceblue">
-                Nền tảng hỗ trợ giáo viên tạo bài kiểm tra, sinh viên làm bài và quản lý tiến độ học tập dễ dàng.
-            </p>
-            <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg px-4 me-2">
-                <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+
+    <!-- 🔥 Banner Hero -->
+    <div class="p-5 mb-5 rounded-4 shadow-lg text-center"
+         style="background: linear-gradient(135deg,#0d6efd,#6f42c1); color: white;">
+        <h1 class="display-4 fw-bold mb-3">🎓 Hệ thống Quản lý Học tập</h1>
+        <p class="lead mb-4">
+            Nền tảng hỗ trợ giảng viên & sinh viên quản lý học tập hiệu quả, thông minh và nhanh chóng.
+        </p>
+        @* <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg px-4 shadow-sm">
+                <i class="fa-solid fa-right-to-bracket me-1"></i> Đăng nhập
             </a>
             <a asp-controller="Course" asp-action="Index" class="btn btn-outline-light btn-lg px-4">
-                <i class="bi bi-book me-1"></i> Khóa học
+                <i class="fa-solid fa-book me-1"></i> Khóa học
             </a>
-        </div>
+        </div> *@
     </div>
 
-    <!-- Thống kê nhanh -->
+    <!-- 📊 Thống kê nhanh -->
     <div class="row text-center mb-5">
         <div class="col-md-4 mb-3">
-            <div class="card border-0 shadow-sm py-4">
-                <div class="card-body">
-                    <i class="bi bi-people display-5 text-primary"></i>
-                    <h5 class="mt-3">1,250+ Sinh viên</h5>
-                    <p class="text-muted">Đang theo học các khóa trên hệ thống</p>
-                </div>
+            <div class="card stat-card border-0 shadow-sm py-4 rounded-4">
+                <i class="fa-solid fa-user-graduate display-4 text-primary"></i>
+                <h4 class="mt-3 fw-bold">1,250+ Sinh viên</h4>
+                <p class="text-muted mb-0">Đang theo học trên hệ thống</p>
             </div>
         </div>
+
         <div class="col-md-4 mb-3">
-            <div class="card border-0 shadow-sm py-4">
-                <div class="card-body">
-                    <i class="bi bi-person-badge display-5 text-success"></i>
-                    <h5 class="mt-3">45 Giảng viên</h5>
-                    <p class="text-muted">Giảng dạy và quản lý môn học</p>
-                </div>
+            <div class="card stat-card border-0 shadow-sm py-4 rounded-4">
+                <i class="fa-solid fa-chalkboard-teacher display-4 text-success"></i>
+                <h4 class="mt-3 fw-bold">45 Giảng viên</h4>
+                <p class="text-muted mb-0">Giảng dạy các môn học</p>
             </div>
         </div>
+
         <div class="col-md-4 mb-3">
-            <div class="card border-0 shadow-sm py-4">
-                <div class="card-body">
-                    <i class="bi bi-journal-bookmark display-5 text-warning"></i>
-                    <h5 class="mt-3">320 Khóa học</h5>
-                    <p class="text-muted">Được tổ chức trong hệ thống LMS</p>
-                </div>
+            <div class="card stat-card border-0 shadow-sm py-4 rounded-4">
+                <i class="fa-solid fa-book-open display-4 text-warning"></i>
+                <h4 class="mt-3 fw-bold">320 Khóa học</h4>
+                <p class="text-muted mb-0">Tạo lập và quản lý trong LMS</p>
             </div>
         </div>
     </div>
 
-    <!-- Danh sách khóa học nổi bật -->
-    <h3 class="mb-4 text-primary fw-bold"><i class="bi bi-star-fill me-2"></i>Khóa học nổi bật</h3>
+    <!-- ⭐ Khóa học nổi bật -->
+    <h3 class="mb-4 text-primary fw-bold">
+        <i class="fa-solid fa-star text-warning me-2"></i>Khóa học nổi bật
+    </h3>
+
     <div class="row">
+        <!-- Card 1 -->
         <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm">
-                <img src="https://source.unsplash.com/400x250/?programming" class="card-img-top" alt="Course 1">
+            <div class="card course-card h-100 shadow-sm rounded-4 overflow-hidden">
+                <img src="https://source.unsplash.com/400x250/?programming"
+                     class="card-img-top" />
                 <div class="card-body">
-                    <h5 class="card-title">Lập trình C# cơ bản</h5>
-                    <p class="card-text text-muted">Giảng viên: Nguyễn Văn A</p>
-                    <a asp-controller="Course" asp-action="Details" asp-route-id="1" class="btn btn-outline-primary w-100">Xem chi tiết</a>
+                    <h5 class="fw-bold">Lập trình C# cơ bản</h5>
+                    <p class="text-muted">Giảng viên: Nguyễn Văn A</p>
+                    <a asp-controller="Course" asp-action="Details" asp-route-id="1"
+                       class="btn btn-outline-primary w-100">
+                        Xem chi tiết
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Card 2 -->
         <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm">
-                <img src="https://source.unsplash.com/400x250/?design" class="card-img-top" alt="Course 2">
+            <div class="card course-card h-100 shadow-sm rounded-4 overflow-hidden">
+                <img src="https://source.unsplash.com/400x250/?frontend,design"
+                     class="card-img-top" />
                 <div class="card-body">
-                    <h5 class="card-title">Thiết kế Web Frontend</h5>
-                    <p class="card-text text-muted">Giảng viên: Trần Thị B</p>
-                    <a asp-controller="Course" asp-action="Details" asp-route-id="2" class="btn btn-outline-primary w-100">Xem chi tiết</a>
+                    <h5 class="fw-bold">Thiết kế Web Frontend</h5>
+                    <p class="text-muted">Giảng viên: Trần Thị B</p>
+                    <a asp-controller="Course" asp-action="Details" asp-route-id="2"
+                       class="btn btn-outline-primary w-100">
+                        Xem chi tiết
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Card 3 -->
         <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm">
-                <img src="https://source.unsplash.com/400x250/?data" class="card-img-top" alt="Course 3">
+            <div class="card course-card h-100 shadow-sm rounded-4 overflow-hidden">
+                <img src="https://source.unsplash.com/400x250/?data,analytics"
+                     class="card-img-top" />
                 <div class="card-body">
-                    <h5 class="card-title">Phân tích dữ liệu với SQL</h5>
-                    <p class="card-text text-muted">Giảng viên: Lê Văn C</p>
-                    <a asp-controller="Course" asp-action="Details" asp-route-id="3" class="btn btn-outline-primary w-100">Xem chi tiết</a>
+                    <h5 class="fw-bold">Phân tích dữ liệu với SQL</h5>
+                    <p class="text-muted">Giảng viên: Lê Văn C</p>
+                    <a asp-controller="Course" asp-action="Details" asp-route-id="3"
+                       class="btn btn-outline-primary w-100">
+                        Xem chi tiết
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Phần liên hệ -->
+    <!-- 📞 Liên hệ -->
     <div class="mt-5 text-center border-top pt-4">
-        <h4>📞 Liên hệ hỗ trợ</h4>
-        <p>Email: <a href="mailto:support@eduplatform.com">support@eduplatform.com</a> | Hotline: 0123 456 789</p>
+        <h4><i class="fa-solid fa-headset me-1"></i>Hỗ trợ hệ thống</h4>
+        <p class="text-muted mb-1">
+            Email: <a href="mailto:support@eduplatform.com">support@eduplatform.com</a>
+        </p>
+        <p class="text-muted">Hotline: <strong>0123 456 789</strong></p>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        console.log("Trang Home LMS đã tải thành công!");
+        console.log("🌐 Trang chủ LMS đã sẵn sàng!");
     </script>
 }

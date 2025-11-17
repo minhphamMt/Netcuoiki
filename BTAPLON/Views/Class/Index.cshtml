@@ -1,82 +1,176 @@
-﻿﻿@using System.Linq
+﻿@using System.Linq
 @model IEnumerable<BTAPLON.Models.Class>
+
 @{
     var canManage = ViewBag.CanManage as bool? ?? false;
     var isTeacher = ViewBag.IsTeacher as bool? ?? false;
-    ViewData["Title"] = canManage ? "Quản lý lớp học" : "Lớp giảng dạy";
     var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
+
+    ViewData["Title"] = canManage ? "Quản lý lớp học" : "Lớp giảng dạy";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h2 class="mb-1">@(canManage ? "Quản lý lớp học" : "Danh sách lớp giảng dạy")</h2>
-        <p class="text-muted mb-0">Theo dõi các lớp học và truy cập nhanh vào diễn đàn thảo luận.</p>
+<!-- HEADER -->
+<div class="class-header p-4 rounded-4 shadow-sm mb-4">
+    <div class="d-flex justify-content-between flex-wrap align-items-center gap-3">
+        <div>
+            <h1 class="fw-bold text-white mb-1">
+                <i class="fa-solid fa-graduation-cap me-2"></i>
+                @(canManage ? "Quản lý lớp học" : "Danh sách lớp giảng dạy")
+            </h1>
+            <p class="text-white-50 mb-0">Theo dõi các lớp học và truy cập nhanh vào diễn đàn thảo luận.</p>
+        </div>
+
+        @if (canManage)
+        {
+            <a asp-action="Create" class="btn btn-light shadow-sm px-4 rounded-pill">
+                <i class="fa-solid fa-plus me-2"></i>Tạo lớp mới
+            </a>
+        }
     </div>
-    @if (canManage)
-    {
-        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Tạo lớp học mới</a>
-    }
 </div>
 
+
+<!-- SEARCH FORM -->
 <form method="get" asp-action="Index" class="mb-3">
-    <div class="input-group">
-        <input type="search" name="searchTerm" value="@searchTerm" class="form-control" placeholder="Tìm kiếm theo mã lớp, khóa học, học kỳ..." />
+    <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+        <span class="input-group-text bg-white border-end-0">
+            <i class="fa-solid fa-search text-muted"></i>
+        </span>
+
+        <input type="search"
+               name="searchTerm"
+               value="@searchTerm"
+               class="form-control border-start-0"
+               placeholder="Tìm kiếm theo mã lớp, khóa học, học kỳ..." />
+
         @if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            <a asp-action="Index" class="btn btn-outline-secondary">Xóa</a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-xmark"></i>
+            </a>
         }
-        <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Tìm kiếm</button>
+
+        <button type="submit" class="btn btn-primary px-4">
+            Tìm kiếm
+        </button>
     </div>
 </form>
 
+
 @if (Model == null || !Model.Any())
 {
-    <div class="alert alert-info">
+    <div class="alert alert-info shadow-sm rounded-4 p-3">
         @(canManage
             ? "Chưa có lớp học nào trong hệ thống. Hãy tạo lớp học đầu tiên của bạn."
             : "Bạn chưa được phân công lớp giảng dạy nào. Vui lòng liên hệ quản trị viên để được hỗ trợ.")
-    </div>
+</div>
 }
 else
 {
     <div class="table-responsive">
-        <table class="table table-striped align-middle">
+        <table class="table table-hover align-middle shadow-sm rounded-4 overflow-hidden bg-white">
             <thead class="table-light">
                 <tr>
                     <th>Mã lớp</th>
                     <th>Học kỳ</th>
                     <th>Năm học</th>
                     <th>Khóa học</th>
-                    <th class="text-end">Tùy chọn</th>
+                    <th class="text-end" style="width: 190px">Thao tác</th>
                 </tr>
             </thead>
+
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@(!string.IsNullOrWhiteSpace(item.ClassCode) ? item.ClassCode : $"Lớp #{item.ClassID}")</td>
-                        <td>@item.Semester</td>
+                        <td>
+                            <strong>@(string.IsNullOrWhiteSpace(item.ClassCode) ? $"Lớp #{item.ClassID}" : item.ClassCode)</strong>
+                        </td>
+
+                        <td>
+                            <span class="badge semester-badge">@item.Semester</span>
+                        </td>
+
                         <td>@item.Year</td>
-                        <td>@item.Course?.CourseName</td>
+
+                        <td>
+                            <span class="fw-semibold">@item.Course?.CourseName</span>
+                        </td>
+
                         <td class="text-end">
-                            <a asp-action="Details" asp-route-id="@item.ClassID" class="btn btn-outline-secondary btn-sm me-1">Chi tiết</a>
-                            <a asp-controller="Forum" asp-action="Index" asp-route-classId="@item.ClassID" class="btn btn-outline-primary btn-sm me-1">Diễn đàn</a>
+
+                            <!-- NÚT THEO PHONG CÁCH TRANG "NGƯỜI DÙNG" -->
+                            <!-- Chi tiết -->
+                            <a class="btn btn-outline-secondary btn-sm me-1"
+                               asp-action="Details" asp-route-id="@item.ClassID">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+
+                            <!-- Diễn đàn -->
+                            <a class="btn btn-outline-primary btn-sm me-1"
+                               asp-controller="Forum" asp-action="Index"
+                               asp-route-classId="@item.ClassID">
+                                <i class="fa-solid fa-comments"></i>
+                            </a>
+
                             @if (canManage)
                             {
-                                <a asp-action="Edit" asp-route-id="@item.ClassID" class="btn btn-outline-secondary btn-sm me-1">Chỉnh sửa</a>
-                                <a asp-action="Delete" asp-route-id="@item.ClassID" class="btn btn-outline-danger btn-sm">Xóa</a>
+                                <!-- Sửa -->
+                                <a class="btn btn-outline-primary btn-sm me-1"
+                                   asp-action="Edit" asp-route-id="@item.ClassID">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+
+                                <!-- Xóa -->
+                                <a class="btn btn-outline-danger btn-sm"
+                                   asp-action="Delete" asp-route-id="@item.ClassID"
+                                   onclick="return confirm('Bạn có chắc muốn xóa lớp học này?');">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
                             }
+
                         </td>
                     </tr>
                 }
             </tbody>
+
         </table>
     </div>
 
     @if (isTeacher && !canManage)
     {
-        <div class="alert alert-secondary mt-3">
-            Bạn có thể quản lý chi tiết lớp học từ mục <strong>Bảng điều khiển</strong> và truy cập các công cụ khác trong khóa học.
+        <div class="alert alert-secondary mt-3 shadow-sm rounded-4">
+            Bạn có thể quản lý chi tiết lớp học từ mục <strong>Bảng điều khiển</strong>.
         </div>
     }
 }
+
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+
+<!-- CUSTOM STYLE -->
+<style>
+
+    /* Header */
+    .class-header {
+        background: linear-gradient(135deg, #4e54c8, #8f94fb);
+        color: white;
+    }
+
+    /* Semester badge */
+    .semester-badge {
+        background: #e7f5ff;
+        color: #0b7285;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Table hover */
+    table.table-hover tbody tr:hover {
+        background: #f6f8ff;
+    }
+
+</style>

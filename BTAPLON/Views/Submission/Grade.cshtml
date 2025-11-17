@@ -1,39 +1,81 @@
 ﻿@model BTAPLON.Models.Submission
 
 @{
-    ViewData["Title"] = "Grade Submission";
+    ViewData["Title"] = "Chấm bài nộp";
 }
 
-<h2 class="mb-3">Chấm bài nộp</h2>
+<h2 class="mb-4 fw-bold"><i class="bi bi-clipboard-check me-2 text-primary"></i>@ViewData["Title"]</h2>
 
-<div class="card mb-4">
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light fw-semibold">
+        Thông tin bài nộp
+    </div>
     <div class="card-body">
-        <p><strong>Sinh viên:</strong> @Model.Student?.FullName</p>
-        <p><strong>Bài tập:</strong> @Model.Assignment?.Title</p>
-        <p><strong>Lớp:</strong> @Model.Assignment?.Class?.ClassCode</p>
-        <p><strong>File nộp:</strong> <a href="@Model.FilePath" target="_blank">Xem file</a></p>
-        <p><strong>Thời gian nộp:</strong> @Model.SubmittedAt</p>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <p class="mb-1 text-muted">Sinh viên</p>
+                <h6 class="fw-bold">@Model.Student?.FullName</h6>
+            </div>
+            <div class="col-md-6">
+                <p class="mb-1 text-muted">Lớp học</p>
+                <h6 class="fw-bold">@Model.Assignment?.Class?.ClassCode</h6>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <p class="mb-1 text-muted">Bài tập</p>
+            <h6 class="fw-bold">@Model.Assignment?.Title</h6>
+        </div>
+
+        <div class="mb-3">
+            <p class="mb-1 text-muted">File nộp</p>
+            <a href="@Model.FilePath" class="btn btn-outline-primary btn-sm" target="_blank">
+                <i class="bi bi-file-earmark-arrow-down me-1"></i>Xem file nộp
+            </a>
+        </div>
+
+        <div>
+            <p class="mb-1 text-muted">Thời gian nộp</p>
+            <span class="badge bg-info text-dark px-3 py-2">
+                <i class="bi bi-clock me-1"></i> @(Model.SubmittedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm"))
+
+            </span>
+        </div>
+
     </div>
 </div>
 
-<form asp-action="Grade" method="post" class="card p-4 shadow-sm">
+<form asp-action="Grade" method="post" class="card shadow-sm p-4">
     @Html.AntiForgeryToken()
     <input type="hidden" name="id" value="@Model.SubmissionID" />
 
+    <h5 class="mb-3 fw-semibold">Chấm điểm</h5>
+
     <div class="mb-3">
-        <label asp-for="Score" class="form-label"></label>
-        <input asp-for="Score" class="form-control" />
-        <span asp-validation-for="Score" class="text-danger"></span>
+        <label asp-for="Score" class="form-label fw-semibold">Điểm</label>
+        <input asp-for="Score" class="form-control" type="number" step="0.25" min="0" />
+        <span asp-validation-for="Score" class="text-danger small"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Feedback" class="form-label"></label>
-        <textarea asp-for="Feedback" class="form-control" rows="4"></textarea>
-        <span asp-validation-for="Feedback" class="text-danger"></span>
+        <label asp-for="Feedback" class="form-label fw-semibold">Nhận xét</label>
+        <textarea asp-for="Feedback" class="form-control" rows="4" placeholder="Nhận xét chi tiết cho sinh viên..."></textarea>
+        <span asp-validation-for="Feedback" class="text-danger small"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Lưu điểm</button>
-    <a class="btn btn-secondary ms-2" asp-controller="Assignment" asp-action="Details" asp-route-id="@Model.AssignmentID">Hủy</a>
+    <div class="d-flex justify-content-end">
+        <a class="btn btn-secondary me-2"
+           asp-controller="Assignment"
+           asp-action="Details"
+           asp-route-id="@Model.AssignmentID">
+            Hủy
+        </a>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save me-1"></i> Lưu điểm
+        </button>
+    </div>
 </form>
 
 @section Scripts {

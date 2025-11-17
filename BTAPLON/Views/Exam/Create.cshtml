@@ -3,59 +3,126 @@
     ViewData["Title"] = "Tạo bài thi";
 }
 
-<h2>@ViewData["Title"]</h2>
-<hr />
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-<form asp-action="Create" method="post">
-    @Html.AntiForgeryToken()
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label asp-for="Title" class="form-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-semibold mb-0">
+        <i class="fa-solid fa-file-circle-plus text-primary me-2"></i>@ViewData["Title"]
+    </h2>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+
+                <!-- LEFT COLUMN -->
+                <div class="col-md-6">
+
+                    <h5 class="mb-3 text-primary">
+                        <i class="fa-solid fa-circle-info me-2"></i>Thông tin bài thi
+                    </h5>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-semibold">
+                            Tên bài thi
+                        </label>
+                        <input asp-for="Title" class="form-control shadow-sm" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-semibold">Mô tả</label>
+                        <textarea asp-for="Description" class="form-control shadow-sm" rows="4"
+                                  placeholder="Nhập mô tả (không bắt buộc)..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Lớp áp dụng
+                        </label>
+                        <select asp-for="ClassID" asp-items="ViewBag.ClassID" class="form-select shadow-sm">
+                            <option value="">-- Chọn lớp --</option>
+                        </select>
+                        <span asp-validation-for="ClassID" class="text-danger small"></span>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="col-md-6">
+
+                    <h5 class="mb-3 text-primary">
+                        <i class="fa-solid fa-clock me-2"></i>Cài đặt thời gian
+                    </h5>
+
+                    <div class="mb-3">
+                        <label asp-for="DurationMinutes" class="form-label fw-semibold">Thời lượng (phút)</label>
+                        <input asp-for="DurationMinutes"
+                               class="form-control shadow-sm"
+                               type="number" min="1" max="600"
+                               placeholder="VD: 60" />
+                        <span asp-validation-for="DurationMinutes" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="StartTime" class="form-label fw-semibold">Thời gian mở bài</label>
+                        <input asp-for="StartTime" type="datetime-local" class="form-control shadow-sm" />
+                        <small class="text-muted">
+                            <i class="fa-regular fa-circle-question me-1"></i>
+                            Nếu để trống, bài thi sẽ mở ngay khi bạn bấm "Mở đề".
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="EndTime" class="form-label fw-semibold">Thời gian kết thúc</label>
+                        <input asp-for="EndTime" type="datetime-local" class="form-control shadow-sm" />
+                        <span asp-validation-for="EndTime" class="text-danger small"></span>
+                        <small class="text-muted">
+                            <i class="fa-regular fa-circle-question me-1"></i>
+                            Sau thời gian này, hệ thống tự động đóng bài thi.
+                        </small>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <h5 class="mb-3 text-primary">
+                        <i class="fa-solid fa-shield-halved me-2"></i>Bảo mật & Chống gian lận
+                    </h5>
+
+                    <div class="form-check mb-3">
+                        <input asp-for="PreventBackNavigation" class="form-check-input" />
+                        <label asp-for="PreventBackNavigation" class="form-check-label fw-semibold">
+                            Chặn quay lại trang (Anti-cheat)
+                        </label>
+                        <div class="form-text">
+                            Ngăn không cho học viên quay lại câu trước bằng nút back.
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
-            <div class="mb-3">
-                <label asp-for="Description" class="form-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="fa-solid fa-gear me-2"></i>Lưu và cấu hình câu hỏi
+                </button>
+
+                <a asp-action="Index" class="btn btn-secondary px-4">
+                    <i class="fa-solid fa-arrow-left me-2"></i>Huỷ
+                </a>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Lớp áp dụng</label>
-                <select asp-for="ClassID" asp-items="ViewBag.ClassID" class="form-select">
-                    <option value="">-- Chọn lớp --</option>
-                </select>
-                <span asp-validation-for="ClassID" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label asp-for="DurationMinutes" class="form-label"></label>
-                <input asp-for="DurationMinutes" class="form-control" type="number" min="1" max="600" />
-                <span asp-validation-for="DurationMinutes" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="StartTime" class="form-label">Thời gian mở</label>
-                <input asp-for="StartTime" class="form-control" type="datetime-local" />
-                <span class="form-text">Nếu bỏ trống, đề sẽ mở ngay khi bấm "Mở đề".</span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="EndTime" class="form-label">Ngày kết thúc</label>
-                <input asp-for="EndTime" class="form-control" type="datetime-local" />
-                <span asp-validation-for="EndTime" class="text-danger"></span>
-                <span class="form-text">Hệ thống sẽ tự động đóng bài thi khi đến thời gian này.</span>
-            </div>
-            <div class="form-check mb-3">
-                <input asp-for="PreventBackNavigation" class="form-check-input" />
-                <label asp-for="PreventBackNavigation" class="form-check-label">Chặn quay lại (anti-cheat)</label>
-            </div>
-        </div>
+
+        </form>
+
     </div>
-    <button type="submit" class="btn btn-primary">Lưu và cấu hình câu hỏi</button>
-    <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
-</form>
+</div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

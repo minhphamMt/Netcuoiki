@@ -1,87 +1,115 @@
 ﻿@model BTAPLON.Models.ViewModels.StudentAssignmentDetailViewModel
-@using System
+@using System;
+
 @{
-    ViewData["Title"] = ViewData["Title"] ?? "Chi tiết bài tập";
     var assignment = Model.Assignment;
     var submission = Model.Submission;
     var dueDate = assignment.DueDate;
     var isSubmitted = submission != null;
     var scoreDisplay = submission?.Score?.ToString("0.##") ?? "-";
     var teacherName = assignment.Class?.Course?.Teacher?.FullName
-        ?? assignment.Class?.Course?.Teacher?.Email
-        ?? "Chưa cập nhật";
+                      ?? assignment.Class?.Course?.Teacher?.Email
+                      ?? "Chưa cập nhật";
+
+    ViewData["Title"] = "Chi tiết bài tập";
 }
 
+<!-- HEADER -->
+<div class="detail-header rounded-4 p-4 mb-4">
+    <h1 class="fw-bold text-white mb-1">
+        <i class="fa-solid fa-file-lines me-2"></i>@assignment.Title
+    </h1>
+    <p class="text-white-50 mb-0">
+        @(assignment.Class?.ClassCode ?? "Lớp không xác định") · @assignment.Class?.Course?.CourseName
+    </p>
+</div>
+
 <div class="row g-4">
+
+    <!-- MAIN CONTENT -->
     <div class="col-lg-8">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm rounded-4 mb-4">
             <div class="card-body">
+
+                <!-- STATUS BADGE -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h1 class="h4 mb-1">@assignment.Title</h1>
-                        <p class="text-muted mb-0">
-                            @(assignment.Class?.ClassCode ?? "Lớp không xác định") · @assignment.Class?.Course?.CourseName
-                        </p>
-                    </div>
-                    <span class="badge @(Model.IsOverdue && !isSubmitted ? "bg-danger" : "bg-secondary")">
+                    <h4 class="fw-bold">Thông tin bài tập</h4>
+
+                    <span class="status-badge
+                                @(Model.IsOverdue && !isSubmitted ? "overdue" :
+                                                            isSubmitted ? "done" : "pending")">
                         @(Model.IsOverdue && !isSubmitted ? "Quá hạn" : (isSubmitted ? "Đã nộp" : "Đang chờ"))
                     </span>
                 </div>
 
+                <!-- DESCRIPTION -->
                 <div class="mb-4">
-                    <h6 class="text-uppercase text-muted">Mô tả</h6>
-                    <p class="mb-0">@(string.IsNullOrWhiteSpace(assignment.Description) ? "Không có mô tả" : assignment.Description)</p>
+                    <h6 class="text-uppercase text-muted small">Mô tả</h6>
+                    <p>@(string.IsNullOrWhiteSpace(assignment.Description) ? "Không có mô tả" : assignment.Description)</p>
                 </div>
 
+                <!-- DUE DATE + SCORE -->
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <div class="border rounded-3 p-3">
-                            <div class="text-muted text-uppercase small">Hạn nộp</div>
-                            <div class="fw-semibold">
+                        <div class="info-box p-3 rounded-3">
+                            <div class="label">Hạn nộp</div>
+                            <div class="value">
+                                <i class="fa-solid fa-clock me-1 text-muted"></i>
                                 @(dueDate.HasValue? dueDate.Value.ToString("dd/MM/yyyy HH:mm") : "Không giới hạn")
                             </div>
                         </div>
                     </div>
+
                     <div class="col-md-6">
-                        <div class="border rounded-3 p-3">
-                            <div class="text-muted text-uppercase small">Điểm</div>
-                            <div class="fw-semibold">@scoreDisplay</div>
+                        <div class="info-box p-3 rounded-3">
+                            <div class="label">Điểm</div>
+                            <div class="value">@scoreDisplay</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <h5 class="h6 text-uppercase text-muted">Nộp bài</h5>
-                    <form asp-controller="Submission" asp-action="Submit" method="post" enctype="multipart/form-data">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="assignmentID" value="@assignment.AssignmentID" />
-                        <div class="row g-2 align-items-center">
-                            <div class="col-lg-8">
-                                <input type="file" class="form-control" name="fileUpload" id="fileUpload" />
-                            </div>
-                            <div class="col-lg-4 text-lg-end">
-                                <button type="submit" class="btn btn-primary w-100">Nộp bài</button>
+                <!-- SUBMISSION AREA -->
+                <h6 class="text-uppercase text-muted small">Nộp bài</h6>
+
+                <form asp-controller="Submission" asp-action="Submit" method="post" enctype="multipart/form-data" class="mb-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="assignmentID" value="@assignment.AssignmentID" />
+
+                    <div class="row g-2">
+                        <div class="col-lg-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fa-solid fa-upload"></i>
+                                </span>
+                                <input type="file" class="form-control border-start-0" name="fileUpload" id="fileUpload" />
                             </div>
                         </div>
-                        <small class="text-muted d-block mt-2">Hãy đảm bảo chọn đúng tệp cần nộp. Bạn có thể nộp lại nếu cần cập nhật.</small>
-                    </form>
-                </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <button class="btn btn-primary w-100">
+                                <i class="fa-solid fa-paper-plane me-1"></i>Nộp bài
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Bạn có thể nộp lại nếu muốn cập nhật bài làm.</small>
+                </form>
 
+                <!-- SUBMISSION INFO -->
                 @if (submission != null)
                 {
-                    <div class="alert alert-success mt-4">
-                        <div class="d-flex justify-content-between">
+                    <div class="submission-box mt-3 p-3 rounded-3">
+                        <div class="d-flex justify-content-between mb-2">
                             <div>
-                                <div class="fw-semibold">Bài nộp mới nhất</div>
+                                <div class="fw-semibold">Bài nộp gần nhất</div>
                                 <div class="small text-muted">@submission.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</div>
                             </div>
-                            <div>
-                                @if (!string.IsNullOrEmpty(submission.FilePath))
-                                {
-                                    <a class="btn btn-outline-light btn-sm" href="@submission.FilePath" target="_blank">Xem tệp</a>
-                                }
-                            </div>
+                            @if (!string.IsNullOrEmpty(submission.FilePath))
+                            {
+                                <a class="btn btn-outline-light btn-sm" href="@submission.FilePath" target="_blank">
+                                    <i class="fa-solid fa-file-arrow-down me-1"></i>Xem tệp
+                                </a>
+                            }
                         </div>
+
                         @if (!string.IsNullOrWhiteSpace(submission.Feedback))
                         {
                             <hr />
@@ -92,20 +120,89 @@
                         }
                     </div>
                 }
+
             </div>
         </div>
     </div>
+
+    <!-- SIDEBAR -->
     <div class="col-lg-4">
-        <div class="card shadow-sm mb-4">
+
+        <div class="card shadow-sm rounded-4 mb-4">
             <div class="card-body">
-                <h5 class="card-title h6 text-uppercase text-muted">Thông tin lớp</h5>
-                <p class="mb-1"><strong>Lớp:</strong> @assignment.Class?.ClassCode</p>
-                <p class="mb-1"><strong>Khóa học:</strong> @assignment.Class?.Course?.CourseName</p>
-                <p class="mb-0"><strong>Giảng viên:</strong> @teacherName</p>
+                <h6 class="text-uppercase text-muted mb-3 fw-bold">Thông tin lớp</h6>
+
+                <p><strong>Lớp:</strong> @assignment.Class?.ClassCode</p>
+                <p><strong>Khóa học:</strong> @assignment.Class?.Course?.CourseName</p>
+                <p><strong>Giảng viên:</strong> @teacherName</p>
             </div>
         </div>
+
         <a asp-action="MyAssignments" class="btn btn-outline-secondary w-100">
-            <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+            <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách
         </a>
     </div>
 </div>
+
+<!-- STYLES -->
+<style>
+
+    /* HEADER */
+    .detail-header {
+        background: linear-gradient(135deg, #00b09b, #96c93d);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0,0,0,.15);
+    }
+
+    /* Info Box */
+    .info-box {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+
+        .info-box .label {
+            font-size: .8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .info-box .value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+    /* Submission Box */
+    .submission-box {
+        background: linear-gradient(135deg, #51cf66, #40c057);
+        color: white;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: .85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+        .status-badge.done {
+            background: #d3f9d8;
+            color: #2b8a3e;
+        }
+
+        .status-badge.pending {
+            background: #edf2ff;
+            color: #364fc7;
+        }
+
+        .status-badge.overdue {
+            background: #ffe3e3;
+            color: #c92a2a;
+        }
+
+</style>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />

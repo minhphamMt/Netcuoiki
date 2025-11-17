@@ -3,45 +3,167 @@
     ViewData["Title"] = "Chỉnh sửa người dùng";
 }
 
-<h1 class="h3 mb-3">Chỉnh sửa thông tin người dùng</h1>
+<!-- HEADER -->
+<div class="dashboard-header mb-4 p-4 rounded-4">
+    <h1 class="fw-bold text-white mb-1">
+        <i class="fa-solid fa-user-pen me-2"></i>Chỉnh sửa thông tin người dùng
+    </h1>
+    <p class="text-white-50 mb-0">Cập nhật thông tin người dùng trong hệ thống.</p>
+</div>
 
-<form asp-action="EditUser" method="post" class="card p-4 shadow" style="max-width:500px">
-    @Html.AntiForgeryToken()
 
-    <input type="hidden" asp-for="UserID" />
+<!-- FORM CONTAINER -->
+<div class="form-container mx-auto">
+    <form asp-action="EditUser" method="post" class="dashboard-card shadow-sm p-4 rounded-4">
+        @Html.AntiForgeryToken()
 
-    <div class="mb-3">
-        <label class="form-label">Họ và tên</label>
-        <input asp-for="FullName" class="form-control" />
-        <span asp-validation-for="FullName" class="text-danger"></span>
-    </div>
+        <input type="hidden" asp-for="UserID" />
 
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <div class="mb-3">
-        <label class="form-label">Mật khẩu</label>
-        <input asp-for="PasswordHash" class="form-control" type="password" />
-        <small class="form-text text-muted">Để trống nếu giữ nguyên mật khẩu hiện tại.</small>
-        <span asp-validation-for="PasswordHash" class="text-danger"></span>
-    </div>
+        <!-- Full Name -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Họ và tên</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-user"></i></span>
+                <input asp-for="FullName" class="form-control" />
+            </div>
+            <span asp-validation-for="FullName" class="text-danger small"></span>
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Vai trò</label>
-        <select asp-for="Role" class="form-select">
-            <option value="Admin">Quản trị viên</option>
-            <option value="Teacher">Giảng viên</option>
-            <option value="Student">Học viên</option>
-        </select>
-        <span asp-validation-for="Role" class="text-danger"></span>
-    </div>
+        <!-- Email -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Email</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-envelope"></i></span>
+                <input asp-for="Email" class="form-control" />
+            </div>
+            <span asp-validation-for="Email" class="text-danger small"></span>
+        </div>
 
-    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i>Lưu thay đổi</button>
-    <a asp-action="Users" class="btn btn-secondary  mt-1"><i class="bi bi-arrow-left me-1"></i>Quay lại</a>
-</form>
+        <!-- Password -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Mật khẩu</label>
+            <div class="input-group password-wrapper">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-lock"></i></span>
+                <input asp-for="PasswordHash" type="password" class="form-control password-field" />
+                <span class="input-group-text bg-light password-toggle" style="cursor: pointer;">
+                    <i class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+            <small class="text-muted">Để trống nếu muốn giữ nguyên mật khẩu hiện tại.</small>
+            <br />
+            <span asp-validation-for="PasswordHash" class="text-danger small"></span>
+        </div>
+
+        <!-- Role -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Vai trò</label>
+            <select asp-for="Role" class="form-select form-select-lg">
+                <option value="Admin">Quản trị viên</option>
+                <option value="Teacher">Giảng viên</option>
+                <option value="Student">Học viên</option>
+            </select>
+            <span asp-validation-for="Role" class="text-danger small"></span>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="fa-solid fa-circle-check me-2"></i>Lưu thay đổi
+            </button>
+
+            <a asp-action="Users" class="btn btn-secondary px-4">
+                <i class="fa-solid fa-arrow-left me-2"></i>Quay lại
+            </a>
+        </div>
+    </form>
+</div>
+
+
+<!-- CUSTOM STYLE -->
+<style>
+
+    /* Header Gradient */
+    .dashboard-header {
+        background: linear-gradient(135deg, #8E2DE2, #4A00E0);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+
+    /* Center form */
+    .form-container {
+        max-width: 560px;
+    }
+
+    /* Card */
+    .dashboard-card {
+        background: #fff;
+        border-radius: 18px;
+        transition: .2s;
+    }
+
+        .dashboard-card:hover {
+            background: #f8f9fa;
+        }
+
+    /* Inputs */
+    .input-group-text {
+        border-right: none;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .form-control {
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #7b2ff7;
+            box-shadow: 0 0 0 3px rgba(123,47,247,0.25);
+        }
+
+    /* Select */
+    .form-select {
+        border-radius: 12px;
+    }
+
+    /* Password toggle */
+    .password-toggle i {
+        font-size: 1rem;
+    }
+
+    .password-toggle:hover {
+        color: #6c5ce7;
+    }
+
+    /* Buttons */
+    button, a.btn {
+        border-radius: 12px !important;
+    }
+</style>
+
+
+<!-- PASSWORD TOGGLE SCRIPT -->
+<script>
+    document.querySelectorAll('.password-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function () {
+            const input = this.parentElement.querySelector('.password-field');
+            const icon = this.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+    });
+</script>
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

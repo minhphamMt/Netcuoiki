@@ -137,14 +137,42 @@ namespace BTAPLON.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            var course = _context.Courses.Find(id);
-            if (course == null) return NotFound();
+            var course = _context.Courses
+                .Include(c => c.Classes)
+                .FirstOrDefault(c => c.CourseID == id);
 
+            if (course == null)
+                return NotFound();
+
+            // 1️⃣ XÓA DISCUSSION THREADS
+            var threads = _context.DiscussionThreads
+                                .Where(t => t.CourseID == id)
+                                .ToList();
+            if (threads.Any())
+                _context.DiscussionThreads.RemoveRange(threads);
+
+            // 2️⃣ XÓA FORUM QUESTIONS
+            var questions = _context.ForumQuestions
+                                    .Where(q => q.CourseID == id)
+                                    .ToList();
+            if (questions.Any())
+                _context.ForumQuestions.RemoveRange(questions);
+
+            // 3️⃣ XÓA TOÀN BỘ LỚP HỌC LIÊN QUAN (EF CASCADE sẽ xóa bài tập, bài thi…)
+            var classes = _context.Classes
+                                 .Where(c => c.CourseID == id)
+                                 .ToList();
+            if (classes.Any())
+                _context.Classes.RemoveRange(classes);
+
+            // 4️⃣ XÓA KHÓA HỌC SAU CÙNG
             _context.Courses.Remove(course);
+
             _context.SaveChanges();
 
             return RedirectToAction("Index");
         }
+
 
 
 

@@ -3,39 +3,101 @@
     ViewData["Title"] = "Chỉnh sửa thông báo";
 }
 
-<div class="row justify-content-center">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .card-custom {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    }
+
+    .card-header-gradient {
+        background: linear-gradient(135deg, #0d6efd, #6610f2);
+        color: white;
+        padding: 1.2rem 1.5rem;
+    }
+
+    .card-custom .form-label {
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        padding: 0.45rem 1.2rem;
+        border-radius: 10px;
+    }
+
+    .btn-outline-secondary {
+        border-radius: 10px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        padding: 0.55rem .9rem;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #6f42c1;
+            box-shadow: 0 0 0 .2rem rgba(111, 66, 193, 0.25);
+        }
+</style>
+
+<div class="row justify-content-center mt-4">
     <div class="col-lg-6 col-xl-5">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <strong>@Model.Heading</strong>
+
+        <div class="card card-custom">
+
+            <!-- Header đẹp hơn -->
+            <div class="card-header card-header-gradient">
+                <h5 class="mb-0">
+                    <i class="fa-solid fa-bullhorn me-2"></i>
+                    @Model.Heading
+                </h5>
             </div>
-            <div class="card-body">
+
+            <div class="card-body p-4">
                 <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
                     <div class="mb-3">
                         <label asp-for="Form.ClassId" class="form-label"></label>
-                        <select asp-for="Form.ClassId" class="form-select" asp-items="Model.TeacherClasses">
+                        <select asp-for="Form.ClassId"
+                                class="form-select"
+                                asp-items="Model.TeacherClasses">
                             <option value="">-- Chọn lớp học --</option>
                         </select>
                         <span asp-validation-for="Form.ClassId" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
                         <label asp-for="Form.Title" class="form-label"></label>
                         <input asp-for="Form.Title" class="form-control" />
                         <span asp-validation-for="Form.Title" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
                         <label asp-for="Form.Content" class="form-label"></label>
                         <textarea asp-for="Form.Content" class="form-control" rows="5"></textarea>
                         <span asp-validation-for="Form.Content" class="text-danger"></span>
                     </div>
-                    <div class="d-flex justify-content-between">
-                        <a asp-action="Index" class="btn btn-outline-secondary">Hủy</a>
-                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Hủy
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-save me-1"></i> Lưu thay đổi
+                        </button>
                     </div>
                 </form>
             </div>
+
         </div>
+
     </div>
 </div>
 

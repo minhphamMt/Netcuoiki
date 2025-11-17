@@ -1,20 +1,48 @@
 ﻿@model BTAPLON.Models.Enrollment
 
-<h2>Edit Enrollment</h2>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="EnrollmentID" />
+<div class="container mt-4" style="max-width: 550px;">
+    <h2 class="fw-bold mb-4">
+        <i class="fa-solid fa-user-check text-primary me-2"></i>Chỉnh sửa ghi danh
+    </h2>
 
-    <div class="form-group">
-        <label>Class</label>
-        <select asp-for="ClassID" asp-items="ViewBag.ClassID" class="form-control"></select>
-    </div>
+    <form asp-action="Edit" method="post" class="card p-4 shadow-sm border-0 rounded-4">
+        <input type="hidden" asp-for="EnrollmentID" />
 
-    <div class="form-group">
-        <label>Student</label>
-        <select asp-for="StudentID" asp-items="ViewBag.StudentID" class="form-control"></select>
-    </div>
+        <!-- Class -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">
+                <i class="fa-solid fa-door-open text-primary me-1"></i>Chọn lớp học
+            </label>
+            <select asp-for="ClassID"
+                    asp-items="ViewBag.ClassID"
+                    class="form-select rounded-3">
+            </select>
+            <span asp-validation-for="ClassID" class="text-danger small mt-1"></span>
+        </div>
 
-    <button type="submit" class="btn btn-primary mt-2">Lưu</button>
-    <a asp-action="Index" class="btn btn-secondary mt-2">Quay lại</a>
-</form>
+        <!-- Student -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">
+                <i class="fa-solid fa-user-graduate text-primary me-1"></i>Chọn học viên
+            </label>
+            <select asp-for="StudentID"
+                    asp-items="ViewBag.StudentID"
+                    class="form-select rounded-3">
+            </select>
+            <span asp-validation-for="StudentID" class="text-danger small mt-1"></span>
+        </div>
+
+        <!-- Buttons -->
+        <button type="submit" class="btn btn-primary w-100 rounded-3 py-2">
+            <i class="fa-solid fa-floppy-disk me-1"></i>Lưu thay đổi
+        </button>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary w-100 mt-2 rounded-3 py-2">
+            <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+        </a>
+    </form>
+</div>
