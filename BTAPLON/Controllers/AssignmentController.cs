@@ -33,10 +33,21 @@ namespace BTAPLON.Controllers
         // LIST
         public IActionResult Index(string? searchTerm)
         {
+            var userId = HttpContext.Session.GetInt32("UserID");
+            var role = HttpContext.Session.GetString("UserRole");
+
             var query = _context.Assignments
                .Include(a => a.Class)!
                    .ThenInclude(c => c.Course)
                .AsQueryable();
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                query = query.Where(a =>
+                    a.Class != null &&
+                    a.Class.Course != null &&
+                    a.Class.Course.TeacherID == userId);
+            }
 
             var trimmedSearch = searchTerm?.Trim();
             if (!string.IsNullOrWhiteSpace(trimmedSearch))
@@ -65,7 +76,19 @@ namespace BTAPLON.Controllers
         [SessionAuthorize("Admin", "Teacher")]
         public IActionResult Create()
         {
-            ViewBag.ClassID = new SelectList(_context.Classes, "ClassID", "ClassCode");
+            var userId = HttpContext.Session.GetInt32("UserID");
+            var role = HttpContext.Session.GetString("UserRole");
+
+            var classQuery = _context.Classes
+                .Include(c => c.Course)
+                .AsQueryable();
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                classQuery = classQuery.Where(c => c.Course != null && c.Course.TeacherID == userId);
+            }
+
+            ViewBag.ClassID = new SelectList(classQuery.ToList(), "ClassID", "ClassCode");
             return View();
         }
 
@@ -75,10 +98,41 @@ namespace BTAPLON.Controllers
         [SessionAuthorize("Admin", "Teacher")]
         public IActionResult Create(Assignment model)
         {
+            var userId = HttpContext.Session.GetInt32("UserID");
+            var role = HttpContext.Session.GetString("UserRole");
+
             if (!ModelState.IsValid)
             {
-                ViewBag.ClassID = new SelectList(_context.Classes, "ClassID", "ClassCode", model.ClassID);
+                var invalidClassQuery = _context.Classes
+                    .Include(c => c.Course)
+                    .AsQueryable();
+
+                if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+                {
+                    invalidClassQuery = invalidClassQuery.Where(c => c.Course != null && c.Course.TeacherID == userId);
+                }
+
+                ViewBag.ClassID = new SelectList(invalidClassQuery.ToList(), "ClassID", "ClassCode", model.ClassID);
                 return View(model);
+            }
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                var teacherClass = _context.Classes
+                    .Include(c => c.Course)
+                    .FirstOrDefault(c => c.ClassID == model.ClassID);
+
+                if (teacherClass?.Course?.TeacherID != userId)
+                {
+                    ModelState.AddModelError("ClassID", "Bạn chỉ có thể tạo bài tập cho lớp mà bạn phụ trách.");
+
+                    var restrictedClassQuery = _context.Classes
+                        .Include(c => c.Course)
+                        .Where(c => c.Course != null && c.Course.TeacherID == userId);
+
+                    ViewBag.ClassID = new SelectList(restrictedClassQuery.ToList(), "ClassID", "ClassCode", model.ClassID);
+                    return View(model);
+                }
             }
 
             _context.Assignments.Add(model);
@@ -92,11 +146,32 @@ namespace BTAPLON.Controllers
         {
             var a = _context.Assignments
                 .Include(x => x.Class)
+                .ThenInclude(c => c.Course)
                 .FirstOrDefault(x => x.AssignmentID == id);
 
             if (a == null) return NotFound();
 
-            ViewBag.ClassID = new SelectList(_context.Classes, "ClassID", "ClassCode", a.ClassID);
+            var userId = HttpContext.Session.GetInt32("UserID");
+            var role = HttpContext.Session.GetString("UserRole");
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                if (a.Class?.Course?.TeacherID != userId)
+                {
+                    return Forbid();
+                }
+            }
+
+            var classQuery = _context.Classes
+                .Include(c => c.Course)
+                .AsQueryable();
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                classQuery = classQuery.Where(c => c.Course != null && c.Course.TeacherID == userId);
+            }
+
+            ViewBag.ClassID = new SelectList(classQuery.ToList(), "ClassID", "ClassCode", a.ClassID);
             return View(a);
         }
 
@@ -106,13 +181,64 @@ namespace BTAPLON.Controllers
         [SessionAuthorize("Admin", "Teacher")]
         public IActionResult Edit(Assignment model)
         {
+            var userId = HttpContext.Session.GetInt32("UserID");
+            var role = HttpContext.Session.GetString("UserRole");
+
+            var assignment = _context.Assignments
+                .Include(a => a.Class)
+                    .ThenInclude(c => c.Course)
+                .FirstOrDefault(a => a.AssignmentID == model.AssignmentID);
+
+            if (assignment == null) return NotFound();
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                if (assignment.Class?.Course?.TeacherID != userId)
+                {
+                    return Forbid();
+                }
+            }
+
             if (!ModelState.IsValid)
             {
-                ViewBag.ClassID = new SelectList(_context.Classes, "ClassID", "ClassCode", model.ClassID);
+                var invalidClassQuery = _context.Classes
+                    .Include(c => c.Course)
+                    .AsQueryable();
+
+                if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+                {
+                    invalidClassQuery = invalidClassQuery.Where(c => c.Course != null && c.Course.TeacherID == userId);
+                }
+
+                ViewBag.ClassID = new SelectList(invalidClassQuery.ToList(), "ClassID", "ClassCode", model.ClassID);
                 return View(model);
             }
 
-            _context.Assignments.Update(model);
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                var targetClass = _context.Classes
+                    .Include(c => c.Course)
+                    .FirstOrDefault(c => c.ClassID == model.ClassID);
+
+                if (targetClass?.Course?.TeacherID != userId)
+                {
+                    ModelState.AddModelError("ClassID", "Bạn chỉ có thể chỉnh sửa bài tập cho lớp mà bạn phụ trách.");
+
+                    var restrictedClassQuery = _context.Classes
+                        .Include(c => c.Course)
+                        .Where(c => c.Course != null && c.Course.TeacherID == userId);
+
+                    ViewBag.ClassID = new SelectList(restrictedClassQuery.ToList(), "ClassID", "ClassCode", model.ClassID);
+                    return View(model);
+                }
+            }
+
+            assignment.Title = model.Title;
+            assignment.Description = model.Description;
+            assignment.DueDate = model.DueDate;
+            assignment.ClassID = model.ClassID;
+
+            _context.Assignments.Update(assignment);
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
@@ -121,10 +247,25 @@ namespace BTAPLON.Controllers
         [SessionAuthorize("Admin", "Teacher")]
         public IActionResult Delete(int id)
         {
-            var a = _context.Assignments.Find(id);
-            if (a == null) return NotFound();
+            var userId = HttpContext.Session.GetInt32("UserID");
+            var role = HttpContext.Session.GetString("UserRole");
 
-            _context.Assignments.Remove(a);
+            var assignment = _context.Assignments
+                .Include(x => x.Class)
+                    .ThenInclude(c => c.Course)
+                .FirstOrDefault(x => x.AssignmentID == id);
+
+            if (assignment == null) return NotFound();
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                if (assignment.Class?.Course?.TeacherID != userId)
+                {
+                    return Forbid();
+                }
+            }
+
+            _context.Assignments.Remove(assignment);
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
@@ -139,6 +280,17 @@ namespace BTAPLON.Controllers
                 .FirstOrDefault(x => x.AssignmentID == id);
 
             if (a == null) return NotFound();
+
+            var userId = HttpContext.Session.GetInt32("UserID");
+            var role = HttpContext.Session.GetString("UserRole");
+
+            if (string.Equals(role, "Teacher", StringComparison.OrdinalIgnoreCase) && userId != null)
+            {
+                if (a.Class?.Course?.TeacherID != userId)
+                {
+                    return Forbid();
+                }
+            }
 
             return View(a);
         }

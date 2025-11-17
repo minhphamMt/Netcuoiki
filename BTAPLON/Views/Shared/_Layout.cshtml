@@ -5,6 +5,7 @@
 @using System.Linq
 @using BTAPLON.Data
 @inject EduDbContext DbContext
+
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();

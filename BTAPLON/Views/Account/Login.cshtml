@@ -107,8 +107,16 @@
 
             <div class="mb-4">
                 <label class="form-label fw-semibold">Mật khẩu</label>
-                <input class="form-control" type="password" name="password" placeholder="Nhập mật khẩu..." required />
+
+                <div class="input-group">
+                    <input id="passwordInput" class="form-control" type="password" name="password" placeholder="Nhập mật khẩu..." required />
+
+                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                        👁
+                    </button>
+                </div>
             </div>
+
 
             <button class="btn btn-primary w-100" type="submit">
                 Đăng nhập
@@ -121,3 +129,14 @@
         </form>
     </div>
 </div>
+<script>
+    const pwdInput = document.getElementById("passwordInput");
+    const toggleBtn = document.getElementById("togglePassword");
+
+    toggleBtn.addEventListener("click", function () {
+        const isHidden = pwdInput.type === "password";
+        pwdInput.type = isHidden ? "text" : "password";
+        this.textContent = isHidden ? "🙈" : "👁";
+    });
+</script>
+

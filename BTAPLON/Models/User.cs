@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+using System.ComponentModel.DataAnnotations;
 
 namespace BTAPLON.Models
 {
@@ -8,8 +10,12 @@ namespace BTAPLON.Models
     {
         public int UserID { get; set; }
         public string? FullName { get; set; }
+        [Required(ErrorMessage = "Email không được để trống")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
         public string? Email { get; set; }
+        [Required(ErrorMessage = "Mật khẩu không được để trống")]
         public string? PasswordHash { get; set; }
+        [Required(ErrorMessage = "Vai trò không được để trống")]
         public string? Role { get; set; } 
         public DateTime CreatedAt { get; set; }
 

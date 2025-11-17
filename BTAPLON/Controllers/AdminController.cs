@@ -214,9 +214,36 @@ namespace BTAPLON.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddUser(User user)
         {
+            user.Email = user.Email?.Trim();
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                ModelState.AddModelError("Email", "Email không được để trống");
+            }
+            else
+            {
+                var emailValidator = new System.ComponentModel.DataAnnotations.EmailAddressAttribute();
+                if (!emailValidator.IsValid(user.Email))
+                {
+                    ModelState.AddModelError("Email", "Email không hợp lệ");
+                }
+                else if (_context.Users.Any(u => u.Email != null && u.Email.ToLower() == user.Email.ToLower()))
+                {
+                    ModelState.AddModelError("Email", "Email đã tồn tại trong hệ thống");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(user);
+            }
             if (!string.IsNullOrWhiteSpace(user.PasswordHash) && !PasswordHelper.IsBcryptHash(user.PasswordHash))
             {
                 user.PasswordHash = PasswordHelper.HashPassword(user.PasswordHash);
+            }
+
+            if (user.CreatedAt == default)
+            {
+                user.CreatedAt = DateTime.UtcNow;
             }
 
             _context.Users.Add(user);

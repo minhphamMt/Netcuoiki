@@ -27,9 +27,18 @@
 
         <!-- Student list -->
         <div class="mb-3">
-            <label class="form-label fw-semibold">
-                <i class="fa-solid fa-users me-1 text-primary"></i>Danh sách học viên
-            </label>
+            <div class="d-flex justify-content-between mb-2">
+                <label class="form-label fw-semibold">
+                    <i class="fa-solid fa-users me-1 text-primary"></i>Danh sách học viên
+                </label>
+
+                <button type="button"
+                        id="toggleCheckAll"
+                        class="btn btn-sm btn-outline-primary rounded-3">
+                    <i class="fa-solid fa-check-double me-1"></i>Chọn tất cả
+                </button>
+            </div>
+
 
             <div class="border rounded-4 p-3 shadow-sm bg-light"
                  style="max-height: 300px; overflow-y: auto;">
@@ -74,3 +83,17 @@
         </a>
     </form>
 </div>
+<script>
+    document.getElementById("toggleCheckAll").addEventListener("click", function () {
+        const checkboxes = document.querySelectorAll("input[name='StudentIDs']");
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+
+        // Đổi tên nút khi chuyển trạng thái
+        this.innerHTML = allChecked
+            ? '<i class="fa-solid fa-check-double me-1"></i>Chọn tất cả'
+            : '<i class="fa-solid fa-xmark me-1"></i>Bỏ chọn tất cả';
+    });
+</script>
+
